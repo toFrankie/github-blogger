@@ -5,7 +5,7 @@
   "tasks": [
     {
       "type": "npm",
-      "script": "watch",
+      "script": "ext:watch",
       "problemMatcher": "$ts-webpack-watch",
       "isBackground": true,
       "presentation": {
@@ -13,14 +13,13 @@
         "group": "watchers"
       },
       "group": {
-        "kind": "build",
-        "isDefault": true
+        "kind": "build"
       }
     },
     {
       "type": "npm",
-      "script": "watch-tests",
-      "problemMatcher": "$tsc-watch",
+      "script": "webview-ui:start",
+      "problemMatcher": "$ts-webpack-watch",
       "isBackground": true,
       "presentation": {
         "reveal": "never",
@@ -29,8 +28,8 @@
       "group": "build"
     },
     {
-      "label": "tasks: watch-tests",
-      "dependsOn": ["npm: watch", "npm: watch-tests"],
+      "label": "tasks: dev",
+      "dependsOn": ["npm: ext:watch", "npm: webview-ui:start"],
       "problemMatcher": []
     }
   ]

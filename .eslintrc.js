@@ -1,12 +1,10 @@
-const {init} = require('@ifanrx/eslint-config-standard-ts/init')
+const {init} = require('@ifanrx/eslint-config-standard/init')
 
 module.exports = init({
   root: true,
-  extends: ['@ifanrx/standard-react', '@ifanrx/standard-ts'],
+  extends: ['@ifanrx/standard-react', '@ifanrx/standard'],
   rules: {
     'import/no-extraneous-dependencies': 'off',
     'no-console': 'off',
-    '@typescript-eslint/explicit-function-return-type': 'off',
-    '@typescript-eslint/no-floating-promises': 'off',
   },
 })
