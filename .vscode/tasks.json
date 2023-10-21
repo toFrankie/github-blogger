@@ -5,7 +5,7 @@
   "tasks": [
     {
       "type": "npm",
-      "script": "ext:watch",
+      "script": "start:ext",
       "problemMatcher": "$ts-webpack-watch",
       "isBackground": true,
       "presentation": {
@@ -18,7 +18,7 @@
     },
     {
       "type": "npm",
-      "script": "webview-ui:start",
+      "script": "start:webview-ui",
       "problemMatcher": "$ts-webpack-watch",
       "isBackground": true,
       "presentation": {
@@ -29,7 +29,7 @@
     },
     {
       "label": "tasks: dev",
-      "dependsOn": ["npm: ext:watch", "npm: webview-ui:start"],
+      "dependsOn": ["npm: start:ext", "npm: start:webview-ui"],
       "problemMatcher": []
     }
   ]

@@ -1,4 +1,6 @@
-import {window, Uri, ViewColumn} from 'vscode'
+import path from 'node:path'
+
+import {window, Uri, ViewColumn, ExtensionMode} from 'vscode'
 
 // import {getUri} from '../utilities/getUri'
 import {getNonce} from '../utilities/getNonce'
@@ -17,15 +19,17 @@ export class LoaderPanel {
   static currentPanel
   _panel
   _disposables = []
+  _context
 
   /**
    * The LoaderPanel class private constructor (called only from the render method).
    *
    * @param panel A reference to the webview panel
-   * @param extensionUri The URI of the directory containing the extension
+   * @param context A reference to the extension context
    */
-  constructor(panel) {
+  constructor(panel, context) {
     this._panel = panel
+    this._context = context
 
     // Set an event listener to listen for when the panel is disposed (i.e. when the user closes
     // the panel or when the panel is closed programmatically)
@@ -48,9 +52,10 @@ export class LoaderPanel {
    * Renders the current webview panel if it exists otherwise a new webview panel
    * will be created and displayed.
    *
-   * @param extensionUri The URI of the directory containing the extension.
+   * @param context A reference to the extension context
    */
-  static render(extensionUri) {
+  static render(context) {
+    const {extensionUri} = context
     if (LoaderPanel.currentPanel) {
       // If the webview panel already exists reveal it
       LoaderPanel.currentPanel._panel.reveal(ViewColumn.One)
@@ -67,15 +72,12 @@ export class LoaderPanel {
         {
           // Enable JavaScript in the webview
           enableScripts: true,
-          // Restrict the webview to only load resources from the `out` and `webview-ui/build` directories
-          localResourceRoots: [
-            Uri.joinPath(extensionUri, 'out'),
-            Uri.joinPath(extensionUri, 'dist'),
-          ],
+          // Restrict the webview to only load resources from the `out` and `webview-ui/dist` directories
+          localResourceRoots: [Uri.joinPath(extensionUri, 'dist')],
         }
       )
 
-      LoaderPanel.currentPanel = new LoaderPanel(panel, extensionUri)
+      LoaderPanel.currentPanel = new LoaderPanel(panel, context)
     }
   }
 
@@ -110,7 +112,20 @@ export class LoaderPanel {
    */
   // eslint-disable-next-line class-methods-use-this
   _getWebviewContent() {
-    const scriptUri = `http://localhost:8080/index.js`
+    const isProduction = this._context.extensionMode === ExtensionMode.Production
+
+    console.log('isProduction', isProduction)
+
+    let scriptUri = ''
+    if (isProduction) {
+      const filePath = Uri.file(
+        path.join(this._context.extensionPath, 'dist', 'webview-ui/index.js')
+      )
+      scriptUri = this._panel.webview.asWebviewUri(filePath).toString()
+    } else {
+      scriptUri = `http://localhost:8080/index.js`
+    }
+
     const nonce = getNonce()
 
     // Tip: Install the es6-string-html VS Code extension to enable code highlighting below

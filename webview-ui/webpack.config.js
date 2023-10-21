@@ -1,8 +1,10 @@
 const path = require('node:path')
 
-const {HotModuleReplacementPlugin} = require('webpack')
+const {DefinePlugin, HotModuleReplacementPlugin} = require('webpack')
 const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin')
 // const HtmlWebpackPlugin = require('html-webpack-plugin')
+
+const isDevMode = process.env.NODE_ENV === 'development'
 
 // const devServerClientOptions = {
 //   hot: true,
@@ -37,14 +39,21 @@ const devEntries = [
 
 /** @type {import('webpack').Configuration} */
 module.exports = {
-  mode: 'development',
-  devtool: 'cheap-module-source-map',
-  entry: [...devEntries, path.resolve(__dirname, 'src/index.jsx')],
+  mode: isDevMode ? 'development' : 'production',
+
+  devtool: isDevMode ? 'eval-cheap-module-source-map' : false,
+
+  entry: isDevMode
+    ? [...devEntries, path.resolve(__dirname, 'src/index.jsx')]
+    : [path.resolve(__dirname, 'src/index.jsx')],
+
   output: {
-    publicPath: 'http://localhost:8080/',
+    clean: true,
+    publicPath: isDevMode ? 'http://localhost:8080/' : '/',
     path: path.resolve(__dirname, '../dist/webview-ui'),
     filename: 'index.js',
   },
+
   devServer: {
     hot: false,
     client: false,
@@ -57,14 +66,18 @@ module.exports = {
       'Access-Control-Allow-Origin': '*',
     },
   },
+
   plugins: [
-    new HotModuleReplacementPlugin(),
-    new ReactRefreshWebpackPlugin(),
+    isDevMode && new HotModuleReplacementPlugin(),
+    isDevMode && new ReactRefreshWebpackPlugin(),
+    new DefinePlugin({'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV)}),
     // new HtmlWebpackPlugin(),
-  ],
+  ].filter(Boolean),
+
   resolve: {
     extensions: ['.js', '.jsx', '.json'],
   },
+
   module: {
     rules: [
       {
