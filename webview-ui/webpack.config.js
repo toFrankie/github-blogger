@@ -87,6 +87,16 @@ module.exports = {
         exclude: /node_modules/,
       },
       {
+        test: /\.css$/i,
+        use: [
+          'style-loader',
+          {
+            loader: 'css-loader',
+            options: {importLoaders: 1},
+          },
+        ],
+      },
+      {
         test: [/\.bmp$/, /\.gif$/, /\.jpe?g$/, /\.png$/, /\.svg$/],
         type: 'asset',
         parser: {
