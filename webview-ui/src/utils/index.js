@@ -13,3 +13,14 @@ export async function to(promise, errorExt) {
     return res
   }
 }
+
+export function getVscode() {
+  // 兼容 HMR
+  if (window.__vscode__) {
+    return window.__vscode__
+  }
+
+  const vscode = acquireVsCodeApi()
+  window.__vscode__ = vscode
+  return vscode
+}

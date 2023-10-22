@@ -122,8 +122,6 @@ export default class EditPanel {
   _getWebviewContent() {
     const isProduction = this._context.extensionMode === ExtensionMode.Production
 
-    console.log('isProduction', isProduction)
-
     let scriptUri = ''
     if (isProduction) {
       const filePath = Uri.file(

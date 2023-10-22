@@ -6,20 +6,20 @@ import {useEffect} from 'react'
 import {observer, useLocalObservable} from 'mobx-react-lite'
 import {Spin, message} from 'antd'
 import {WebviewRPC} from 'vscode-webview-rpc'
+import 'bytemd/dist/index.min.css'
 
+import './App.css'
 import Editor from './components/editor'
 import ActionBox from './components/action-box'
 import LabelManager from './components/label-manager'
 import List from './components/list'
-import {getMilestones} from './service'
 
-import 'bytemd/dist/index.min.css'
-import './App.css'
+import {getMilestones} from './service'
+import {getVscode} from './utils'
 
 let RPC
 
-// eslint-disable-next-line no-undef
-const vscode = acquireVsCodeApi()
+const vscode = getVscode()
 
 const showError = res => {
   message.error(res)
