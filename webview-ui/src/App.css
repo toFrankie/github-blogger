@@ -1,10 +1,6 @@
 body {
   padding: 0;
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu',
-    'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
 
 code {
@@ -96,10 +92,9 @@ code {
   padding: 4px;
   margin-bottom: 8px;
   overflow: hidden;
-  font-size: 14px;
   font-size: 16px;
   line-height: 20px;
-  color: rgba(0, 0, 0, 0.65);
+  color: rgb(0 0 0 / 65%);
   text-overflow: ellipsis;
   white-space: nowrap;
   cursor: pointer;

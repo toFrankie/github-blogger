@@ -146,7 +146,7 @@ export default class EditPanel {
           <meta name="viewport" content="width=device-width, initial-scale=1.0" />
           <title>Hello World</title>
         </head>
-        <body>
+        <body style="background-color: #F6F8FA">
           <div id="root"></div>
           <script type="module" nonce="${nonce}" src="${scriptUri}"></script>
         </body>
