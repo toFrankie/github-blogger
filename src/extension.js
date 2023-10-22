@@ -2,7 +2,7 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode'
 
-import LoaderPanel, {getWebviewOptions} from './panels/loader-panel'
+import EditPanel, {getWebviewOptions} from './panels/edit-panel'
 import MultiSelectInput from './panels/multi-select-input'
 import {checkConfig} from './utils'
 
@@ -21,7 +21,7 @@ export function activate(context) {
       return MultiSelectInput(context)
     }
 
-    LoaderPanel.render(context)
+    EditPanel.render(context)
   })
 
   const disposableConfig = vscode.commands.registerCommand('vscode-blog.config', () => {
@@ -30,14 +30,13 @@ export function activate(context) {
 
   context.subscriptions.push(disposableOpen, disposableConfig)
 
-  // TODO:
   if (vscode.window.registerWebviewPanelSerializer) {
     // Make sure we register a serializer in activation event
-    vscode.window.registerWebviewPanelSerializer(LoaderPanel.viewType, {
+    vscode.window.registerWebviewPanelSerializer(EditPanel.viewType, {
       async deserializeWebviewPanel(webviewPanel) {
         // Reset the webview options so we use latest uri for `localResourceRoots`.
         webviewPanel.webview.options = getWebviewOptions(context.extensionUri)
-        LoaderPanel.revive(webviewPanel, context.extensionUri)
+        EditPanel.revive(webviewPanel, context.extensionUri)
       },
     })
   }

@@ -23,7 +23,7 @@ export function getWebviewOptions(extensionUri) {
  * - Setting the HTML (and by proxy CSS/JavaScript) content of the webview panel
  * - Setting message listeners so data can be passed between the webview and extension
  */
-export default class LoaderPanel {
+export default class EditPanel {
   static currentPanel
   static viewType = 'EditPanel'
   _panel
@@ -31,7 +31,7 @@ export default class LoaderPanel {
   _context
 
   /**
-   * The LoaderPanel class private constructor (called only from the render method).
+   * The EditPanel class private constructor (called only from the render method).
    *
    * @param panel A reference to the webview panel
    * @param context A reference to the extension context
@@ -67,8 +67,8 @@ export default class LoaderPanel {
     const {extensionUri} = context
 
     // If the webview panel already exists reveal it
-    if (LoaderPanel.currentPanel) {
-      LoaderPanel.currentPanel._panel.reveal(ViewColumn.One)
+    if (EditPanel.currentPanel) {
+      EditPanel.currentPanel._panel.reveal(ViewColumn.One)
       return
     }
 
@@ -76,24 +76,24 @@ export default class LoaderPanel {
 
     // If a webview panel does not already exist create and show a new one
     const panel = window.createWebviewPanel(
-      LoaderPanel.viewType,
+      EditPanel.viewType,
       'Blog Editing',
       column || ViewColumn.One,
       getWebviewOptions(extensionUri)
     )
 
-    LoaderPanel.currentPanel = new LoaderPanel(panel, context)
+    EditPanel.currentPanel = new EditPanel(panel, context)
   }
 
   static revive(panel, extensionUri) {
-    LoaderPanel.currentPanel = new LoaderPanel(panel, extensionUri)
+    EditPanel.currentPanel = new EditPanel(panel, extensionUri)
   }
 
   /**
    * Cleans up and disposes of webview resources when the webview panel is closed.
    */
   dispose() {
-    LoaderPanel.currentPanel = undefined
+    EditPanel.currentPanel = undefined
 
     // Dispose of the current webview panel
     this._panel.dispose()
