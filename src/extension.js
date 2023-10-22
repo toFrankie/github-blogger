@@ -2,7 +2,9 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode'
 
-import {LoaderPanel} from './panels/loader-panel'
+import LoaderPanel, {getWebviewOptions} from './panels/loader-panel'
+import MultiSelectInput from './panels/multi-select-input'
+import {checkConfig} from './utils'
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -14,9 +16,29 @@ export function activate(context) {
   // The command has been defined in the package.json file
   // Now provide the implementation of the command with registerCommand
   // The commandId parameter must match the command field in package.json
-  const disposable = vscode.commands.registerCommand('vscode-blog.helloWorld', () => {
+  const disposableOpen = vscode.commands.registerCommand('vscode-blog.open', async () => {
+    if (!(await checkConfig())) {
+      return MultiSelectInput(context)
+    }
+
     LoaderPanel.render(context)
   })
 
-  context.subscriptions.push(disposable)
+  const disposableConfig = vscode.commands.registerCommand('vscode-blog.config', () => {
+    MultiSelectInput(context)
+  })
+
+  context.subscriptions.push(disposableOpen, disposableConfig)
+
+  // TODO:
+  if (vscode.window.registerWebviewPanelSerializer) {
+    // Make sure we register a serializer in activation event
+    vscode.window.registerWebviewPanelSerializer(LoaderPanel.viewType, {
+      async deserializeWebviewPanel(webviewPanel) {
+        // Reset the webview options so we use latest uri for `localResourceRoots`.
+        webviewPanel.webview.options = getWebviewOptions(context.extensionUri)
+        LoaderPanel.revive(webviewPanel, context.extensionUri)
+      },
+    })
+  }
 }

@@ -6,5 +6,7 @@ module.exports = init({
   rules: {
     'import/no-extraneous-dependencies': 'off',
     'no-console': 'off',
+    'consistent-return': 'off',
+    'no-param-reassign': 'off',
   },
 })

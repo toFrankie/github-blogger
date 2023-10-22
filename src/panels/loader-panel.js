@@ -2,8 +2,16 @@ import path from 'node:path'
 
 import {window, Uri, ViewColumn, ExtensionMode} from 'vscode'
 
-// import {getUri} from '../utilities/getUri'
-import {getNonce} from '../utilities/getNonce'
+import {getNonce} from '../utils'
+
+export function getWebviewOptions(extensionUri) {
+  return {
+    // Enable javascript in the webview
+    enableScripts: true,
+    // And restrict the webview to only loading content from our extension's `media` directory.
+    localResourceRoots: [Uri.joinPath(extensionUri, 'dist')],
+  }
+}
 
 /**
  * This class manages the state and behavior of HelloWorld webview panels.
@@ -15,8 +23,9 @@ import {getNonce} from '../utilities/getNonce'
  * - Setting the HTML (and by proxy CSS/JavaScript) content of the webview panel
  * - Setting message listeners so data can be passed between the webview and extension
  */
-export class LoaderPanel {
+export default class LoaderPanel {
   static currentPanel
+  static viewType = 'EditPanel'
   _panel
   _disposables = []
   _context
@@ -56,29 +65,28 @@ export class LoaderPanel {
    */
   static render(context) {
     const {extensionUri} = context
-    if (LoaderPanel.currentPanel) {
-      // If the webview panel already exists reveal it
-      LoaderPanel.currentPanel._panel.reveal(ViewColumn.One)
-    } else {
-      // If a webview panel does not already exist create and show a new one
-      const panel = window.createWebviewPanel(
-        // Panel view type
-        'showHelloWorld',
-        // Panel title
-        'Hello World',
-        // The editor column the panel should be displayed in
-        ViewColumn.One,
-        // Extra panel configurations
-        {
-          // Enable JavaScript in the webview
-          enableScripts: true,
-          // Restrict the webview to only load resources from the `out` and `webview-ui/dist` directories
-          localResourceRoots: [Uri.joinPath(extensionUri, 'dist')],
-        }
-      )
 
-      LoaderPanel.currentPanel = new LoaderPanel(panel, context)
+    // If the webview panel already exists reveal it
+    if (LoaderPanel.currentPanel) {
+      LoaderPanel.currentPanel._panel.reveal(ViewColumn.One)
+      return
     }
+
+    const column = window.activeTextEditor ? window.activeTextEditor.viewColumn : undefined
+
+    // If a webview panel does not already exist create and show a new one
+    const panel = window.createWebviewPanel(
+      LoaderPanel.viewType,
+      'Blog Editing',
+      column || ViewColumn.One,
+      getWebviewOptions(extensionUri)
+    )
+
+    LoaderPanel.currentPanel = new LoaderPanel(panel, context)
+  }
+
+  static revive(panel, extensionUri) {
+    LoaderPanel.currentPanel = new LoaderPanel(panel, extensionUri)
   }
 
   /**

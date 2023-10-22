@@ -4,18 +4,43 @@
   "description": "",
   "version": "0.0.1",
   "engines": {
-    "vscode": "^1.83.0"
+    "vscode": "^1.62.0"
   },
   "categories": [
-    "Other"
+    "Notebooks"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/toFrankie/vscode-blog.git"
+  },
   "activationEvents": [],
   "main": "./dist/extension.js",
   "contributes": {
+    "configuration": {
+      "title": "GitHub Issue Blog",
+      "properties": {
+        "vscode-blog.github.token": {
+          "type": "string",
+          "default": ""
+        },
+        "vscode-blog.github.user": {
+          "type": "string",
+          "default": ""
+        },
+        "vscode-blog.github.repo": {
+          "type": "string",
+          "default": ""
+        }
+      }
+    },
     "commands": [
       {
-        "command": "vscode-blog.helloWorld",
-        "title": "Hello World"
+        "command": "vscode-blog.open",
+        "title": "Open vscode blog"
+      },
+      {
+        "command": "vscode-blog.config",
+        "title": "Config vscode blog"
       }
     ]
   },
@@ -53,6 +78,8 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.23.2",
-    "core-js": "^3.33.1"
+    "@octokit/core": "^5.0.1",
+    "core-js": "^3.33.1",
+    "vscode-webview-rpc": "^0.0.4"
   }
 }
