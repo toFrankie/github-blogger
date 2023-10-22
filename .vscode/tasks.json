@@ -4,8 +4,9 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "type": "npm",
-      "script": "start:ext",
+      "label": "run ext",
+      "type": "shell",
+      "command": "source ~/.nvm/nvm.sh && nvm use default && pnpm run start:ext",
       "problemMatcher": "$ts-webpack-watch",
       "isBackground": true,
       "presentation": {
@@ -17,20 +18,22 @@
       }
     },
     {
-      "type": "npm",
-      "script": "start:webview-ui",
+      "label": "run webview-ui",
+      "type": "shell",
+      "command": "source ~/.nvm/nvm.sh && nvm use default && pnpm run start:webview-ui",
       "problemMatcher": "$ts-webpack-watch",
       "isBackground": true,
       "presentation": {
         "reveal": "never",
         "group": "watchers"
       },
-      "group": "build"
+      "group": {
+        "kind": "build"
+      }
     },
     {
-      "label": "tasks: dev",
-      "dependsOn": ["npm: start:ext", "npm: start:webview-ui"],
-      "problemMatcher": []
+      "label": "run extension",
+      "dependsOn": ["run ext", "run webview-ui"]
     }
   ]
 }
