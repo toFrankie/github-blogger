@@ -3,6 +3,7 @@ import path from 'node:path'
 import {window, Uri, ViewColumn, ExtensionMode} from 'vscode'
 
 import {getNonce} from '../utils'
+import Server from '../server'
 
 export function getWebviewOptions(extensionUri) {
   return {
@@ -29,6 +30,7 @@ export default class EditPanel {
   _panel
   _disposables = []
   _context
+  _server
 
   /**
    * The EditPanel class private constructor (called only from the render method).
@@ -39,6 +41,7 @@ export default class EditPanel {
   constructor(panel, context) {
     this._panel = panel
     this._context = context
+    this._server = new Server(panel.webview)
 
     // Set an event listener to listen for when the panel is disposed (i.e. when the user closes
     // the panel or when the panel is closed programmatically)

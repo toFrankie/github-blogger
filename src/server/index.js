@@ -54,7 +54,7 @@ export default class Service {
   octokit
   webview
   rpc
-  å
+
   constructor(webview) {
     this.config = {}
     this.webview = webview
