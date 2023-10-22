@@ -7,13 +7,13 @@ import {observer, useLocalObservable} from 'mobx-react-lite'
 import {Spin, message} from 'antd'
 import {WebviewRPC} from 'vscode-webview-rpc'
 import 'bytemd/dist/index.min.css'
+import 'github-markdown-css'
 
 import './App.css'
 import Editor from './components/editor'
 import ActionBox from './components/action-box'
 import LabelManager from './components/label-manager'
 import List from './components/list'
-
 import {getMilestones} from './service'
 import {getVscode} from './utils'
 

@@ -145,6 +145,21 @@ export default class EditPanel {
           <meta charset="UTF-8" />
           <meta name="viewport" content="width=device-width, initial-scale=1.0" />
           <title>Hello World</title>
+          <style>
+            .markdown-body {
+              box-sizing: border-box;
+              min-width: 200px;
+              max-width: 980px;
+              padding: 45px;
+              margin: 0 auto;
+            }
+
+            @media (max-width: 767px) {
+              .markdown-body {
+                padding: 15px;
+              }
+            }
+          </style>
         </head>
         <body style="background-color: #F6F8FA">
           <div id="root"></div>
