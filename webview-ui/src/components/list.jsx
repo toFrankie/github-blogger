@@ -48,7 +48,8 @@ export default function List({store, visible, totalLabels, labels, totalCount, c
                   store.setCurrentIssue(item)
                 }}
               >
-                {item.title}
+                <div className="title">{item.title}</div>
+                <div className="number">#{item.number}</div>
               </div>
             ))
           ) : (

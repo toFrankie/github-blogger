@@ -83,28 +83,38 @@ code {
 }
 
 .blog-filter {
-  margin-bottom: 8px;
+  margin-bottom: 16px;
 }
 
 .app-bloglist-item {
-  position: relative;
-  width: 90%;
-  padding: 4px;
-  margin-bottom: 8px;
-  overflow: hidden;
-  font-size: 16px;
-  line-height: 20px;
-  color: rgb(0 0 0 / 65%);
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  padding: 10px 8px;
+  font-size: 14px;
+  color: #1f2328;
   cursor: pointer;
-  border-radius: 7px;
+  border-top: max(1px, 0.0625rem) solid hsl(210deg 18% 87% / 100%);
   transition: all 0.3s cubic-bezier(0.7, 0.3, 0.1, 1);
 }
 
+.app-bloglist-item:first-of-type {
+  border-top: none;
+}
+
+.app-bloglist-item .title {
+  width: auto;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.app-bloglist-item .number {
+  margin-left: 6px;
+  color: #656d76;
+}
+
 .app-bloglist-item:hover {
-  color: #fff;
-  background-color: #94c2ed;
+  color: #0969da;
+  background-color: #f6f8fa;
 }
 
 .edit-tag,
@@ -123,8 +133,11 @@ code {
 }
 
 .app-bloglist .list {
-  flex: 1;
-  overflow: auto;
+  margin-bottom: 16px;
+  overflow: hidden;
+  overflow-y: auto;
+  border: max(1px, 0.0625rem) solid hsl(210deg 18% 87% / 100%);
+  border-radius: 6px;
 }
 
 .ant-drawer-body {
