@@ -1,11 +1,15 @@
 import {Editor, Viewer} from '@bytemd/react'
 import {Input, Tag} from 'antd'
-import formt from '@bytemd/plugin-frontmatter'
+import frontmatter from '@bytemd/plugin-frontmatter'
 import gfm from '@bytemd/plugin-gfm'
 import hl from '@bytemd/plugin-highlight'
 import breaks from '@bytemd/plugin-breaks'
+import gemoji from '@bytemd/plugin-gemoji'
+import math from '@bytemd/plugin-math'
+import mediumZoom from '@bytemd/plugin-medium-zoom'
+import mermaid from '@bytemd/plugin-mermaid'
 
-const plugins = [formt(), breaks(), gfm(), hl()]
+const plugins = [frontmatter(), breaks(), gfm(), hl(), gemoji(), math(), mediumZoom(), mermaid()]
 
 const {CheckableTag} = Tag
 
