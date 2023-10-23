@@ -10,6 +10,7 @@ import 'bytemd/dist/index.min.css'
 import 'github-markdown-css'
 
 import './App.css'
+import './reset.css'
 import Editor from './components/editor'
 import ActionBox from './components/action-box'
 import LabelManager from './components/label-manager'

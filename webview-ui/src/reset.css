@@ -1,0 +1,12 @@
+code {
+  color: var(--color-fg-default);
+}
+
+blockquote {
+  background: none !important;
+  border-color: var(--color-border-default);
+}
+
+.markdown-body {
+  font-size: 14px;
+}
