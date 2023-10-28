@@ -41,9 +41,9 @@ export default function ContentEditor({
 }) {
   const handleChange = (item, checked) => {
     if (checked) {
-      store.addTag(item)
+      store.addLabel(item)
     } else {
-      store.removeTag(item)
+      store.removeLabel(item)
     }
   }
 

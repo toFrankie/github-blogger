@@ -77,16 +77,16 @@ code {
   width: 100%;
 }
 
-.app-bloglist {
+.app-issue-list {
   display: flex;
   flex-direction: column;
 }
 
-.blog-filter {
+.issue-filter {
   margin-bottom: 16px;
 }
 
-.app-bloglist-item {
+.app-issue-list-item {
   display: flex;
   align-items: center;
   padding: 8px;
@@ -97,45 +97,45 @@ code {
   transition: all 0.3s cubic-bezier(0.7, 0.3, 0.1, 1);
 }
 
-.app-bloglist-item .title {
+.app-issue-list-item .title {
   width: auto;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.app-bloglist-item .number {
+.app-issue-list-item .number {
   margin-left: 6px;
   color: #656d76;
 }
 
-.app-bloglist-item:hover {
+.app-issue-list-item:hover {
   color: #0969da;
   background-color: #f6f8fa;
 }
 
-.edit-tag,
-.site-tag-plus,
-.tag-input {
+.edit-label,
+.site-label-plus,
+.label-input {
   margin: 4px;
   font-size: 16px;
   font-weight: bolder;
   cursor: pointer;
 }
 
-.app-bloglist {
+.app-issue-list {
   display: flex;
   flex-direction: column;
   height: 100%;
 }
 
-.app-bloglist .list {
+.app-issue-list .list {
   margin-bottom: 16px;
   overflow: hidden;
   overflow-y: auto;
 }
 
-.app-bloglist .list::-webkit-scrollbar {
+.app-issue-list .list::-webkit-scrollbar {
   width: 0;
   height: initial;
 }
@@ -144,6 +144,6 @@ code {
   padding: 8px;
 }
 
-.blog-pagination {
+.issue-pagination {
   text-align: center;
 }

@@ -252,7 +252,7 @@ export default class Service {
    */
   async _registerMethod() {
     const getLabels = async () => {
-      const data = await this.getLabels({per_page: 100})
+      const data = await this.getLabels({page: 0, per_page: 100})
       return data
     }
     const getIssues = async (page, labels) => {

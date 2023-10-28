@@ -2,7 +2,7 @@ import {useState, useRef} from 'react'
 import {Drawer, Input, Tooltip, Tag, message} from 'antd'
 import {PlusOutlined} from '@ant-design/icons'
 
-export default function TagsManager({store, visible, labels}) {
+export default function LabelsManager({store, visible, labels}) {
   const [text, setText] = useState('')
   const [editValue, setEditValue] = useState('')
   const [editIndex, setEditIndex] = useState()
@@ -10,18 +10,18 @@ export default function TagsManager({store, visible, labels}) {
   const saveEditInputRef = useRef(null)
   const saveInputRef = useRef(null)
 
-  const handleEditInputConfirm = async tag => {
+  const handleEditInputConfirm = async label => {
     if (checkDuplicate(editValue) || checkEmpty(editValue)) return reset()
-    await store.updateLabel(tag.name, editValue)
+    await store.updateLabel(label.name, editValue)
     reset()
   }
 
-  const handleClose = tag => {
-    store.deleteLabel(tag.name)
+  const handleClose = label => {
+    store.deleteLabel(label.name)
   }
 
   const handleInputConfirm = async () => {
-    if (checkDuplicate(text)) return message.error(`Tag: "${text}" already exists!`)
+    if (checkDuplicate(text)) return message.error(`Label: "${text}" already exists!`)
     if (checkEmpty(text)) return reset()
     await store.createLabel(text)
     reset()
@@ -46,9 +46,9 @@ export default function TagsManager({store, visible, labels}) {
     <Drawer
       closable={false}
       placement="right"
-      title="Tags Management"
+      title="Labels Management"
       open={visible}
-      onClose={() => store.setTagsVisible(false)}
+      onClose={() => store.setLabelVisible(false)}
     >
       <>
         {labels.map(label => {
@@ -57,7 +57,7 @@ export default function TagsManager({store, visible, labels}) {
               <Input
                 key={label.id}
                 ref={saveEditInputRef}
-                className="tag-input"
+                className="label-input"
                 size="small"
                 value={editValue}
                 onBlur={() => handleEditInputConfirm(label)}
@@ -66,12 +66,12 @@ export default function TagsManager({store, visible, labels}) {
               />
             )
           }
-          const isLongTag = label.name.length > 20
+          const isLongLabel = label.name.length > 20
           const tagElem = (
             <Tag
               key={label.name}
               closable
-              className="edit-tag"
+              className="edit-label"
               color="#1890ff"
               onClose={() => handleClose(label)}
             >
@@ -85,11 +85,11 @@ export default function TagsManager({store, visible, labels}) {
                   e.preventDefault()
                 }}
               >
-                {isLongTag ? `${label.name.slice(0, 20)}...` : label.name}
+                {isLongLabel ? `${label.name.slice(0, 20)}...` : label.name}
               </span>
             </Tag>
           )
-          return isLongTag ? (
+          return isLongLabel ? (
             <Tooltip key={label.id} title={label}>
               {tagElem}
             </Tooltip>
@@ -100,7 +100,7 @@ export default function TagsManager({store, visible, labels}) {
         {inputVisible && (
           <Input
             ref={saveInputRef}
-            className="tag-input"
+            className="label-input"
             size="small"
             type="text"
             value={text}
@@ -111,7 +111,7 @@ export default function TagsManager({store, visible, labels}) {
         )}
         {!inputVisible && (
           <Tag
-            className="site-tag-plus"
+            className="site-label-plus"
             onClick={() => {
               setInputVisible(true)
               setTimeout(() => {
@@ -119,7 +119,7 @@ export default function TagsManager({store, visible, labels}) {
               }, 0)
             }}
           >
-            <PlusOutlined /> New Tag
+            <PlusOutlined /> New Label
           </Tag>
         )}
       </>

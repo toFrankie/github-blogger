@@ -43,7 +43,7 @@ const App = observer(() => {
     totalCount: 1,
     currentPage: 1,
     listVisible: false,
-    tagsVisible: false,
+    labelsVisible: false,
     loading: false,
     setLoading: e => {
       store.loading = e
@@ -104,8 +104,8 @@ const App = observer(() => {
       store.listVisible = e
       store.getIssues()
     },
-    setTagsVisible: e => {
-      store.tagsVisible = e
+    setLabelVisible: e => {
+      store.labelsVisible = e
     },
     setCurrentIssue: e => {
       store.current = e
@@ -113,11 +113,11 @@ const App = observer(() => {
     setCurrentIssueBody: e => {
       store.current.body = e
     },
-    addTag: e => {
+    addLabel: e => {
       if (!store.current.labels) store.current.labels = []
       store.current.labels = store.current.labels.concat(e)
     },
-    removeTag: e => {
+    removeLabel: e => {
       if (!store.current.labels) store.current.labels = []
       store.current.labels = store.current.labels.filter(item => item.id !== e.id)
     },
@@ -197,7 +197,7 @@ const App = observer(() => {
           totalLabels={store.labels}
           visible={store.listVisible}
         />
-        <LabelManager labels={store.labels} store={store} visible={store.tagsVisible} />
+        <LabelManager labels={store.labels} store={store} visible={store.labelsVisible} />
         <ActionBox store={store} />
       </div>
     </Spin>

@@ -4,7 +4,7 @@ import {MenuUnfoldOutlined, PlusOutlined, SendOutlined, TagsOutlined} from '@ant
 export default function ActionBox({store}) {
   return (
     <div className="app-action-box">
-      <Tooltip placement="left" title="New Blog">
+      <Tooltip placement="left" title="New Issue">
         <Button
           icon={<PlusOutlined />}
           shape="circle"
@@ -12,12 +12,12 @@ export default function ActionBox({store}) {
           onClick={() => store.setCurrentIssue({})}
         />
       </Tooltip>
-      <Tooltip placement="left" title="Tags">
+      <Tooltip placement="left" title="Labels">
         <Button
           icon={<TagsOutlined />}
           shape="circle"
           type="primary"
-          onClick={() => store.setTagsVisible(true)}
+          onClick={() => store.setLabelVisible(true)}
         />
       </Tooltip>
       <Tooltip placement="left" title="Update">

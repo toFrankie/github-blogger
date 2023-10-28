@@ -16,11 +16,11 @@ export default function List({store, visible, totalLabels, labels, totalCount, c
       open={visible}
       onClose={() => store.setListVisible(false)}
     >
-      <div className="app-bloglist">
-        <div className="blog-filter">
+      <div className="app-issue-list">
+        <div className="issue-filter">
           <Select
             allowClear
-            placeholder="Filter by tags"
+            placeholder="Filter by labels"
             style={{width: '100%'}}
             value={selectedOptions}
             onBlur={() => store.getIssues()}
@@ -42,7 +42,7 @@ export default function List({store, visible, totalLabels, labels, totalCount, c
             store.issues.map(item => (
               <div
                 key={item.id}
-                className="app-bloglist-item"
+                className="app-issue-list-item"
                 onClick={() => {
                   store.setListVisible(false)
                   store.setCurrentIssue(item)
@@ -56,7 +56,7 @@ export default function List({store, visible, totalLabels, labels, totalCount, c
             <Empty />
           )}
         </div>
-        <div className="blog-pagination">
+        <div className="issue-pagination">
           {totalCount > 20 ? (
             <Pagination
               current={currentPage}

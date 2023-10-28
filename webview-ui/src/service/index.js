@@ -87,6 +87,8 @@ export const getLabels = async () => {
     octokit.request('GET /repos/{owner}/{repo}/labels', {
       owner: user,
       repo,
+      page: 0,
+      per_page: 100,
     })
   )
   if (!err) return res?.data
