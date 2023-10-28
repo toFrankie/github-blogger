@@ -89,20 +89,17 @@ code {
 .app-bloglist-item {
   display: flex;
   align-items: center;
-  padding: 10px 8px;
+  padding: 8px;
   font-size: 14px;
   color: #1f2328;
   cursor: pointer;
-  border-top: max(1px, 0.0625rem) solid hsl(210deg 18% 87% / 100%);
+  border-radius: 6px;
   transition: all 0.3s cubic-bezier(0.7, 0.3, 0.1, 1);
-}
-
-.app-bloglist-item:first-of-type {
-  border-top: none;
 }
 
 .app-bloglist-item .title {
   width: auto;
+  overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -136,8 +133,11 @@ code {
   margin-bottom: 16px;
   overflow: hidden;
   overflow-y: auto;
-  border: max(1px, 0.0625rem) solid hsl(210deg 18% 87% / 100%);
-  border-radius: 6px;
+}
+
+.app-bloglist .list::-webkit-scrollbar {
+  width: 0;
+  height: initial;
 }
 
 .ant-drawer-body {
@@ -145,6 +145,5 @@ code {
 }
 
 .blog-pagination {
-  margin-bottom: 24px;
   text-align: center;
 }

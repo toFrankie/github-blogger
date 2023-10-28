@@ -80,7 +80,7 @@ export default class EditPanel {
     // If a webview panel does not already exist create and show a new one
     const panel = window.createWebviewPanel(
       EditPanel.viewType,
-      'Blog Editing',
+      'Issue editor',
       column || ViewColumn.One,
       getWebviewOptions(extensionUri)
     )

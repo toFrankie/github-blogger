@@ -12,8 +12,8 @@ export default function List({store, visible, totalLabels, labels, totalCount, c
     <Drawer
       closable={false}
       placement="left"
-      title="Blog List"
-      visible={visible}
+      title="Issue List"
+      open={visible}
       onClose={() => store.setListVisible(false)}
     >
       <div className="app-bloglist">

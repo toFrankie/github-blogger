@@ -28,7 +28,7 @@ export default function ActionBox({store}) {
           onClick={() => store.updateIssue()}
         />
       </Tooltip>
-      <Tooltip placement="left" title="Blog List">
+      <Tooltip placement="left" title="Issue List">
         <Button
           icon={<MenuUnfoldOutlined />}
           shape="circle"

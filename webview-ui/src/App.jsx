@@ -123,7 +123,7 @@ const App = observer(() => {
     },
     updateIssue: async () => {
       const {number = undefined, title = '', body = '', labels = []} = store.current
-      if (!title || !body) return message.error('Please enter the content~')
+      if (!title || !body) return message.error('Please enter the content...')
       if (!number) {
         const data = await RPC.emit('createIssue', [title, body, labels])
         store.current.number = data.number
@@ -182,7 +182,7 @@ const App = observer(() => {
         <Editor
           content={store.current.body || ''}
           labels={store.current.labels || []}
-          placeholder="Leave your thought~"
+          placeholder="Leave your thought..."
           store={store}
           title={store.current.title || ''}
           totalLabels={store.labels || []}

@@ -52,7 +52,7 @@
     "start:webview-ui": "cd webview-ui && pnpm start",
     "build:webview-ui": "cd webview-ui && pnpm build",
     "lint": "run-s lint:eslint lint:prettier",
-    "lint:eslint": "eslint 'src/**/*.{js,ts,txs}' --cache --fix",
+    "lint:eslint": "eslint 'src/**/*.{js,jxs}' --cache --fix",
     "lint:prettier": "prettier . '!**/pnpm-lock.yaml' --cache --write",
     "lint:stylelint": "stylelint 'src/**/*.css' --cache --fix"
   },

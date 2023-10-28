@@ -47,7 +47,7 @@ export default function TagsManager({store, visible, labels}) {
       closable={false}
       placement="right"
       title="Tags Management"
-      visible={visible}
+      open={visible}
       onClose={() => store.setTagsVisible(false)}
     >
       <>

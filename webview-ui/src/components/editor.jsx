@@ -1,5 +1,5 @@
 import {Editor, Viewer} from '@bytemd/react'
-import {Input, Tag} from 'antd'
+import {Input, Tag, Space} from 'antd'
 import frontmatter from '@bytemd/plugin-frontmatter'
 import gfm from '@bytemd/plugin-gfm'
 import hl from '@bytemd/plugin-highlight'
@@ -10,8 +10,6 @@ import mediumZoom from '@bytemd/plugin-medium-zoom'
 import mermaid from '@bytemd/plugin-mermaid'
 
 const plugins = [frontmatter(), breaks(), gfm(), hl(), gemoji(), math(), mediumZoom(), mermaid()]
-
-const {CheckableTag} = Tag
 
 export function MDEditor({value, setValue, uploadImages, placeholder}) {
   return (
@@ -59,15 +57,17 @@ export default function ContentEditor({
         />
       </div>
       <div className="app-labels">
-        {totalLabels.map(item => (
-          <CheckableTag
-            key={item.id}
-            checked={labels.filter(label => label.id === item.id).length > 0}
-            onChange={checked => handleChange(item, checked)}
-          >
-            {item.name}
-          </CheckableTag>
-        ))}
+        <Space size={[0, 'small']} wrap>
+          {totalLabels.map(item => (
+            <Tag.CheckableTag
+              key={item.id}
+              checked={labels.filter(label => label.id === item.id).length > 0}
+              onChange={checked => handleChange(item, checked)}
+            >
+              {item.name}
+            </Tag.CheckableTag>
+          ))}
+        </Space>
       </div>
       <Editor
         placeholder={placeholder}
