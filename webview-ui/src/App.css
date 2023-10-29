@@ -33,7 +33,7 @@ code {
 .app-action-box {
   position: fixed;
   right: 16px;
-  bottom: 102px;
+  bottom: 32px;
   z-index: 99999;
   display: flex;
   flex-direction: column;
