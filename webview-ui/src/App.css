@@ -32,7 +32,7 @@ code {
 
 .app-action-box {
   position: fixed;
-  right: 8px;
+  right: 16px;
   bottom: 102px;
   z-index: 99999;
   display: flex;
@@ -107,12 +107,12 @@ code {
 
 .app-issue-list-item .number {
   margin-left: 6px;
-  color: #656d76;
+  color: #808080;
 }
 
 .app-issue-list-item:hover {
-  color: #0969da;
-  background-color: #f6f8fa;
+  color: #00b96b;
+  background-color: #f4f5f5;
 }
 
 .label-input {

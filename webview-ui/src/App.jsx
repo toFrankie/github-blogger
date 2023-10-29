@@ -4,7 +4,7 @@
 
 import {useEffect} from 'react'
 import {observer, useLocalObservable} from 'mobx-react-lite'
-import {Spin, message} from 'antd'
+import {ConfigProvider, Spin, message} from 'antd'
 import {WebviewRPC} from 'vscode-webview-rpc'
 import 'bytemd/dist/index.min.css'
 import 'github-markdown-css'
@@ -30,6 +30,14 @@ const showError = res => {
 const showSuccess = res => {
   message.success(res)
   return Promise.resolve()
+}
+
+const theme = {
+  token: {
+    colorPrimary: '#00b96b',
+    colorInfo: '#00b96b',
+    borderRadius: 6,
+  },
 }
 
 const App = observer(() => {
@@ -177,30 +185,32 @@ const App = observer(() => {
   }
 
   return (
-    <Spin spinning={store.loading} tip="Syncing...">
-      <div className="app">
-        <Editor
-          content={store.current.body || ''}
-          labels={store.current.labels || []}
-          placeholder="Leave your thought..."
-          store={store}
-          title={store.current.title || ''}
-          totalLabels={store.labels || []}
-          uploadImages={uploadImages}
-        />
-        <List
-          currentPage={store.currentPage}
-          issues={store.issues}
-          labels={store.filterLabels}
-          store={store}
-          totalCount={store.totalCount}
-          totalLabels={store.labels}
-          visible={store.listVisible}
-        />
-        <LabelManager labels={store.labels} store={store} visible={store.labelsVisible} />
-        <ActionBox store={store} />
-      </div>
-    </Spin>
+    <ConfigProvider theme={theme}>
+      <Spin spinning={store.loading} tip="Syncing...">
+        <div className="app">
+          <Editor
+            content={store.current.body || ''}
+            labels={store.current.labels || []}
+            placeholder="Leave your thought..."
+            store={store}
+            title={store.current.title || ''}
+            totalLabels={store.labels || []}
+            uploadImages={uploadImages}
+          />
+          <List
+            currentPage={store.currentPage}
+            issues={store.issues}
+            labels={store.filterLabels}
+            store={store}
+            totalCount={store.totalCount}
+            totalLabels={store.labels}
+            visible={store.listVisible}
+          />
+          <LabelManager labels={store.labels} store={store} visible={store.labelsVisible} />
+          <ActionBox store={store} />
+        </div>
+      </Spin>
+    </ConfigProvider>
   )
 })
 
