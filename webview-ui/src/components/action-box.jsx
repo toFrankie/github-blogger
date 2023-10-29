@@ -1,5 +1,5 @@
 import {Button, Tooltip} from 'antd'
-import {MenuUnfoldOutlined, PlusOutlined, SendOutlined, TagsOutlined} from '@ant-design/icons'
+import {CloudUploadOutlined, MenuUnfoldOutlined, PlusOutlined, TagOutlined} from '@ant-design/icons'
 
 export default function ActionBox({store}) {
   return (
@@ -14,7 +14,7 @@ export default function ActionBox({store}) {
       </Tooltip>
       <Tooltip placement="left" title="Labels">
         <Button
-          icon={<TagsOutlined />}
+          icon={<TagOutlined />}
           shape="circle"
           type="primary"
           onClick={() => store.setLabelVisible(true)}
@@ -22,7 +22,7 @@ export default function ActionBox({store}) {
       </Tooltip>
       <Tooltip placement="left" title="Update">
         <Button
-          icon={<SendOutlined />}
+          icon={<CloudUploadOutlined />}
           shape="circle"
           type="primary"
           onClick={() => store.updateIssue()}

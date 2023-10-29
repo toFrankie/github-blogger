@@ -43,6 +43,11 @@ code {
   margin-bottom: 8px;
 }
 
+.app-action-box > .ant-btn > .ant-btn-icon {
+  position: relative;
+  top: 1px;
+}
+
 .bytemd {
   position: absolute;
   top: 0;
@@ -90,7 +95,7 @@ code {
 .app-issue-list-item {
   display: flex;
   align-items: center;
-  padding: 8px;
+  padding: 9px 8px;
   font-size: 14px;
   color: #1f2328;
   cursor: pointer;
