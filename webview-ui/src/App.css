@@ -80,6 +80,7 @@ code {
 .app-issue-list {
   display: flex;
   flex-direction: column;
+  min-height: 100%;
 }
 
 .issue-filter {
@@ -114,19 +115,14 @@ code {
   background-color: #f6f8fa;
 }
 
-.edit-label,
-.site-label-plus,
 .label-input {
-  margin: 4px;
-  font-size: 16px;
-  font-weight: bolder;
-  cursor: pointer;
+  width: auto;
+  margin-right: 8px;
+  font-size: 12px;
 }
 
-.app-issue-list {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
+.add-label {
+  cursor: pointer;
 }
 
 .app-issue-list .list {

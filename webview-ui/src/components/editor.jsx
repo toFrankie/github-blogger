@@ -57,7 +57,7 @@ export default function ContentEditor({
         />
       </div>
       <div className="app-labels">
-        <Space size={[0, 'small']} wrap>
+        <Space wrap size={[0, 'small']}>
           {totalLabels.map(item => (
             <Tag.CheckableTag
               key={item.id}

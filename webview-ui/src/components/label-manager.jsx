@@ -1,5 +1,5 @@
 import {useState, useRef} from 'react'
-import {Drawer, Input, Tooltip, Tag, message} from 'antd'
+import {Drawer, Input, Tooltip, Tag, message, Space} from 'antd'
 import {PlusOutlined} from '@ant-design/icons'
 
 export default function LabelsManager({store, visible, labels}) {
@@ -50,7 +50,7 @@ export default function LabelsManager({store, visible, labels}) {
       open={visible}
       onClose={() => store.setLabelVisible(false)}
     >
-      <>
+      <Space wrap size={[0, 'small']}>
         {labels.map(label => {
           if (label.id === editIndex) {
             return (
@@ -66,15 +66,10 @@ export default function LabelsManager({store, visible, labels}) {
               />
             )
           }
+
           const isLongLabel = label.name.length > 20
           const tagElem = (
-            <Tag
-              key={label.name}
-              closable
-              className="edit-label"
-              color="#1890ff"
-              onClose={() => handleClose(label)}
-            >
+            <Tag key={label.name} closable onClose={() => handleClose(label)}>
               <span
                 onDoubleClick={e => {
                   setEditIndex(label.id)
@@ -97,6 +92,7 @@ export default function LabelsManager({store, visible, labels}) {
             tagElem
           )
         })}
+
         {inputVisible && (
           <Input
             ref={saveInputRef}
@@ -109,9 +105,10 @@ export default function LabelsManager({store, visible, labels}) {
             onPressEnter={handleInputConfirm}
           />
         )}
+
         {!inputVisible && (
           <Tag
-            className="site-label-plus"
+            className="add-label"
             onClick={() => {
               setInputVisible(true)
               setTimeout(() => {
@@ -122,7 +119,7 @@ export default function LabelsManager({store, visible, labels}) {
             <PlusOutlined /> New Label
           </Tag>
         )}
-      </>
+      </Space>
     </Drawer>
   )
 }

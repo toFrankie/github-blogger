@@ -105,6 +105,7 @@ export default class Service {
       this.octokit.request(APIS.CREATE_LABEL, {
         owner: this.config.user,
         repo: this.config.repo,
+        color: 'f5fee6',
         ...params,
       })
     )
