@@ -1,4 +1,4 @@
-export const EXTENSION_NAME = 'vscode-blog'
+export const EXTENSION_NAME = 'github-blogger'
 
 export const APIS = {
   GET_LABELS: 'GET /repos/{owner}/{repo}/labels',

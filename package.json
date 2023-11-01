@@ -1,7 +1,7 @@
 {
-  "name": "vscode-blog",
-  "displayName": "vscode-blog",
-  "description": "",
+  "name": "github-blogger",
+  "displayName": "Github Blogger",
+  "description": "Github Issue Managerment Tool",
   "version": "0.0.1",
   "engines": {
     "vscode": "^1.62.0"
@@ -11,23 +11,24 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/toFrankie/vscode-blog.git"
+    "url": "https://github.com/toFrankie/github-blogger.git"
   },
   "activationEvents": [],
   "main": "./dist/extension.js",
+  "icon": "./images/icon.png",
   "contributes": {
     "configuration": {
-      "title": "GitHub Issue Blog",
+      "title": "GitHub Issue Blogger",
       "properties": {
-        "vscode-blog.github.token": {
+        "github-blogger.github.token": {
           "type": "string",
           "default": ""
         },
-        "vscode-blog.github.user": {
+        "github-blogger.github.user": {
           "type": "string",
           "default": ""
         },
-        "vscode-blog.github.repo": {
+        "github-blogger.github.repo": {
           "type": "string",
           "default": ""
         }
@@ -35,12 +36,12 @@
     },
     "commands": [
       {
-        "command": "vscode-blog.open",
-        "title": "Open vscode blog"
+        "command": "github-blogger.open",
+        "title": "Open github blogger"
       },
       {
-        "command": "vscode-blog.config",
-        "title": "Config vscode blog"
+        "command": "github-blogger.config",
+        "title": "Config github blogger"
       }
     ]
   },
@@ -64,7 +65,7 @@
     "@ifanrx/eslint-config-standard-react": "^1.1.2",
     "@ifanrx/prettier-config-standard": "^1.1.2",
     "@ifanrx/stylelint-config-standard": "^1.1.3",
-    "@types/vscode": "^1.83.1",
+    "@types/vscode": "^1.62.0",
     "@vscode/vsce": "^2.21.1",
     "babel-loader": "^9.1.3",
     "eslint": "^8.52.0",
