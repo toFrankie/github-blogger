@@ -1,7 +1,7 @@
 {
   "name": "github-blogger",
   "displayName": "Github Blogger",
-  "description": "Github Issue Managerment Tool",
+  "description": "Github Issue Management Tool",
   "version": "0.0.1",
   "engines": {
     "vscode": "^1.62.0"
