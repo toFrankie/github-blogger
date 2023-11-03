@@ -6,22 +6,8 @@ const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin'
 
 const isDevMode = process.env.NODE_ENV === 'development'
 
-// const devServerClientOptions = {
-//   hot: true,
-//   client: {
-//     webSocketURL: {
-//       hostname: 'localhost',
-//       protocol: 'ws',
-//     },
-//   },
-//   host: 'localhost',
-//   port: 8080,
-//   allowedHosts: 'all',
-// }
-
 const devServerClientOptions = {
   hot: true,
-  // !: 指定构造 WebSocket 的协议是 ws
   protocol: 'ws',
   hostname: 'localhost',
   port: 8080,
@@ -51,6 +37,7 @@ module.exports = {
     clean: true,
     publicPath: isDevMode ? 'http://localhost:8080/' : '/',
     path: path.resolve(__dirname, '../dist/webview-ui'),
+    chunkFilename: isDevMode ? '[id].js' : '[name].[contenthash:5].js',
     filename: 'index.js',
   },
 
@@ -76,6 +63,10 @@ module.exports = {
 
   resolve: {
     extensions: ['.js', '.jsx', '.json'],
+  },
+
+  optimization: {
+    chunkIds: 'named',
   },
 
   module: {
