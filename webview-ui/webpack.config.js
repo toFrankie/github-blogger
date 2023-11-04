@@ -35,9 +35,9 @@ module.exports = {
 
   output: {
     clean: true,
+    asyncChunks: false,
     publicPath: isDevMode ? 'http://localhost:8080/' : '/',
     path: path.resolve(__dirname, '../dist/webview-ui'),
-    chunkFilename: isDevMode ? '[id].js' : '[name].[contenthash:5].js',
     filename: 'index.js',
   },
 
