@@ -101,8 +101,8 @@ const App = observer(() => {
       ])
       store.issues = issues || []
     },
-    setCurrentPage(index) {
-      store.currentPage = index
+    setCurrentPage(page) {
+      store.currentPage = page
       store.getIssues()
     },
     updateTitle: e => {

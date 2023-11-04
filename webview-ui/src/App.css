@@ -131,6 +131,7 @@ code {
 }
 
 .app-issue-list .list {
+  flex: 1;
   margin-bottom: 16px;
   overflow: hidden;
   overflow-y: auto;

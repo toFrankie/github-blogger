@@ -59,11 +59,13 @@ export default function List({store, visible, totalLabels, labels, totalCount, c
         <div className="issue-pagination">
           {totalCount > 20 ? (
             <Pagination
+              showSizeChanger={false}
+              showQuickJumper={true}
               current={currentPage}
               pageSize={20}
               size="small"
               total={totalCount}
-              onChange={e => store.setCurrentPage(e)}
+              onChange={page => store.setCurrentPage(page)}
             />
           ) : null}
         </div>
