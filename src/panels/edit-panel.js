@@ -1,6 +1,6 @@
 import path from 'node:path'
 
-import {window, Uri, ViewColumn, ExtensionMode} from 'vscode'
+import {window, Uri, ViewColumn, ExtensionMode, commands} from 'vscode'
 
 import {getNonce} from '../utils'
 import Server from '../server'
@@ -86,6 +86,8 @@ export default class EditPanel {
     )
 
     EditPanel.currentPanel = new EditPanel(panel, context)
+
+    commands.executeCommand('workbench.action.closeSidebar')
   }
 
   static revive(panel, extensionUri) {
