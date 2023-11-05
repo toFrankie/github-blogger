@@ -13,7 +13,7 @@ export default async function multiStepInput() {
     return state
   }
 
-  const title = 'Add GitHub Info'
+  const title = 'Github Blogger Initialization'
 
   async function inputToken(input, state) {
     state.token = await input.showInputBox({
