@@ -3,6 +3,7 @@
   "displayName": "Github Blogger",
   "description": "Quickly create and manage Github Issues",
   "version": "0.0.1",
+  "publisher": "Frankie",
   "engines": {
     "vscode": "^1.62.0"
   },
