@@ -4,7 +4,7 @@ import * as vscode from 'vscode'
 import {window, QuickInputButtons} from 'vscode'
 import {Octokit} from '@octokit/core'
 
-import {EXTENSION_NAME} from '../constants'
+import {APIS, EXTENSION_NAME} from '../constants'
 
 export default async function multiStepInput() {
   async function collectInputs() {
@@ -47,7 +47,8 @@ export default async function multiStepInput() {
       step: 3,
       totalSteps: 3,
       value: state.repo || '',
-      prompt: 'Create a empty github repo for your issue blog, give a name for the repo',
+      prompt:
+        'Create a empty github repo for your issue blog, give a name for the repo. If the repo already exists, it will not be recreated.',
       validate: validateNameIsUnique,
       shouldResume,
     })
@@ -55,7 +56,7 @@ export default async function multiStepInput() {
 
   function shouldResume() {
     // Could show a notification with the option to resume.
-    return new Promise()((_resolve, _reject) => {
+    return new Promise((_resolve, _reject) => {
       // noop
       _resolve()
     })
@@ -88,12 +89,22 @@ export default async function multiStepInput() {
     },
     async progress => {
       progress.report({increment: 0})
+
+      const repoName = state.repo
+
       try {
-        await octokit.request('POST /user/repos', {name: state.repo})
-        window.showInformationMessage(`Init GitHub issue blog successfully.`)
+        await octokit.request(APIS.CREATE_REPO, {name: repoName})
+        window.showInformationMessage('Github Blogger initialization is completed.')
       } catch (e) {
+        if (e.message.includes('already exists')) {
+          window.showInformationMessage(
+            `Github Blogger initialization is completed. The ${repoName} repo already exists, skip the creation step.`
+          )
+          return
+        }
+
         window.showErrorMessage(
-          `Init GitHub issue blog failed, please check the config.\n${e.message}`
+          `Github Blogger initialization failed, please check the config.\n${e.message}`
         )
       }
       progress.report({increment: 100})
