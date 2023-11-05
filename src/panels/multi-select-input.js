@@ -69,15 +69,15 @@ export default async function multiStepInput() {
   const state = await collectInputs()
   await vscode.workspace
     .getConfiguration(EXTENSION_NAME)
-    .update('github.token', state.token, vscode.ConfigurationTarget.Global)
+    .update('token', state.token, vscode.ConfigurationTarget.Global)
 
   await vscode.workspace
     .getConfiguration(EXTENSION_NAME)
-    .update('github.user', state.user, vscode.ConfigurationTarget.Global)
+    .update('user', state.user, vscode.ConfigurationTarget.Global)
 
   await vscode.workspace
     .getConfiguration(EXTENSION_NAME)
-    .update('github.repo', state.repo, vscode.ConfigurationTarget.Global)
+    .update('repo', state.repo, vscode.ConfigurationTarget.Global)
 
   const octokit = new Octokit({auth: state.token})
 

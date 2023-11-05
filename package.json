@@ -18,18 +18,21 @@
   "icon": "./images/icon.png",
   "contributes": {
     "configuration": {
-      "title": "GitHub Issue Blogger",
+      "title": "GitHub Blogger",
       "properties": {
-        "github-blogger.github.token": {
+        "github-blogger.token": {
           "type": "string",
+          "description": "Your GitHub Personal Access Token",
           "default": ""
         },
-        "github-blogger.github.user": {
+        "github-blogger.user": {
           "type": "string",
+          "description": "Your GitHub Username",
           "default": ""
         },
-        "github-blogger.github.repo": {
+        "github-blogger.repo": {
           "type": "string",
+          "description": "Your GitHub Repository Name",
           "default": ""
         }
       }
@@ -37,11 +40,11 @@
     "commands": [
       {
         "command": "github-blogger.open",
-        "title": "Open github blogger"
+        "title": "Open Github Blogger"
       },
       {
         "command": "github-blogger.config",
-        "title": "Config github blogger"
+        "title": "Config Github Blogger"
       }
     ]
   },

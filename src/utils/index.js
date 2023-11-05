@@ -36,18 +36,18 @@ export function getUri(webview, extensionUri, pathList) {
 
 export async function checkConfig() {
   const [token, user, repo] = await Promise.all([
-    workspace.getConfiguration(EXTENSION_NAME).get('github.token'),
-    workspace.getConfiguration(EXTENSION_NAME).get('github.user'),
-    workspace.getConfiguration(EXTENSION_NAME).get('github.repo'),
+    workspace.getConfiguration(EXTENSION_NAME).get('token'),
+    workspace.getConfiguration(EXTENSION_NAME).get('user'),
+    workspace.getConfiguration(EXTENSION_NAME).get('repo'),
   ])
   return Boolean(token && user && repo)
 }
 
 export async function getSetting() {
   const [token, user, repo] = await Promise.all([
-    workspace.getConfiguration(EXTENSION_NAME).get('github.token'),
-    workspace.getConfiguration(EXTENSION_NAME).get('github.user'),
-    workspace.getConfiguration(EXTENSION_NAME).get('github.repo'),
+    workspace.getConfiguration(EXTENSION_NAME).get('token'),
+    workspace.getConfiguration(EXTENSION_NAME).get('user'),
+    workspace.getConfiguration(EXTENSION_NAME).get('repo'),
   ])
   return {token, user, repo}
 }
