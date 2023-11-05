@@ -133,7 +133,7 @@ const App = observer(() => {
       const {number = undefined, title = '', body = '', labels = []} = store.current
       if (!title || !body) return message.error('Please enter the content...')
       if (!number) {
-        const data = await RPC.emit('createIssue', [title, body, labels])
+        const data = await RPC.emit('createIssue', [title, body, JSON.stringify(labels)])
         store.current.number = data.number
       } else {
         await RPC.emit('updateIssue', [number, title, body, JSON.stringify(labels)])

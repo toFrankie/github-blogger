@@ -266,7 +266,11 @@ export default class Service {
     }
 
     const createIssue = async (title, body, labels) => {
-      return await this.createIssue({title, body, labels})
+      return await this.createIssue({
+        title,
+        body,
+        labels: JSON.parse(labels),
+      })
     }
 
     const updateIssue = async (issueNumber, title, body, labels) => {
