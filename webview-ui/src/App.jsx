@@ -53,11 +53,11 @@ const App = observer(() => {
     listVisible: false,
     labelsVisible: false,
     loading: false,
-    setLoading: e => {
-      store.loading = e
+    setLoading: loading => {
+      store.loading = loading
     },
-    setFilterLabels: e => {
-      store.filterLabels = e
+    setFilterLabels: labels => {
+      store.filterLabels = labels
     },
     getLabels: async () => {
       const labels = await RPC.emit('getLabels', [])
@@ -105,29 +105,29 @@ const App = observer(() => {
       store.currentPage = page
       store.getIssues()
     },
-    updateTitle: e => {
-      store.current.title = e
+    updateTitle: title => {
+      store.current.title = title
     },
-    setListVisible: e => {
-      store.listVisible = e
+    setListVisible: visible => {
+      store.listVisible = visible
       store.getIssues()
     },
-    setLabelVisible: e => {
-      store.labelsVisible = e
+    setLabelVisible: visible => {
+      store.labelsVisible = visible
     },
-    setCurrentIssue: e => {
-      store.current = e
+    setCurrentIssue: issue => {
+      store.current = issue
     },
-    setCurrentIssueBody: e => {
-      store.current.body = e
+    setCurrentIssueBody: body => {
+      store.current.body = body
     },
-    addLabel: e => {
+    addLabel: label => {
       if (!store.current.labels) store.current.labels = []
-      store.current.labels = store.current.labels.concat(e)
+      store.current.labels = store.current.labels.concat(label)
     },
-    removeLabel: e => {
+    removeLabel: label => {
       if (!store.current.labels) store.current.labels = []
-      store.current.labels = store.current.labels.filter(item => item.id !== e.id)
+      store.current.labels = store.current.labels.filter(item => item.id !== label.id)
     },
     updateIssue: async () => {
       const {number = undefined, title = '', body = '', labels = []} = store.current

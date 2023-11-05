@@ -3,7 +3,7 @@
 import {Octokit} from '@octokit/core'
 import {ExtensionRPC} from 'vscode-webview-rpc'
 
-import {APIS} from '../constants'
+import {APIS, DEFAULT_LABEL_COLOR} from '../constants'
 import {getSetting, to, cdnURL} from '../utils'
 
 /**
@@ -101,7 +101,7 @@ export default class Service {
       this.octokit.request(APIS.CREATE_LABEL, {
         owner: this.config.user,
         repo: this.config.repo,
-        color: 'f5fee6',
+        color: DEFAULT_LABEL_COLOR,
         ...params,
       })
     )
