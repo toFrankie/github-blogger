@@ -2,7 +2,7 @@
 
 > Inspired by [Aaronphy/Blogger](https://github.com/Aaronphy/Blogger).
 
-This is a plugin for VS Code that allows you to quickly create and manage Github Issues as blog posts. It uses the [Github REST API](https://docs.github.com/en/rest?apiVersion=2022-11-28) and [Github GraphQL API](https://docs.github.com/en/graphql) to manage your Issues, and all content created or updated through this plugin can be found in your Github repository.
+This is a extension for VS Code that allows you to quickly create and manage Github Issues as blog posts. It uses the [Github REST API](https://docs.github.com/en/rest?apiVersion=2022-11-28) and [Github GraphQL API](https://docs.github.com/en/graphql) to manage your Issues, and all content created or updated through this extension can be found in your Github repository.
 
 ## Quick Start
 
@@ -21,7 +21,7 @@ This is a plugin for VS Code that allows you to quickly create and manage Github
 
 ## About
 
-The plugin mainly consists of the following libraries:
+The extension mainly consists of the following libraries:
 
 - [ant-design](https://github.com/ant-design/ant-design) - Building the user interface
 - [bytemd](https://github.com/bytedance/bytemd) - Parsing markdown
