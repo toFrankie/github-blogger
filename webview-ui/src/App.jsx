@@ -85,7 +85,7 @@ const App = observer(() => {
       let count
       if (store.filterLabels.length > 0) {
         count = await RPC.emit('getFilterCount', [
-          store.filterLabels.map(item => item.name).join(','),
+          store.filterLabels.map(label => label.name).join(','),
         ])
       } else {
         count = await RPC.emit('getTotalCount')
@@ -97,7 +97,7 @@ const App = observer(() => {
       store.getIssueTotalCount()
       const issues = await RPC.emit('getIssues', [
         store.currentPage,
-        store.filterLabels.map(item => item.name).join(','),
+        store.filterLabels.map(label => label.name).join(','),
       ])
       store.issues = issues || []
     },

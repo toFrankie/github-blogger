@@ -1,41 +1,52 @@
-import {Drawer, Select, Empty, Pagination} from 'antd'
+import {Drawer, Select, Empty, Pagination, Input, Space} from 'antd'
 
 export default function List({store, visible, totalLabels, labels, totalCount, currentPage}) {
   const selectedOptions = labels.map(item => item.name)
 
-  const handleChange = (e = []) => {
+  const handleSelectChange = (e = []) => {
     store.setFilterLabels(totalLabels.filter(o => e.includes(o.name)))
     store.getIssues()
+  }
+
+  const handleInputChange = e => {
+    const title = e.target.value.trim()
+    console.log(title)
+    // TODO:
   }
 
   return (
     <Drawer
       closable={false}
+      open={visible}
       placement="left"
       title="Issue List"
-      open={visible}
       onClose={() => store.setListVisible(false)}
     >
       <div className="app-issue-list">
         <div className="issue-filter">
-          <Select
-            allowClear
-            placeholder="Filter by labels"
-            style={{width: '100%'}}
-            value={selectedOptions}
-            onBlur={() => store.getIssues()}
-            onChange={handleChange}
-            onClear={() => {
-              store.setFilterLabels([])
-              store.getIssues()
-            }}
-          >
-            {totalLabels.map(item => (
-              <Select.Option key={item.id} value={item.name}>
-                {item.name}
-              </Select.Option>
-            ))}
-          </Select>
+          <Space direction="vertical" style={{width: '100%'}}>
+            <Input allowClear placeholder="Filter by title" onChange={handleInputChange} />
+            <Select
+              allowClear
+              showSearch
+              mode="multiple"
+              style={{width: '100%'}}
+              placeholder="Filter by labels"
+              value={selectedOptions}
+              onBlur={() => store.getIssues()}
+              onChange={handleSelectChange}
+              onClear={() => {
+                store.setFilterLabels([])
+                store.getIssues()
+              }}
+            >
+              {totalLabels.map(item => (
+                <Select.Option key={item.id} value={item.name}>
+                  {item.name}
+                </Select.Option>
+              ))}
+            </Select>
+          </Space>
         </div>
         <div className="list">
           {store.issues.length > 0 ? (
@@ -59,10 +70,10 @@ export default function List({store, visible, totalLabels, labels, totalCount, c
         <div className="issue-pagination">
           {totalCount > 20 ? (
             <Pagination
-              showSizeChanger={false}
-              showQuickJumper={true}
+              showQuickJumper
               current={currentPage}
               pageSize={20}
+              showSizeChanger={false}
               size="small"
               total={totalCount}
               onChange={page => store.setCurrentPage(page)}
