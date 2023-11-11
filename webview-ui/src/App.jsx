@@ -4,13 +4,14 @@
 
 import {useEffect} from 'react'
 import {observer, useLocalObservable} from 'mobx-react-lite'
-import {ConfigProvider, Spin, message} from 'antd'
+import {ConfigProvider, message} from 'antd'
 import {WebviewRPC} from 'vscode-webview-rpc'
 import 'bytemd/dist/index.min.css'
 import 'github-markdown-css'
 
 import './App.css'
 import './reset.css'
+
 import Editor from './components/editor'
 import ActionBox from './components/action-box'
 import LabelManager from './components/label-manager'
@@ -154,6 +155,7 @@ const App = observer(() => {
       if (!number) {
         const data = await RPC.emit('createIssue', [title, body, JSON.stringify(labels)])
         store.current.number = data.number
+        store.current.html_url = data.html_url
       } else {
         await RPC.emit('updateIssue', [number, title, body, JSON.stringify(labels)])
       }
@@ -212,6 +214,7 @@ const App = observer(() => {
           placeholder="Leave your thought..."
           store={store}
           title={store.current.title || ''}
+          number={store.current.number}
           totalLabels={store.labels || []}
           uploadImages={uploadImages}
         />
@@ -225,7 +228,7 @@ const App = observer(() => {
           visible={store.listVisible}
         />
         <LabelManager labels={store.labels} store={store} visible={store.labelsVisible} />
-        <ActionBox store={store} />
+        <ActionBox store={store} number={store.current.number} />
       </div>
     </ConfigProvider>
   )

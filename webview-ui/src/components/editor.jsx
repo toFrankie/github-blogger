@@ -32,6 +32,7 @@ export function MDViewer({value}) {
 
 export default function ContentEditor({
   title,
+  number,
   content,
   labels,
   totalLabels,
@@ -55,6 +56,7 @@ export default function ContentEditor({
           value={title}
           onChange={e => store.updateTitle(e.target.value)}
         />
+        {!!number && <div className="number">#{number}</div>}
       </div>
       <div className="app-labels">
         <Space wrap size={[0, 'small']}>
@@ -75,9 +77,7 @@ export default function ContentEditor({
         previewDebounce={50}
         uploadImages={uploadImages}
         value={content || ''}
-        onChange={v => {
-          store.setCurrentIssueBody(v)
-        }}
+        onChange={v => store.setCurrentIssueBody(v)}
       />
     </>
   )

@@ -1,10 +1,20 @@
 import {Button, Tooltip} from 'antd'
-import {CloudUploadOutlined, MenuUnfoldOutlined, PlusOutlined, TagOutlined} from '@ant-design/icons'
+import {
+  CloudUploadOutlined,
+  GithubOutlined,
+  MenuUnfoldOutlined,
+  PlusOutlined,
+  TagOutlined,
+} from '@ant-design/icons'
 
-export default function ActionBox({store}) {
+import {getVscode} from '../utils'
+
+const vscode = getVscode()
+
+export default function ActionBox({store, number}) {
   return (
     <div className="app-action-box">
-      <Tooltip placement="left" title="New Issue">
+      <Tooltip placement="left" title="Create new issue">
         <Button
           icon={<PlusOutlined />}
           shape="circle"
@@ -12,20 +22,36 @@ export default function ActionBox({store}) {
           onClick={() => store.setCurrentIssue({})}
         />
       </Tooltip>
+      <Tooltip placement="left" title="Update current issue">
+        <Button
+          icon={<CloudUploadOutlined />}
+          shape="circle"
+          type="primary"
+          onClick={() => store.updateIssue()}
+        />
+      </Tooltip>
+      {!!number && (
+        <Tooltip placement="left" title="Open in default browser">
+          <Button
+            icon={<GithubOutlined />}
+            shape="circle"
+            type="primary"
+            onClick={() => {
+              console.log(store.current.html_url)
+              vscode.postMessage({
+                command: 'openExternalLink',
+                url: store.current.html_url || store.current.url,
+              })
+            }}
+          />
+        </Tooltip>
+      )}
       <Tooltip placement="left" title="Labels">
         <Button
           icon={<TagOutlined />}
           shape="circle"
           type="primary"
           onClick={() => store.setLabelVisible(true)}
-        />
-      </Tooltip>
-      <Tooltip placement="left" title="Update">
-        <Button
-          icon={<CloudUploadOutlined />}
-          shape="circle"
-          type="primary"
-          onClick={() => store.updateIssue()}
         />
       </Tooltip>
       <Tooltip placement="left" title="Issue List">

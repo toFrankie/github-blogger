@@ -16,7 +16,21 @@ code {
 }
 
 .app-title {
+  display: flex;
+  align-items: center;
   padding: 8px;
+}
+
+.app-title input {
+  flex: 1;
+  font-weight: 500;
+  color: #1f2328;
+}
+
+.app-title .number {
+  margin-left: 8px;
+  font-size: 14px;
+  color: #808080;
 }
 
 .app-labels {

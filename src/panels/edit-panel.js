@@ -1,6 +1,6 @@
 import path from 'node:path'
 
-import {window, Uri, ViewColumn, ExtensionMode, commands} from 'vscode'
+import {window, Uri, ViewColumn, ExtensionMode, commands, env} from 'vscode'
 
 import {getNonce} from '../utils'
 import Server from '../server'
@@ -146,7 +146,7 @@ export default class EditPanel {
         <head>
           <meta charset="UTF-8" />
           <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-          <title>Hello World</title>
+          <title>Github Blogger</title>
           <style>
             .markdown-body {
               box-sizing: border-box;
@@ -181,12 +181,16 @@ export default class EditPanel {
   _setWebviewMessageListener(webview) {
     webview.onDidReceiveMessage(
       message => {
-        const {command} = message
+        const {command, url} = message
 
         switch (command) {
           case 'reload':
             this.html = this.html.replace(/nonce="\w+?"/, `nonce="${getNonce()}"`)
             this.panel.webview.html = this.html
+            break
+
+          case 'openExternalLink':
+            env.openExternal(Uri.parse(url))
             break
 
           // Add more switch case statements here as more webview message commands
