@@ -61,7 +61,7 @@ export default function ContentEditor({
           {totalLabels.map(item => (
             <Tag.CheckableTag
               key={item.id}
-              checked={labels.filter(label => label.id === item.id).length > 0}
+              checked={labels.some(label => label.id === item.id || label.id === item.node_id)}
               onChange={checked => handleChange(item, checked)}
             >
               {item.name}

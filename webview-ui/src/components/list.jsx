@@ -4,14 +4,16 @@ export default function List({store, visible, totalLabels, labels, totalCount, c
   const selectedOptions = labels.map(item => item.name)
 
   const handleSelectChange = (e = []) => {
+    store.resetCurrentPage()
     store.setFilterLabels(totalLabels.filter(o => e.includes(o.name)))
     store.getIssues()
   }
 
   const handleInputChange = e => {
     const title = e.target.value.trim()
-    console.log(title)
-    // TODO:
+    store.setFilterTitle(title)
+    store.resetCurrentPage()
+    store.getIssues()
   }
 
   return (

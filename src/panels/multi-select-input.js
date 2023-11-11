@@ -197,7 +197,6 @@ class MultiStepInput {
             }
           }),
           input.onDidHide(() => {
-            console.log('onDidHide', InputFlowAction.cancel, InputFlowAction.resume)
             ;(async () => {
               reject(
                 shouldResume && (await shouldResume())

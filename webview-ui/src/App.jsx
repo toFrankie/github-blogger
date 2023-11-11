@@ -45,6 +45,7 @@ const App = observer(() => {
     labels: [],
     milestones: [],
     issues: [],
+    filterTitle: '',
     filterLabels: [],
     filterMilestones: [],
     current: {},
@@ -55,6 +56,9 @@ const App = observer(() => {
     loading: false,
     setLoading: loading => {
       store.loading = loading
+    },
+    setFilterTitle: title => {
+      store.filterTitle = title
     },
     setFilterLabels: labels => {
       store.filterLabels = labels
@@ -90,16 +94,29 @@ const App = observer(() => {
       } else {
         count = await RPC.emit('getTotalCount')
       }
-      console.log(count)
       store.totalCount = count
     },
     getIssues: async () => {
-      store.getIssueTotalCount()
-      const issues = await RPC.emit('getIssues', [
-        store.currentPage,
-        store.filterLabels.map(label => label.name).join(','),
-      ])
-      store.issues = issues || []
+      if (store.filterLabels.length < 2 && !store.filterTitle) {
+        store.getIssueTotalCount()
+        const issues = await RPC.emit('getIssues', [
+          store.currentPage,
+          store.filterLabels.map(label => label.name).join(','),
+        ])
+        store.issues = issues || []
+      } else {
+        const {issueCount, issues} = await RPC.emit('getFilterIssues', [
+          store.filterTitle,
+          store.filterLabels.map(label => label.name).join(','),
+          store.currentPage,
+        ])
+
+        store.totalCount = issueCount
+        store.issues = issues
+      }
+    },
+    resetCurrentPage: () => {
+      store.currentPage = 1
     },
     setCurrentPage(page) {
       store.currentPage = page

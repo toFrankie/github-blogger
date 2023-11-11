@@ -2,6 +2,8 @@ export const EXTENSION_NAME = 'github-blogger'
 
 export const DEFAULT_LABEL_COLOR = 'f5fee6' // without leading #
 
+export const DEFAULT_PAGINATION_SIZE = 20
+
 export const APIS = {
   CREATE_REPO: 'POST /user/repos',
   GET_LABELS: 'GET /repos/{owner}/{repo}/labels',

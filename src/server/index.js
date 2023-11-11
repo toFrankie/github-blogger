@@ -2,8 +2,9 @@
 
 import {Octokit} from '@octokit/core'
 import {ExtensionRPC} from 'vscode-webview-rpc'
+import {encode} from 'js-base64'
 
-import {APIS, DEFAULT_LABEL_COLOR} from '../constants'
+import {APIS, DEFAULT_LABEL_COLOR, DEFAULT_PAGINATION_SIZE} from '../constants'
 import {getSetting, to, cdnURL} from '../utils'
 
 /**
@@ -18,8 +19,11 @@ const documents = {
    */
   getIssueCount: ({username, repository}) => `
     query {
-      repository(owner:"${username}", name: "${repository}") {
-        issues(states:OPEN) {
+      repository(
+        owner: "${username}"
+        name: "${repository}"
+      ) {
+        issues(states: OPEN) {
           totalCount
         }
       }
@@ -36,10 +40,64 @@ const documents = {
    */
   getFilterIssueCount: ({username, repository, label, milestone}) => `
     {
-      search(type:ISSUE, query: "user:${username} repo:${repository} state:open ${
-        milestone ? `milestone:${milestone}` : ''
-      } ${label ? `label:${label}` : ''}") {
+      search(
+        type: ISSUE
+        query: "user:${username} repo:${repository} state:open ${
+          milestone ? `milestone:${milestone}` : ''
+        } ${label ? `label:${label}` : ''}"
+      ) {
         issueCount
+      }
+    }
+  `,
+
+  /**
+   * 过滤器来获取 issue
+   * @param {object} params
+   * @param {string} params.username 用户名
+   * @param {string} params.repository 仓库名
+   * @param {string} [params.label] 标签
+   * @param {string} [params.milestone] 里程碑
+   */
+  getFilterIssue: ({username, repository, first, labels, title, cursor}) => `
+    {
+      search(
+        type: ISSUE
+        first: ${first}
+        ${cursor ? `after: "${cursor}"` : ''}
+        query: "user:${username} repo:${repository} state:open ${labels ? `label:${labels}` : ''} ${
+          title ? `in:title ${title}` : ''
+        }"
+      ) {
+        issueCount
+        edges {
+          node {
+            ... on Issue {
+              url
+              id
+              title
+              url
+              body
+              createdAt
+              updatedAt
+              number
+              state
+              milestone {
+                id
+                title
+              }
+              labels(first: 100) {
+                nodes {
+                  id
+                  url
+                  name
+                  color
+                  description
+                }
+              }
+            }
+          }
+        }
       }
     }
   `,
@@ -105,7 +163,6 @@ export default class Service {
         ...params,
       })
     )
-    console.log(err)
     if (!err) {
       return res?.data || {}
     }
@@ -145,13 +202,34 @@ export default class Service {
       this.octokit.request(APIS.GET_ISSUES, {
         owner: this.config.user,
         repo: this.config.repo,
+        per_page: DEFAULT_PAGINATION_SIZE,
         ...params,
-        per_page: 20,
       })
     )
     if (!err) {
       return res?.data
     }
+    return []
+  }
+
+  async getFilterIssues(params) {
+    const [err, res] = await to(
+      this.octokit.graphql(
+        documents.getFilterIssue({
+          username: this.config.user,
+          repository: this.config.repo,
+          ...params,
+        })
+      )
+    )
+    if (!err)
+      return {
+        issueCount: res.search.issueCount,
+        issues: res.search.edges.map(({node}) => ({
+          ...node,
+          labels: node.labels.nodes,
+        })),
+      }
     return []
   }
 
@@ -217,12 +295,7 @@ export default class Service {
         })
       )
     )
-    if (!err) {
-      const {
-        search: {issueCount},
-      } = res
-      return issueCount
-    }
+    if (!err) return res.search.issueCount
     return 1
   }
 
@@ -232,15 +305,7 @@ export default class Service {
         documents.getIssueCount({username: this.config.user, repository: this.config.repo})
       )
     )
-    console.log('total', res)
-    if (!err) {
-      const {
-        repository: {
-          issues: {totalCount},
-        },
-      } = res
-      return totalCount
-    }
+    if (!err) return res.repository.issues.totalCount
     return 1
   }
 
@@ -252,15 +317,28 @@ export default class Service {
       const data = await this.getLabels({page: 0, per_page: 100})
       return data
     }
+
     const getIssues = async (page, labels) => {
       return await this.getIssues({page, labels})
     }
+
+    const getFilterIssues = async (title, labels, page) => {
+      return await this.getFilterIssues({
+        title,
+        labels,
+        cursor: page > 1 ? encode(`cursor:${(page - 1) * 20}`) : undefined,
+        first: DEFAULT_PAGINATION_SIZE,
+      })
+    }
+
     const createLabel = async name => {
       return await this.createLabel({name})
     }
+
     const deleteLabel = async name => {
       return await this.deleteLabel({name})
     }
+
     const updateLabel = async (name, newName) => {
       return await this.updateLabel({name, new_name: newName})
     }
@@ -299,6 +377,7 @@ export default class Service {
     this.rpc.on('createLabel', createLabel)
     this.rpc.on('updateLabel', updateLabel)
     this.rpc.on('getIssues', getIssues)
+    this.rpc.on('getFilterIssues', getFilterIssues)
     this.rpc.on('updateIssue', updateIssue)
     this.rpc.on('createIssue', createIssue)
     this.rpc.on('uploadImage', uploadImage)

@@ -21,8 +21,11 @@ const documents = {
    */
   getIssueCount: ({username, repository}) => `
     query {
-      repository(owner:"${username}", name: "${repository}") {
-        issues(states:OPEN) {
+      repository(
+        owner: "${username}"
+        name: "${repository}"
+      ) {
+        issues(states: OPEN) {
           totalCount
         }
       }
@@ -34,7 +37,7 @@ const documents = {
    */
   getFilterIssueCount: ({username, repository, label, milestone}) => `
     {
-      search(type:ISSUE, query: "user:${username} repo:${repository} state:open ${
+      search(type: ISSUE, query: "user:${username} repo:${repository} state:open ${
         milestone ? `milestone:${milestone}` : ''
       }${label ? `label:${label}` : ''}") {
         issueCount
