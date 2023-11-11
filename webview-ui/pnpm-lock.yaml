@@ -49,6 +49,9 @@ dependencies:
   github-markdown-css:
     specifier: ^5.3.0
     version: 5.3.0
+  licia:
+    specifier: ^1.38.2
+    version: 1.38.2
   mobx:
     specifier: ^6.10.2
     version: 6.10.2
@@ -4123,6 +4126,10 @@ packages:
 
   /layout-base@2.0.1:
     resolution: {integrity: sha512-dp3s92+uNI1hWIpPGH3jK2kxE2lMjdXdr+DH8ynZHpd6PUlH6x6cbuXnoMmiNumznqaNO31xu9e79F0uuZ0JFg==}
+    dev: false
+
+  /licia@1.38.2:
+    resolution: {integrity: sha512-QsX3fZt88e1KaNdZXTSXqGYNHFXMV8xgfwa3eCTYdv8k4OLQimxwjTdXXej11BdSyUUp0rCZROI8rcTvnZRZ7w==}
     dev: false
 
   /loader-runner@4.3.0:

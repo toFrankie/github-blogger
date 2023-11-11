@@ -1,3 +1,5 @@
+import {debounce} from 'licia'
+import {useCallback} from 'react'
 import {Drawer, Select, Empty, Pagination, Input, Space} from 'antd'
 
 export default function List({store, visible, totalLabels, labels, totalCount, currentPage}) {
@@ -9,18 +11,23 @@ export default function List({store, visible, totalLabels, labels, totalCount, c
     store.getIssues()
   }
 
-  const handleInputChange = e => {
-    const title = e.target.value.trim()
-    store.setFilterTitle(title)
-    store.resetCurrentPage()
-    store.getIssues()
-  }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const handleInputChange = useCallback(
+    debounce(e => {
+      const title = e.target.value.trim()
+      store.setFilterTitle(title)
+      store.resetCurrentPage()
+      store.getIssues()
+    }, 500),
+    []
+  )
 
   return (
     <Drawer
       closable={false}
       open={visible}
       placement="left"
+      style={{height: '100vh'}}
       title="Issue List"
       onClose={() => store.setListVisible(false)}
     >
@@ -32,8 +39,8 @@ export default function List({store, visible, totalLabels, labels, totalCount, c
               allowClear
               showSearch
               mode="multiple"
-              style={{width: '100%'}}
               placeholder="Filter by labels"
+              style={{width: '100%'}}
               value={selectedOptions}
               onBlur={() => store.getIssues()}
               onChange={handleSelectChange}

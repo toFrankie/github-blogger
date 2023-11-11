@@ -85,7 +85,7 @@ code {
 .app-issue-list {
   display: flex;
   flex-direction: column;
-  min-height: 100%;
+  height: 100%;
 }
 
 .issue-filter {
@@ -132,7 +132,6 @@ code {
 
 .app-issue-list .list {
   flex: 1;
-  margin-bottom: 16px;
   overflow: hidden;
   overflow-y: auto;
 }
@@ -147,5 +146,6 @@ code {
 }
 
 .issue-pagination {
+  margin-top: 16px;
   text-align: center;
 }

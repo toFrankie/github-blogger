@@ -97,6 +97,7 @@ const App = observer(() => {
       store.totalCount = count
     },
     getIssues: async () => {
+      store.setLoading(true)
       if (store.filterLabels.length < 2 && !store.filterTitle) {
         store.getIssueTotalCount()
         const issues = await RPC.emit('getIssues', [
@@ -114,6 +115,7 @@ const App = observer(() => {
         store.totalCount = issueCount
         store.issues = issues
       }
+      store.setLoading(false)
     },
     resetCurrentPage: () => {
       store.currentPage = 1
@@ -203,30 +205,28 @@ const App = observer(() => {
 
   return (
     <ConfigProvider theme={theme}>
-      <Spin spinning={store.loading} tip="Syncing...">
-        <div className="app">
-          <Editor
-            content={store.current.body || ''}
-            labels={store.current.labels || []}
-            placeholder="Leave your thought..."
-            store={store}
-            title={store.current.title || ''}
-            totalLabels={store.labels || []}
-            uploadImages={uploadImages}
-          />
-          <List
-            currentPage={store.currentPage}
-            issues={store.issues}
-            labels={store.filterLabels}
-            store={store}
-            totalCount={store.totalCount}
-            totalLabels={store.labels}
-            visible={store.listVisible}
-          />
-          <LabelManager labels={store.labels} store={store} visible={store.labelsVisible} />
-          <ActionBox store={store} />
-        </div>
-      </Spin>
+      <div className="app">
+        <Editor
+          content={store.current.body || ''}
+          labels={store.current.labels || []}
+          placeholder="Leave your thought..."
+          store={store}
+          title={store.current.title || ''}
+          totalLabels={store.labels || []}
+          uploadImages={uploadImages}
+        />
+        <List
+          currentPage={store.currentPage}
+          issues={store.issues}
+          labels={store.filterLabels}
+          store={store}
+          totalCount={store.totalCount}
+          totalLabels={store.labels}
+          visible={store.listVisible}
+        />
+        <LabelManager labels={store.labels} store={store} visible={store.labelsVisible} />
+        <ActionBox store={store} />
+      </div>
     </ConfigProvider>
   )
 })
