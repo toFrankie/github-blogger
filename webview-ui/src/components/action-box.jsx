@@ -37,10 +37,9 @@ export default function ActionBox({store, number}) {
             shape="circle"
             type="primary"
             onClick={() => {
-              console.log(store.current.html_url)
               vscode.postMessage({
                 command: 'openExternalLink',
-                url: store.current.html_url || store.current.url,
+                externalLink: store.current.html_url || store.current.url,
               })
             }}
           />
@@ -62,9 +61,6 @@ export default function ActionBox({store, number}) {
           onClick={() => store.setListVisible(true)}
         />
       </Tooltip>
-      {/* <Tooltip placement="left" title="Settings">
-        <Button icon={<SettingOutlined />} shape="circle" type="primary" onClick={() => {}} />
-      </Tooltip> */}
     </div>
   )
 }

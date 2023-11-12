@@ -11,6 +11,10 @@ export function getWebviewOptions(extensionUri) {
     enableScripts: true,
     // And restrict the webview to only loading content from our extension's `media` directory.
     localResourceRoots: [Uri.joinPath(extensionUri, 'dist')],
+    // Controls if the find widget is enabled in the panel.
+    enableFindWidget: true,
+    // Controls if the webview panel's content (iframe) is kept around even when the panel is no longer visible.
+    retainContextWhenHidden: true,
   }
 }
 
@@ -80,10 +84,12 @@ export default class EditPanel {
     // If a webview panel does not already exist create and show a new one
     const panel = window.createWebviewPanel(
       EditPanel.viewType,
-      'Blog Editor',
+      'Blogger',
       column || ViewColumn.One,
       getWebviewOptions(extensionUri)
     )
+
+    panel.iconPath = Uri.joinPath(extensionUri, 'images/icon.png')
 
     EditPanel.currentPanel = new EditPanel(panel, context)
 
@@ -181,7 +187,7 @@ export default class EditPanel {
   _setWebviewMessageListener(webview) {
     webview.onDidReceiveMessage(
       message => {
-        const {command, url} = message
+        const {command, externalLink} = message
 
         switch (command) {
           case 'reload':
@@ -190,7 +196,7 @@ export default class EditPanel {
             break
 
           case 'openExternalLink':
-            env.openExternal(Uri.parse(url))
+            env.openExternal(Uri.parse(externalLink))
             break
 
           // Add more switch case statements here as more webview message commands
