@@ -128,6 +128,7 @@ export default class Service {
     this._registerMethod()
     this.octokit.hook.after('request', async (_response, options) => {
       if (options.url.includes('/graphql')) return
+      // TODO: 此处要调整
       if (options.method === 'DELETE')
         return await this.rpc.emit('showSuccess', ['Removed Successfully'])
       if (options.method === 'POST')
@@ -309,6 +310,79 @@ export default class Service {
     return 1
   }
 
+  async getRef() {
+    const [err, res] = await to(
+      this.octokit.request(APIS.GET_REF, {
+        owner: this.config.user,
+        repo: this.config.repo,
+        ref: `heads/${this.config.branch}`,
+      })
+    )
+    if (!err) return res.data.object.sha
+    return ''
+  }
+
+  async getCommit(params) {
+    const [err, res] = await to(
+      this.octokit.request(APIS.GET_COMMIT, {
+        owner: this.config.user,
+        repo: this.config.repo,
+        ...params,
+      })
+    )
+    if (!err) return res.data.tree.sha
+    return ''
+  }
+
+  async createBlob(params) {
+    const [err, res] = await to(
+      this.octokit.request(APIS.CREATE_BLOB, {
+        owner: this.config.user,
+        repo: this.config.repo,
+        ...params,
+      })
+    )
+    if (!err) return res.data.sha
+    return ''
+  }
+
+  async createTree(params) {
+    const [err, res] = await to(
+      this.octokit.request(APIS.CREATE_TREE, {
+        owner: this.config.user,
+        repo: this.config.repo,
+        ...params,
+      })
+    )
+    if (!err) return res.data.sha
+    return ''
+  }
+
+  async createCommit(params) {
+    const [err, res] = await to(
+      this.octokit.request(APIS.CREATE_COMMIT, {
+        owner: this.config.user,
+        repo: this.config.repo,
+        ...params,
+      })
+    )
+    if (!err) return res.data.sha
+    return ''
+  }
+
+  async updateRef(params) {
+    const [err, res] = await to(
+      this.octokit.request(APIS.UPDATE_REF, {
+        owner: this.config.user,
+        repo: this.config.repo,
+        ref: `heads/${this.config.branch}`,
+        ...params,
+      })
+    )
+    if (!err) return res.data
+    return ''
+  }
+
   /**
    * 注册事件
    */
@@ -372,6 +446,37 @@ export default class Service {
       return await this.queryFilterIssueCount(label)
     }
 
+    const getRef = async () => {
+      return await this.getRef()
+    }
+
+    const updateRef = async sha => {
+      return await this.updateRef({sha})
+    }
+
+    const getCommit = async sha => {
+      return await this.getCommit({commit_sha: sha})
+    }
+
+    const createCommit = async (parentCommitSha, treeSha, message) => {
+      return await this.createCommit({
+        message,
+        tree: treeSha,
+        parents: [parentCommitSha],
+      })
+    }
+
+    const createBlob = async content => {
+      return await this.createBlob({content})
+    }
+
+    const createTree = async (baseTree, path, sha) => {
+      return await this.createTree({
+        base_tree: baseTree,
+        tree: [{path, mode: '100644', type: 'blob', sha}],
+      })
+    }
+
     this.rpc.on('getLabels', getLabels)
     this.rpc.on('deleteLabel', deleteLabel)
     this.rpc.on('createLabel', createLabel)
@@ -383,5 +488,11 @@ export default class Service {
     this.rpc.on('uploadImage', uploadImage)
     this.rpc.on('getFilterCount', getFilterCount)
     this.rpc.on('getTotalCount', getTotalCount)
+    this.rpc.on('getRef', getRef)
+    this.rpc.on('updateRef', updateRef)
+    this.rpc.on('getCommit', getCommit)
+    this.rpc.on('createCommit', createCommit)
+    this.rpc.on('createBlob', createBlob)
+    this.rpc.on('createTree', createTree)
   }
 }

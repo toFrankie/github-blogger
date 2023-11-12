@@ -35,6 +35,11 @@
           "type": "string",
           "description": "Your GitHub Repository Name",
           "default": ""
+        },
+        "github-blogger.branch": {
+          "type": "string",
+          "description": "Your GitHub Repository Branch",
+          "default": "main"
         }
       }
     },

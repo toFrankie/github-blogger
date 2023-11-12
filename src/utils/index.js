@@ -44,12 +44,13 @@ export async function checkConfig() {
 }
 
 export async function getSetting() {
-  const [token, user, repo] = await Promise.all([
+  const [token, user, repo, branch] = await Promise.all([
     workspace.getConfiguration(EXTENSION_NAME).get('token'),
     workspace.getConfiguration(EXTENSION_NAME).get('user'),
     workspace.getConfiguration(EXTENSION_NAME).get('repo'),
+    workspace.getConfiguration(EXTENSION_NAME).get('branch'),
   ])
-  return {token, user, repo}
+  return {token, user, repo, branch}
 }
 
 export const cdnURL = ({user, repo, file}) => `https://cdn.jsdelivr.net/gh/${user}/${repo}/${file}`

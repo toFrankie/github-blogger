@@ -14,4 +14,10 @@ export const APIS = {
   CREATE_ISSUE: 'POST /repos/{owner}/{repo}/issues',
   UPDATE_ISSUE: 'PATCH /repos/{owner}/{repo}/issues/{issue_number}',
   UPLOAD_IMAGE: 'PUT /repos/{owner}/{repo}/contents/{path}',
+  GET_REF: 'GET /repos/{owner}/{repo}/git/ref/{ref}',
+  UPDATE_REF: 'PATCH /repos/{owner}/{repo}/git/refs/{ref}',
+  GET_COMMIT: 'GET /repos/{owner}/{repo}/git/commits/{commit_sha}',
+  CREATE_COMMIT: 'POST /repos/{owner}/{repo}/git/commits',
+  CREATE_BLOB: 'POST /repos/{owner}/{repo}/git/blobs',
+  CREATE_TREE: 'POST /repos/{owner}/{repo}/git/trees',
 }

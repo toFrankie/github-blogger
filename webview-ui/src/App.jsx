@@ -6,6 +6,7 @@ import {useEffect} from 'react'
 import {observer, useLocalObservable} from 'mobx-react-lite'
 import {ConfigProvider, message} from 'antd'
 import {WebviewRPC} from 'vscode-webview-rpc'
+import dayjs from 'dayjs'
 import 'bytemd/dist/index.min.css'
 import 'github-markdown-css'
 
@@ -71,7 +72,6 @@ const App = observer(() => {
     createLabel: async e => {
       await RPC.emit('createLabel', [e])
       store.getLabels()
-      return Promise.resolve()
     },
     deleteLabel: async e => {
       await RPC.emit('deleteLabel', [e])
@@ -80,7 +80,6 @@ const App = observer(() => {
     updateLabel: async (a, b) => {
       await RPC.emit('updateLabel', [a, b])
       store.getLabels()
-      return Promise.resolve()
     },
     getMilestones: async () => {
       const milestones = await getMilestones()
@@ -159,7 +158,30 @@ const App = observer(() => {
       } else {
         await RPC.emit('updateIssue', [number, title, body, JSON.stringify(labels)])
       }
-      return Promise.resolve()
+    },
+    backupMarkdown: async () => {
+      // 获取 Ref
+      const commitSha = await RPC.emit('getRef')
+
+      // 获取当前 Commit 的 Tree SHA
+      const treeSha = await RPC.emit('getCommit', [commitSha])
+
+      // 生成 Blob
+      const dayjsObj = dayjs()
+      const fileContent = dayjsObj.format('YYYY-MM-DD HH:mm:ss') // TODO: content 要修改
+      const blobSha = await RPC.emit('createBlob', [fileContent])
+
+      // 生成 Tree
+      const filePath = `tmp/${dayjsObj.unix()}.md` // TODO: path 要修改
+      const newTreeSha = await RPC.emit('createTree', [treeSha, filePath, blobSha])
+
+      // 生成 Commit
+      const commitMessage = `chore: test ${dayjsObj.unix()}` // TODO: message 要修改
+      const newCommitSha = await RPC.emit('createCommit', [commitSha, newTreeSha, commitMessage])
+
+      //  更新 Ref
+      const newRef = await RPC.emit('updateRef', [newCommitSha])
+      console.log(newRef)
     },
   }))
 
@@ -211,10 +233,10 @@ const App = observer(() => {
         <Editor
           content={store.current.body || ''}
           labels={store.current.labels || []}
+          number={store.current.number}
           placeholder="Leave your thought..."
           store={store}
           title={store.current.title || ''}
-          number={store.current.number}
           totalLabels={store.labels || []}
           uploadImages={uploadImages}
         />
@@ -228,7 +250,7 @@ const App = observer(() => {
           visible={store.listVisible}
         />
         <LabelManager labels={store.labels} store={store} visible={store.labelsVisible} />
-        <ActionBox store={store} number={store.current.number} />
+        <ActionBox number={store.current.number} store={store} />
       </div>
     </ConfigProvider>
   )
