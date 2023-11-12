@@ -6,8 +6,9 @@ This is a extension for VS Code that allows you to quickly create and manage Git
 
 ## Quick Start
 
-1. Prepare your [Github Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens).
-2. Open command palette by pressing `Command + Shift + P` (macOS) or `Ctrl + Shift + P` (Windows/Linux), and type `Config Github Blogger` to complete the initial configuration. Alternatively, you can add the following configuration directly to the `settings.json`.
+1. Download and install extension from [Marketpalce](https://marketplace.visualstudio.com/items?itemName=Frankie.github-blogger).
+2. Prepare your [Github Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens).
+3. Open command palette by pressing `Command + Shift + P` (macOS) or `Ctrl + Shift + P` (Windows/Linux), and type `Config Github Blogger` to complete the initial configuration. Alternatively, you can add the following configuration directly to the `settings.json`.
 
 ```json
 {
@@ -17,7 +18,7 @@ This is a extension for VS Code that allows you to quickly create and manage Git
 }
 ```
 
-3. Open the command palette again and type `Open Github Blogger` to start writing your blog.
+4. Open the command palette again and type `Open Github Blogger` to start writing your blog.
 
 ## About
 
