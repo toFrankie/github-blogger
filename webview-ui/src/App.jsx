@@ -18,7 +18,9 @@ import ActionBox from './components/action-box'
 import LabelManager from './components/label-manager'
 import List from './components/list'
 import {getMilestones} from './service'
-import {getVscode} from './utils'
+import {generateMarkdown, getVscode} from './utils'
+
+window.Buffer = window.Buffer || require('buffer').Buffer
 
 let RPC
 
@@ -155,11 +157,18 @@ const App = observer(() => {
         const data = await RPC.emit('createIssue', [title, body, JSON.stringify(labels)])
         store.current.number = data.number
         store.current.html_url = data.html_url
+        store.current.updated_at = data.updated_at
       } else {
-        await RPC.emit('updateIssue', [number, title, body, JSON.stringify(labels)])
+        const data = await RPC.emit('updateIssue', [number, title, body, JSON.stringify(labels)])
+        store.current.updated_at = data.updated_at
       }
+      await store.archiveIssue()
     },
-    backupMarkdown: async () => {
+    archiveIssue: async () => {
+      const {number = undefined} = store.current
+
+      if (!Number.isInteger(number)) return
+
       // 获取 Ref
       const commitSha = await RPC.emit('getRef')
 
@@ -167,21 +176,19 @@ const App = observer(() => {
       const treeSha = await RPC.emit('getCommit', [commitSha])
 
       // 生成 Blob
-      const dayjsObj = dayjs()
-      const fileContent = dayjsObj.format('YYYY-MM-DD HH:mm:ss') // TODO: content 要修改
-      const blobSha = await RPC.emit('createBlob', [fileContent])
+      const markdown = generateMarkdown(store.current)
+      const blobSha = await RPC.emit('createBlob', [markdown])
 
       // 生成 Tree
-      const filePath = `tmp/${dayjsObj.unix()}.md` // TODO: path 要修改
+      const filePath = `archive/${number}.md`
       const newTreeSha = await RPC.emit('createTree', [treeSha, filePath, blobSha])
 
       // 生成 Commit
-      const commitMessage = `chore: test ${dayjsObj.unix()}` // TODO: message 要修改
+      const commitMessage = `docs: update #${number}`
       const newCommitSha = await RPC.emit('createCommit', [commitSha, newTreeSha, commitMessage])
 
       //  更新 Ref
-      const newRef = await RPC.emit('updateRef', [newCommitSha])
-      console.log(newRef)
+      await RPC.emit('updateRef', [newCommitSha])
     },
   }))
 
