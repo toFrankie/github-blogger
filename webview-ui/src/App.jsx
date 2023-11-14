@@ -157,6 +157,7 @@ const App = observer(() => {
         const data = await RPC.emit('createIssue', [title, body, JSON.stringify(labels)])
         store.current.number = data.number
         store.current.html_url = data.html_url
+        store.current.created_at = data.created_at
         store.current.updated_at = data.updated_at
       } else {
         const data = await RPC.emit('updateIssue', [number, title, body, JSON.stringify(labels)])
@@ -180,7 +181,7 @@ const App = observer(() => {
       const blobSha = await RPC.emit('createBlob', [markdown])
 
       // 生成 Tree
-      const filePath = `archive/${number}.md`
+      const filePath = `archives/${number}.md`
       const newTreeSha = await RPC.emit('createTree', [treeSha, filePath, blobSha])
 
       // 生成 Commit
