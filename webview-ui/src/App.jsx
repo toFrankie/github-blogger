@@ -167,6 +167,7 @@ const App = observer(() => {
     },
     archiveIssue: async () => {
       const {number = undefined} = store.current
+      const createdAt = store.current.created_at || store.current.createdAt
 
       if (!Number.isInteger(number)) return
 
@@ -181,11 +182,12 @@ const App = observer(() => {
       const blobSha = await RPC.emit('createBlob', [markdown])
 
       // 生成 Tree
-      const filePath = `archives/${number}.md`
+      const year = dayjs(createdAt).year()
+      const filePath = `archives/${year}/${number}.md`
       const newTreeSha = await RPC.emit('createTree', [treeSha, filePath, blobSha])
 
       // 生成 Commit
-      const commitMessage = `docs: update #${number}`
+      const commitMessage = `docs: update issue ${number}`
       const newCommitSha = await RPC.emit('createCommit', [commitSha, newTreeSha, commitMessage])
 
       //  更新 Ref
@@ -211,25 +213,30 @@ const App = observer(() => {
 
   const uploadImages = e => {
     if (e.length === 0) return
+
     const img = e[0]
     if (!checkFile(img)) return
-    const hide = message.loading('Uploading Picture...', 0)
-    const ext = img.name.split('.').pop()
-    const path = `images/${new Date().getTime()}.${ext}`
+
+    const dayjsObj = dayjs()
+    const ext = img.name.split('.').pop().toLowerCase()
+    const path = `images/${dayjsObj.year()}/${dayjsObj.month()}/${dayjsObj.valueOf()}.${ext}`
+
     const fileReader = new FileReader()
     fileReader.readAsDataURL(img)
+
+    const hide = message.loading('Uploading Picture...', 0)
     return new Promise((resolve, reject) => {
       fileReader.onloadend = () => {
         const content = fileReader.result.split(',')[1]
         RPC.emit('uploadImage', [content, path])
           .then(res => {
             hide()
-            message.success('Uploaded!')
+            message.success('Uploaded Successfully')
             resolve(res)
           })
           .catch(err => {
             reject(err)
-            message.error('Uploading failed')
+            message.error('Upload Failed')
           })
       }
     })

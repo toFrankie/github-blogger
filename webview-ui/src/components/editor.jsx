@@ -2,14 +2,23 @@ import {Editor, Viewer} from '@bytemd/react'
 import {Input, Tag, Space} from 'antd'
 import frontmatter from '@bytemd/plugin-frontmatter'
 import gfm from '@bytemd/plugin-gfm'
-import hl from '@bytemd/plugin-highlight'
+import highlight from '@bytemd/plugin-highlight'
 import breaks from '@bytemd/plugin-breaks'
 import gemoji from '@bytemd/plugin-gemoji'
 import math from '@bytemd/plugin-math'
 import mediumZoom from '@bytemd/plugin-medium-zoom'
 import mermaid from '@bytemd/plugin-mermaid'
 
-const plugins = [frontmatter(), breaks(), gfm(), hl(), gemoji(), math(), mediumZoom(), mermaid()]
+const plugins = [
+  frontmatter(),
+  breaks(),
+  gfm(),
+  highlight(),
+  gemoji(),
+  math(),
+  mediumZoom(),
+  mermaid(),
+]
 
 export function MDEditor({value, setValue, uploadImages, placeholder}) {
   return (
@@ -19,9 +28,7 @@ export function MDEditor({value, setValue, uploadImages, placeholder}) {
       previewDebounce={50}
       uploadImages={uploadImages}
       value={value}
-      onChange={v => {
-        setValue(v)
-      }}
+      onChange={v => setValue(v)}
     />
   )
 }
@@ -54,7 +61,7 @@ export default function ContentEditor({
         <Input
           placeholder="Title"
           value={title}
-          onChange={e => store.updateTitle(e.target.value)}
+          onChange={e => store.updateTitle(e.target.value.trim())}
         />
         {!!number && <div className="number">#{number}</div>}
       </div>

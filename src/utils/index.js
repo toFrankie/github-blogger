@@ -53,7 +53,8 @@ export async function getSetting() {
   return {token, user, repo, branch}
 }
 
-export const cdnURL = ({user, repo, file}) => `https://cdn.jsdelivr.net/gh/${user}/${repo}/${file}`
+export const cdnURL = ({user, repo, filePath}) =>
+  `https://cdn.jsdelivr.net/gh/${user}/${repo}/${filePath}`
 
 export async function to(promise, errorExt) {
   try {

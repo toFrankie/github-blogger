@@ -31,7 +31,7 @@ export function getVscode() {
 export function generateMarkdown(issue) {
   return matter.stringify(issue.body, {
     title: issue.title,
-    number: issue.number,
+    number: `#${issue.number}`,
     link: issue.html_url || issue.url,
     created_at: dayjs(issue.created_at || issue.createdAt).format('YYYY-MM-DD HH:mm:ss'),
     updated_at: dayjs(issue.updated_at || issue.updatedAt).format('YYYY-MM-DD HH:mm:ss'),

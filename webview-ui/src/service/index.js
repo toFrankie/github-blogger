@@ -1,5 +1,6 @@
 import {Octokit} from '@octokit/core'
 import {message} from 'antd'
+import dayjs from 'dayjs'
 
 import {cdnURL, to} from '../utils'
 
@@ -148,10 +149,14 @@ export const queryIssueTotalCount = () =>
 export const uploadImages = e => {
   const hide = message.loading('Uploading Picture...', 0)
   const img = e[0]
-  const ext = img.name.split('.').pop()
-  const path = `${new Date().getTime()}.${ext}`
+
+  const dayjsObj = dayjs()
+  const ext = img.name.split('.').pop().toLowerCase()
+  const path = `images/${dayjsObj.year()}/${dayjsObj.month()}/${dayjsObj.valueOf()}.${ext}`
+
   const fileReader = new FileReader()
   fileReader.readAsDataURL(img)
+
   return new Promise((resolve, reject) => {
     fileReader.onloadend = () => {
       const content = fileReader.result.split(',')[1]
@@ -159,11 +164,7 @@ export const uploadImages = e => {
         .then(() => {
           hide()
           message.success('Uploaded!')
-          resolve([
-            {
-              url: cdnURL({user, repo, file: path}),
-            },
-          ])
+          resolve([{url: cdnURL({user, repo, filePath: path})}])
         })
         .catch(err => {
           reject(err)

@@ -128,7 +128,8 @@ export default class Service {
     this._registerMethod()
     this.octokit.hook.after('request', async (_response, options) => {
       if (options.url.includes('/graphql')) return
-      // TODO: 此处要调整
+      if (options.url.includes('/git')) return
+
       if (options.method === 'DELETE')
         return await this.rpc.emit('showSuccess', ['Removed Successfully'])
       if (options.method === 'POST')
@@ -267,7 +268,7 @@ export default class Service {
       this.octokit.request(APIS.UPLOAD_IMAGE, {
         owner: this.config.user,
         repo: this.config.repo,
-        message: 'upload images',
+        message: 'chore: upload image',
         ...params,
       })
     )
@@ -277,7 +278,7 @@ export default class Service {
           url: cdnURL({
             user: this.config.user,
             repo: this.config.repo,
-            file: params.path,
+            filePath: params.path,
           }),
         },
       ]
