@@ -9,8 +9,9 @@ import {cdnURL, to} from '../utils'
  * token： GitHub token
  * user: 用户名
  * repo: 开启issues博客的仓库名
+ * branch: 分支名
  */
-const {token = '', user = '', repo = ''} = window.g_config || {}
+const {token = '', user = '', repo = '', branch = ''} = window.g_config || {}
 
 /**
  * 构建GraphQL
@@ -72,6 +73,7 @@ export const uploadImage = async (content, path) => {
   const res = await octokit.request('PUT /repos/{owner}/{repo}/contents/{path}', {
     owner: user,
     repo,
+    branch,
     path,
     message: 'upload images',
     content,
@@ -164,7 +166,7 @@ export const uploadImages = e => {
         .then(() => {
           hide()
           message.success('Uploaded!')
-          resolve([{url: cdnURL({user, repo, filePath: path})}])
+          resolve([{url: cdnURL({user, repo, branch, filePath: path})}])
         })
         .catch(err => {
           reject(err)

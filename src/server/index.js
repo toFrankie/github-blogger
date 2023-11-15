@@ -268,6 +268,7 @@ export default class Service {
       this.octokit.request(APIS.UPLOAD_IMAGE, {
         owner: this.config.user,
         repo: this.config.repo,
+        branch: this.config.branch,
         message: 'chore: upload image',
         ...params,
       })
@@ -278,6 +279,7 @@ export default class Service {
           url: cdnURL({
             user: this.config.user,
             repo: this.config.repo,
+            branch: this.config.branch,
             filePath: params.path,
           }),
         },

@@ -1,7 +1,8 @@
 import dayjs from 'dayjs'
 import matter from 'gray-matter'
 
-export const cdnURL = ({user, repo, file}) => `https://cdn.jsdelivr.net/gh/${user}/${repo}/${file}`
+export const cdnURL = ({user, repo, branch, file}) =>
+  `https://cdn.jsdelivr.net/gh/${user}/${repo}${branch ? '@' + branch : ''}/${file}`
 
 export async function to(promise, errorExt) {
   try {
