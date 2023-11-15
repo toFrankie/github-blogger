@@ -5,10 +5,11 @@ import {window, QuickInputButtons} from 'vscode'
 import {Octokit} from '@octokit/core'
 
 import {APIS, EXTENSION_NAME} from '../constants'
+import {getSetting} from '../utils'
 
 export default async function multiStepInput() {
   async function collectInputs() {
-    const state = {}
+    const state = await getSetting()
     await MultiStepInput.run(input => inputToken(input, state))
     return state
   }
@@ -19,7 +20,7 @@ export default async function multiStepInput() {
     state.token = await input.showInputBox({
       title,
       step: 1,
-      totalSteps: 3,
+      totalSteps: 4,
       value: state.token || '',
       prompt: 'Enter your GitHub token',
       validate: validateNameIsUnique,
@@ -32,9 +33,23 @@ export default async function multiStepInput() {
     state.user = await input.showInputBox({
       title,
       step: 2,
-      totalSteps: 3,
+      totalSteps: 4,
       value: state.user || '',
       prompt: 'Enter your GitHub username(owner)',
+      validate: validateNameIsUnique,
+      shouldResume,
+    })
+    return input => inputBranch(input, state)
+  }
+
+  async function inputBranch(input, state) {
+    state.branch = await input.showInputBox({
+      title,
+      step: 3,
+      totalSteps: 4,
+      value: state.branch || '',
+      prompt:
+        'Enter your GitHub branch name. Used for image and issue archives, usually the default branch.',
       validate: validateNameIsUnique,
       shouldResume,
     })
@@ -44,8 +59,8 @@ export default async function multiStepInput() {
   async function inputRepoForIssue(input, state) {
     state.repo = await input.showInputBox({
       title,
-      step: 3,
-      totalSteps: 3,
+      step: 4,
+      totalSteps: 4,
       value: state.repo || '',
       prompt:
         'Create a empty github repo for your issue blog, give a name for the repo. If the repo already exists, it will not be recreated.',
@@ -74,6 +89,10 @@ export default async function multiStepInput() {
   await vscode.workspace
     .getConfiguration(EXTENSION_NAME)
     .update('user', state.user, vscode.ConfigurationTarget.Global)
+
+  await vscode.workspace
+    .getConfiguration(EXTENSION_NAME)
+    .update('branch', state.branch, vscode.ConfigurationTarget.Global)
 
   await vscode.workspace
     .getConfiguration(EXTENSION_NAME)

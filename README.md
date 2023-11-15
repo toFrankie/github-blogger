@@ -14,7 +14,8 @@ This is a extension for VS Code that allows you to quickly create and manage Git
 {
   "github-blogger.token": "xxx", // Your GitHub Personal Access Token
   "github-blogger.user": "xxx", // Your GitHub Username
-  "github-blogger.repo": "xxx" // Your GitHub Repository Name
+  "github-blogger.repo": "xxx", // Your GitHub Repository Name
+  "github-blogger.branch": "main" // Your GitHub Repository Branch Name
 }
 ```
 
