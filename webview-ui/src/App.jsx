@@ -206,16 +206,16 @@ const App = observer(() => {
   const checkFile = file => {
     const isLt2M = file.size / 1024 / 1024 < 2
     if (!isLt2M) {
-      message.error('Image`s maxsize is 2MB')
+      message.error('Image maxsize is 2MB')
     }
     return isLt2M
   }
 
   const uploadImages = e => {
-    if (e.length === 0) return
+    if (e.length === 0) return Promise.reject(new Error('Please select a image'))
 
     const img = e[0]
-    if (!checkFile(img)) return
+    if (!checkFile(img)) return Promise.reject(new Error('Image maxsize is 2MB'))
 
     const dayjsObj = dayjs()
     const ext = img.name.split('.').pop().toLowerCase()
