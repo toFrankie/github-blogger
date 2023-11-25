@@ -166,32 +166,37 @@ const App = observer(() => {
       await store.archiveIssue()
     },
     archiveIssue: async () => {
-      const {number = undefined} = store.current
-      const createdAt = store.current.created_at || store.current.createdAt
+      try {
+        const {number = undefined} = store.current
+        const createdAt = store.current.created_at || store.current.createdAt
 
-      if (!Number.isInteger(number)) return
+        if (!Number.isInteger(number)) return
 
-      // 获取 Ref
-      const commitSha = await RPC.emit('getRef')
+        // 获取 Ref
+        const commitSha = await RPC.emit('getRef')
 
-      // 获取当前 Commit 的 Tree SHA
-      const treeSha = await RPC.emit('getCommit', [commitSha])
+        // 获取当前 Commit 的 Tree SHA
+        const treeSha = await RPC.emit('getCommit', [commitSha])
 
-      // 生成 Blob
-      const markdown = generateMarkdown(store.current)
-      const blobSha = await RPC.emit('createBlob', [markdown])
+        // 生成 Blob
+        const markdown = generateMarkdown(store.current)
+        const blobSha = await RPC.emit('createBlob', [markdown])
 
-      // 生成 Tree
-      const year = dayjs(createdAt).year()
-      const filePath = `archives/${year}/${number}.md`
-      const newTreeSha = await RPC.emit('createTree', [treeSha, filePath, blobSha])
+        // 生成 Tree
+        const year = dayjs(createdAt).year()
+        const filePath = `archives/${year}/${number}.md`
+        const newTreeSha = await RPC.emit('createTree', [treeSha, filePath, blobSha])
 
-      // 生成 Commit
-      const commitMessage = `docs: update issue ${number}`
-      const newCommitSha = await RPC.emit('createCommit', [commitSha, newTreeSha, commitMessage])
+        // 生成 Commit
+        const commitMessage = `docs: update issue ${number}`
+        const newCommitSha = await RPC.emit('createCommit', [commitSha, newTreeSha, commitMessage])
 
-      //  更新 Ref
-      await RPC.emit('updateRef', [newCommitSha])
+        //  更新 Ref
+        await RPC.emit('updateRef', [newCommitSha])
+      } catch (e) {
+        console.log('--> archiveIssue failed', e)
+        message.error('Issue Archive Failed')
+      }
     },
   }))
 

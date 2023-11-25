@@ -321,6 +321,8 @@ export default class Service {
         ref: `heads/${this.config.branch}`,
       })
     )
+    if (res === undefined)
+      throw new Error(`Please check if the ${this.config.branch} branch exists`)
     if (!err) return res.data.object.sha
     throw err
   }
