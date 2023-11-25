@@ -322,7 +322,7 @@ export default class Service {
       })
     )
     if (!err) return res.data.object.sha
-    return ''
+    throw err
   }
 
   async getCommit(params) {
@@ -334,7 +334,7 @@ export default class Service {
       })
     )
     if (!err) return res.data.tree.sha
-    return ''
+    throw err
   }
 
   async createBlob(params) {
@@ -346,7 +346,7 @@ export default class Service {
       })
     )
     if (!err) return res.data.sha
-    return ''
+    throw err
   }
 
   async createTree(params) {
@@ -358,7 +358,7 @@ export default class Service {
       })
     )
     if (!err) return res.data.sha
-    return ''
+    throw err
   }
 
   async createCommit(params) {
@@ -370,7 +370,7 @@ export default class Service {
       })
     )
     if (!err) return res.data.sha
-    return ''
+    throw err
   }
 
   async updateRef(params) {
@@ -383,7 +383,7 @@ export default class Service {
       })
     )
     if (!err) return res.data
-    return ''
+    throw err
   }
 
   /**
