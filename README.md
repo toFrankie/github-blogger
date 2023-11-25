@@ -19,6 +19,8 @@ This is a extension for VS Code that allows you to quickly create and manage Git
 }
 ```
 
+> The written issues and the images uploaded during the process are stored in the `archives` and `images` directories. The `github-blogger.branch` is used to specify the branch, typically set to the default branch. Please make sure the branch already exists in the repository, otherwise issues archiving and image uploading may fail.
+
 4. Open the command palette again and type `Open Github Blogger` to start writing your blog.
 
 ## About

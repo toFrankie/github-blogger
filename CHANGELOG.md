@@ -2,6 +2,14 @@
 
 All notable changes will be documented in this file.
 
+## v0.0.3
+
+> November 25, 2023
+
+### Added
+
+- When creating or updating an issue, it will be archived in the repository.
+
 ## v0.0.2
 
 > November 12, 2023
