@@ -6,6 +6,7 @@ import {useEffect} from 'react'
 import {observer, useLocalObservable} from 'mobx-react-lite'
 import {ConfigProvider, message} from 'antd'
 import {WebviewRPC} from 'vscode-webview-rpc'
+import {Buffer} from 'buffer'
 import dayjs from 'dayjs'
 import 'bytemd/dist/index.min.css'
 import 'github-markdown-css'
@@ -20,7 +21,7 @@ import List from './components/list'
 import {getMilestones} from './service'
 import {generateMarkdown, getVscode} from './utils'
 
-window.Buffer = window.Buffer || require('buffer').Buffer
+window.Buffer = window.Buffer || Buffer
 
 let RPC
 

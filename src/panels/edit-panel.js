@@ -1,8 +1,6 @@
-import path from 'node:path'
-
 import {window, Uri, ViewColumn, ExtensionMode, commands, env} from 'vscode'
 
-import {getNonce} from '../utils'
+import {getNonce, getUri} from '../utils'
 import Server from '../server'
 
 export function getWebviewOptions(extensionUri) {
@@ -58,7 +56,7 @@ export default class EditPanel {
     )
 
     // Set the HTML content for the webview panel
-    this._panel.webview.html = this._getWebviewContent()
+    this._panel.webview.html = this._getWebviewContent(panel.webview, context.extensionUri)
 
     // Set an event listener to listen for messages passed from the webview context
     this._setWebviewMessageListener(this._panel.webview)
@@ -125,22 +123,21 @@ export default class EditPanel {
    * are created and inserted into the webview HTML.
    *
    * @param webview A reference to the extension webview
-   * @param _extensionUri The URI of the directory containing the extension
+   * @param extensionUri The URI of the directory containing the extension
    * @returns A template string literal containing the HTML that should be
    * rendered within the webview panel
    */
   // eslint-disable-next-line class-methods-use-this
-  _getWebviewContent() {
+  _getWebviewContent(webview, extensionUri) {
     const isProduction = this._context.extensionMode === ExtensionMode.Production
 
     let scriptUri = ''
+    let stylesUri = ''
     if (isProduction) {
-      const filePath = Uri.file(
-        path.join(this._context.extensionPath, 'dist', 'webview-ui/index.js')
-      )
-      scriptUri = this._panel.webview.asWebviewUri(filePath).toString()
+      scriptUri = getUri(webview, extensionUri, ['dist', 'webview-ui', 'assets', 'index.js'])
+      stylesUri = getUri(webview, extensionUri, ['dist', 'webview-ui', 'assets', 'style.css'])
     } else {
-      scriptUri = `http://localhost:8080/index.js`
+      scriptUri = `http://localhost:8932/src/index.jsx`
     }
 
     const nonce = getNonce()
@@ -153,6 +150,7 @@ export default class EditPanel {
           <meta charset="UTF-8" />
           <meta name="viewport" content="width=device-width, initial-scale=1.0" />
           <title>Github Blogger</title>
+          ${isProduction ? `<link rel="stylesheet" type="text/css" href="${stylesUri}">` : ''}
           <style>
             .markdown-body {
               box-sizing: border-box;
@@ -171,6 +169,19 @@ export default class EditPanel {
         </head>
         <body style="background-color: #F6F8FA">
           <div id="root"></div>
+          ${
+            !isProduction
+              ? `
+                <script type="module">
+                  import RefreshRuntime from "http://localhost:8932/@react-refresh"
+                  RefreshRuntime.injectIntoGlobalHook(window)
+                  window.$RefreshReg$ = () => {}
+                  window.$RefreshSig$ = () => (type) => type
+                  window.__vite_plugin_react_preamble_installed__ = true
+                </script>
+              `
+              : ''
+          }
           <script type="module" nonce="${nonce}" src="${scriptUri}"></script>
         </body>
       </html>
