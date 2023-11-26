@@ -154,7 +154,7 @@ export const uploadImages = e => {
 
   const dayjsObj = dayjs()
   const ext = img.name.split('.').pop().toLowerCase()
-  const path = `images/${dayjsObj.year()}/${dayjsObj.month()}/${dayjsObj.valueOf()}.${ext}`
+  const path = `images/${dayjsObj.year()}/${dayjsObj.month() + 1}/${dayjsObj.valueOf()}.${ext}`
 
   const fileReader = new FileReader()
   fileReader.readAsDataURL(img)
