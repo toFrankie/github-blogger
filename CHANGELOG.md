@@ -2,6 +2,14 @@
 
 All notable changes will be documented in this file.
 
+## v0.0.5
+
+> November 26, 2023
+
+### Fixed
+
+- Fixed a bug where it was not possible to remove an added label.
+
 ## v0.0.4
 
 > November 26, 2023
