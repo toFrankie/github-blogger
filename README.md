@@ -23,6 +23,10 @@ This is a extension for VS Code that allows you to quickly create and manage Git
 
 4. Open the command palette again and type `Open Github Blogger` to start writing your blog.
 
+## Important Notes
+
+- Please ensure that your Blogger repository is public. The reason is that the image uses jsDelivr + Github for CDN acceleration, which does not support private repository. [jsdelivr #18243](https://github.com/jsdelivr/jsdelivr/issues/18243#issuecomment-857512289)
+
 ## About
 
 The extension mainly consists of the following libraries:
