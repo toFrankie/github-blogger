@@ -2,6 +2,14 @@
 
 All notable changes will be documented in this file.
 
+## v0.0.4
+
+> November 26, 2023
+
+### Fixed
+
+- Fixed an issue with the file archive path, which was using the wrong month.
+
 ## v0.0.3
 
 > November 25, 2023
