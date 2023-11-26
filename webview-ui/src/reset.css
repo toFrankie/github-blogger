@@ -2,6 +2,10 @@ code {
   color: var(--color-fg-default);
 }
 
+a code {
+  color: var(--color-accent-fg);
+}
+
 blockquote {
   background: none !important;
   border-color: var(--color-border-default);
@@ -9,4 +13,9 @@ blockquote {
 
 .markdown-body {
   font-size: 14px;
+}
+
+pre code.hljs {
+  display: inline !important;
+  padding: 0 !important;
 }
