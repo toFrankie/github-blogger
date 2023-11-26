@@ -148,7 +148,9 @@ const App = observer(() => {
     },
     removeLabel: label => {
       if (!store.current.labels) store.current.labels = []
-      store.current.labels = store.current.labels.filter(item => item.id !== label.id)
+      store.current.labels = store.current.labels.filter(
+        item => item.id !== label.id && item.id !== label.node_id
+      )
     },
     updateIssue: async () => {
       const {number = undefined, title = '', body = '', labels = []} = store.current
