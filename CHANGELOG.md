@@ -2,6 +2,14 @@
 
 All notable changes will be documented in this file.
 
+## v0.0.6
+
+> November 27, 2023
+
+### Fixed
+
+- Improved code block syntax highlight.
+
 ## v0.0.5
 
 > November 26, 2023
