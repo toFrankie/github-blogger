@@ -14,8 +14,3 @@ blockquote {
 .markdown-body {
   font-size: 14px;
 }
-
-pre code.hljs {
-  display: inline !important;
-  padding: 0 !important;
-}
