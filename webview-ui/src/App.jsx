@@ -9,6 +9,7 @@ import {WebviewRPC} from 'vscode-webview-rpc'
 import dayjs from 'dayjs'
 import 'bytemd/dist/index.min.css'
 import 'github-markdown-css'
+import 'highlight.js/styles/github.css'
 
 import './App.css'
 import './reset.css'
