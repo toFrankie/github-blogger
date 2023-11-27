@@ -61,7 +61,7 @@ export default function ContentEditor({
         <Input
           placeholder="Title"
           value={title}
-          onChange={e => store.updateTitle(e.target.value.trim())}
+          onChange={e => store.updateTitle(e.target.value)}
         />
         {!!number && <div className="number">#{number}</div>}
       </div>
