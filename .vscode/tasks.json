@@ -7,28 +7,72 @@
       "label": "run ext",
       "type": "shell",
       "command": "source ~/.nvm/nvm.sh && nvm use default && pnpm run start:ext",
-      "problemMatcher": "$ts-webpack-watch",
-      "isBackground": true,
       "presentation": {
         "reveal": "never",
         "group": "watchers"
       },
       "group": {
         "kind": "build"
+      },
+      // https://stackoverflow.com/a/54017304/14569218
+      "isBackground": true,
+      "problemMatcher": [
+        {
+          "pattern": [
+            {
+              "regexp": ".",
+              "file": 1,
+              "location": 2,
+              "message": 3
+            }
+          ],
+          "background": {
+            "activeOnStart": true,
+            "beginsPattern": ".",
+            "endsPattern": "."
+          }
+        }
+      ],
+      // https://code.visualstudio.com/docs/terminal/profiles#_common-questions
+      "options": {
+        "shell": {
+          "args": []
+        }
       }
     },
     {
       "label": "run webview-ui",
       "type": "shell",
       "command": "source ~/.nvm/nvm.sh && nvm use default && pnpm run start:webview-ui",
-      "problemMatcher": "$ts-webpack-watch",
-      "isBackground": true,
       "presentation": {
         "reveal": "never",
         "group": "watchers"
       },
       "group": {
         "kind": "build"
+      },
+      "isBackground": true,
+      "problemMatcher": [
+        {
+          "pattern": [
+            {
+              "regexp": ".",
+              "file": 1,
+              "location": 2,
+              "message": 3
+            }
+          ],
+          "background": {
+            "activeOnStart": true,
+            "beginsPattern": ".",
+            "endsPattern": "."
+          }
+        }
+      ],
+      "options": {
+        "shell": {
+          "args": []
+        }
       }
     },
     {
