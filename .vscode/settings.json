@@ -9,5 +9,12 @@
     "dist": true // set this to false to include "dist" folder in search results
   },
   // Turn off tsc task auto detection since we have the necessary tasks as npm scripts
-  "typescript.tsc.autoDetect": "off"
+  // https://github.com/microsoft/vscode/issues/143061
+  // https://stackoverflow.com/questions/70837048/vscode-terminal-task-not-using-zsh-profile/71156819#71156819
+  // https://code.visualstudio.com/docs/terminal/profiles#_common-questions
+  "typescript.tsc.autoDetect": "off",
+  "terminal.integrated.automationProfile.osx": {
+    "path": "/bin/zsh",
+    "args": ["-l", "-i"]
+  }
 }
