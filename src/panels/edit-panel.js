@@ -92,6 +92,7 @@ export default class EditPanel {
     EditPanel.currentPanel = new EditPanel(panel, context)
 
     commands.executeCommand('workbench.action.closeSidebar')
+    commands.executeCommand('workbench.action.closePanel')
   }
 
   static revive(panel, extensionUri) {
