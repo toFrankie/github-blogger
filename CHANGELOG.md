@@ -2,6 +2,15 @@
 
 All notable changes will be documented in this file.
 
+## v0.0.7
+
+> December 17, 2023
+
+### Fixed
+
+- Improved code block syntax highlight.
+- Fixed a bug where spaces could not be entered at the end of the title
+
 ## v0.0.6
 
 > November 27, 2023
