@@ -1,8 +1,10 @@
 import dayjs from 'dayjs'
 import matter from 'gray-matter'
 
-export const cdnURL = ({user, repo, branch, file}) =>
-  `https://cdn.jsdelivr.net/gh/${user}/${repo}${branch ? '@' + branch : ''}/${file}`
+export const cdnURL = ({user, repo, branch, file}) => {
+  const tag = branch ? '@' + branch : ''
+  return `https://cdn.jsdelivr.net/gh/${user}/${repo}${tag}/${file}`
+}
 
 export async function to(promise, errorExt) {
   try {
@@ -19,7 +21,6 @@ export async function to(promise, errorExt) {
 }
 
 export function getVscode() {
-  // 兼容 HMR
   if (window.__vscode__) {
     return window.__vscode__
   }
