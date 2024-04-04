@@ -6,6 +6,7 @@ import {useEffect} from 'react'
 import {observer, useLocalObservable} from 'mobx-react-lite'
 import {ConfigProvider, message} from 'antd'
 import {WebviewRPC} from 'vscode-webview-rpc'
+import {cloneDeep} from 'licia'
 import {Buffer} from 'buffer'
 import dayjs from 'dayjs'
 import 'bytemd/dist/index.min.css'
@@ -20,7 +21,7 @@ import ActionBox from './components/action-box'
 import LabelManager from './components/label-manager'
 import List from './components/list'
 import {getMilestones} from './service'
-import {generateMarkdown, getVscode} from './utils'
+import {compareIssue, generateMarkdown, getVscode} from './utils'
 
 window.Buffer = window.Buffer || Buffer
 
@@ -55,6 +56,7 @@ const App = observer(() => {
     filterLabels: [],
     filterMilestones: [],
     current: {},
+    originalCurrent: {},
     totalCount: 1,
     currentPage: 1,
     listVisible: false,
@@ -140,6 +142,7 @@ const App = observer(() => {
     },
     setCurrentIssue: issue => {
       store.current = issue
+      store.originalCurrent = cloneDeep(issue)
     },
     setCurrentIssueBody: body => {
       store.current.body = body
@@ -156,17 +159,31 @@ const App = observer(() => {
     },
     updateIssue: async () => {
       const {number = undefined, title = '', body = '', labels = []} = store.current
-      if (!title || !body) return message.error('Please enter the content...')
+      if (!title || !body) {
+        return message.error('Please enter the content...')
+      }
+
       if (!number) {
         const data = await RPC.emit('createIssue', [title, body, JSON.stringify(labels)])
         store.current.number = data.number
         store.current.html_url = data.html_url
         store.current.created_at = data.created_at
         store.current.updated_at = data.updated_at
-      } else {
-        const data = await RPC.emit('updateIssue', [number, title, body, JSON.stringify(labels)])
-        store.current.updated_at = data.updated_at
+        store.originalCurrent = cloneDeep(store.current)
+
+        await store.archiveIssue()
+        return
       }
+
+      const isDiff = compareIssue(store.current, store.originalCurrent)
+      if (!isDiff) {
+        return message.warning('No changes made.')
+      }
+
+      const data = await RPC.emit('updateIssue', [number, title, body, JSON.stringify(labels)])
+      store.current.updated_at = data.updated_at
+      store.originalCurrent = cloneDeep(store.current)
+
       await store.archiveIssue()
     },
     archiveIssue: async () => {
