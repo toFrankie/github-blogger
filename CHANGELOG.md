@@ -2,6 +2,18 @@
 
 All notable changes will be documented in this file.
 
+## v0.0.8
+
+> April 4, 2024
+
+### Added
+
+- Supported copy issue URL to clipboard.
+
+### Changed
+
+- When submitting an issue update, it will check for changes to reduce unnecessary commit logs.
+
 ## v0.0.7
 
 > December 17, 2023

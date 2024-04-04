@@ -2,7 +2,7 @@ import dayjs from 'dayjs'
 import matter from 'gray-matter'
 
 export const cdnURL = ({user, repo, branch, file}) => {
-  const tag = branch ? '@' + branch : ''
+  const tag = branch ? `@${branch}` : ''
   return `https://cdn.jsdelivr.net/gh/${user}/${repo}${tag}/${file}`
 }
 
@@ -39,4 +39,18 @@ export function generateMarkdown(issue) {
     updated_at: dayjs(issue.updated_at || issue.updatedAt).format('YYYY-MM-DD HH:mm:ss'),
     labels: issue.labels?.map(({name}) => name) || [],
   })
+}
+
+export function compareIssue(newIssue, oldIssue) {
+  if (newIssue.title !== oldIssue.title) return true
+  if (newIssue.body !== oldIssue.body) return true
+  if (newIssue.labels?.length !== oldIssue.labels?.length) return true
+
+  if (newIssue.labels && oldIssue.labels) {
+    for (const label of newIssue.labels) {
+      if (oldIssue.labels.findIndex(({id}) => id === label.id) === -1) return true
+    }
+  }
+
+  return false
 }

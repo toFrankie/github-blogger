@@ -1,5 +1,5 @@
 import {Editor, Viewer} from '@bytemd/react'
-import {Input, Tag, Space} from 'antd'
+import {Input, Tag, Space, message} from 'antd'
 import frontmatter from '@bytemd/plugin-frontmatter'
 import gfm from '@bytemd/plugin-gfm'
 import highlight from '@bytemd/plugin-highlight'
@@ -55,6 +55,12 @@ export default function ContentEditor({
     }
   }
 
+  const copyLink = () => {
+    const link = store.current.html_url || store.current.url
+    navigator.clipboard.writeText(link)
+    message.success('Link copied.')
+  }
+
   return (
     <>
       <div className="app-title">
@@ -63,7 +69,11 @@ export default function ContentEditor({
           value={title}
           onChange={e => store.updateTitle(e.target.value)}
         />
-        {!!number && <div className="number">#{number}</div>}
+        {!!number && (
+          <div className="number" onClick={copyLink}>
+            #{number}
+          </div>
+        )}
       </div>
       <div className="app-labels">
         <Space wrap size={[0, 'small']}>
