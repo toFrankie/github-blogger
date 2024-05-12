@@ -33,12 +33,12 @@
         },
         "github-blogger.repo": {
           "type": "string",
-          "description": "Your GitHub Repository Name",
+          "description": "Your Blog Repository Name",
           "default": ""
         },
         "github-blogger.branch": {
           "type": "string",
-          "description": "Your GitHub Repository Branch Name",
+          "description": "Your Blog Repository Branch Name",
           "default": "main"
         }
       }
