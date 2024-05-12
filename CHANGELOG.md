@@ -2,6 +2,12 @@
 
 All notable changes will be documented in this file.
 
+## v0.0.9
+
+> May 12, 2024
+
+No functional changes.
+
 ## v0.0.8
 
 > April 4, 2024

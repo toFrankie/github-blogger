@@ -2,7 +2,7 @@
   "name": "github-blogger",
   "displayName": "Github Blogger",
   "description": "✍️ Quickly create and manage Github Issues",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "publisher": "Frankie",
   "engines": {
     "vscode": "^1.62.0"
@@ -33,12 +33,12 @@
         },
         "github-blogger.repo": {
           "type": "string",
-          "description": "Your GitHub Repository Name",
+          "description": "Your Blog Repository Name",
           "default": ""
         },
         "github-blogger.branch": {
           "type": "string",
-          "description": "Your GitHub Repository Branch Name",
+          "description": "Your Blog Repository Branch Name",
           "default": "main"
         }
       }
