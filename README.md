@@ -4,6 +4,8 @@
 
 This VS Code extension lets you create and manage GitHub Issues as blog posts. It uses the GitHub REST API and GraphQL API to handle your Issues, with all content stored in your GitHub repository.
 
+Perhaps you can use it in conjunction with [github-issue-toc](https://github.com/toFrankie/github-issue-toc), which generates the table of contents on the issue page.
+
 ## 📖 Quick Start
 
 1. Get the extension from the [Marketpalce](https://marketplace.visualstudio.com/items?itemName=Frankie.github-blogger).
