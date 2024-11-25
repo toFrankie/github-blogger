@@ -47,6 +47,11 @@ const theme = {
   },
 }
 
+const SUBMIT_TYPE = {
+  CREATE: 'create',
+  UPDATE: 'update',
+}
+
 const App = observer(() => {
   const store = useLocalObservable(() => ({
     labels: [],
@@ -171,7 +176,7 @@ const App = observer(() => {
         store.current.updated_at = data.updated_at
         store.originalCurrent = cloneDeep(store.current)
 
-        await store.archiveIssue()
+        await store.archiveIssue(SUBMIT_TYPE.CREATE)
         return
       }
 
@@ -184,9 +189,9 @@ const App = observer(() => {
       store.current.updated_at = data.updated_at
       store.originalCurrent = cloneDeep(store.current)
 
-      await store.archiveIssue()
+      await store.archiveIssue(SUBMIT_TYPE.UPDATE)
     },
-    archiveIssue: async () => {
+    archiveIssue: async (type = SUBMIT_TYPE.UPDATE) => {
       try {
         const {number = undefined} = store.current
         const createdAt = store.current.created_at || store.current.createdAt
@@ -209,7 +214,10 @@ const App = observer(() => {
         const newTreeSha = await RPC.emit('createTree', [treeSha, filePath, blobSha])
 
         // 生成 Commit
-        const commitMessage = `docs: update issue ${number}`
+        const commitMessage =
+          type === SUBMIT_TYPE.CREATE
+            ? `docs: create issue ${number}`
+            : `docs: update issue ${number}`
         const newCommitSha = await RPC.emit('createCommit', [commitSha, newTreeSha, commitMessage])
 
         //  更新 Ref
