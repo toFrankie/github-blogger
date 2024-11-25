@@ -2,6 +2,12 @@
 
 All notable changes will be documented in this file.
 
+## v1.0.0
+
+> Nov 25, 2024
+
+Enjoy it. ❤️
+
 ## v0.0.9
 
 > May 12, 2024
