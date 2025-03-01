@@ -67,23 +67,23 @@
     "lint:stylelint": "stylelint 'webview-ui/**/*.css' --cache --fix"
   },
   "devDependencies": {
-    "@ifanrx/eslint-config-standard": "^1.2.6",
-    "@ifanrx/eslint-config-standard-react": "^1.1.2",
-    "@ifanrx/prettier-config-standard": "^1.1.2",
-    "@ifanrx/stylelint-config-standard": "^1.1.3",
+    "@ifanrx/eslint-config-standard": "^1.3.0",
+    "@ifanrx/eslint-config-standard-react": "^1.3.0",
+    "@ifanrx/prettier-config-standard": "^1.2.0",
+    "@ifanrx/stylelint-config-standard": "^2.1.0",
     "@types/vscode": "^1.62.0",
     "@vscode/vsce": "^2.21.1",
-    "eslint": "^8.52.0",
+    "eslint": "^8.57.1",
     "npm-run-all": "^4.1.5",
-    "prettier": "^3.0.3",
-    "stylelint": "^15.11.0",
+    "prettier": "^3.5.2",
+    "stylelint": "^16.15.0",
     "typescript": "^5.2.2",
     "vite": "^5.0.2"
   },
   "dependencies": {
     "@octokit/core": "^5.0.1",
-    "core-js": "^3.33.1",
-    "js-base64": "^3.7.5",
+    "core-js": "^3.41.0",
+    "js-base64": "^3.7.7",
     "vscode-webview-rpc": "^0.0.4"
   }
 }

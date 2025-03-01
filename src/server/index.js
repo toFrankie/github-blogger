@@ -130,12 +130,15 @@ export default class Service {
       if (options.url.includes('/graphql')) return
       if (options.url.includes('/git')) return
 
-      if (options.method === 'DELETE')
+      if (options.method === 'DELETE') {
         return await this.rpc.emit('showSuccess', ['Removed Successfully'])
-      if (options.method === 'POST')
+      }
+      if (options.method === 'POST') {
         return await this.rpc.emit('showSuccess', ['Created Successfully'])
-      if (options.method === 'PATCH')
+      }
+      if (options.method === 'PATCH') {
         return await this.rpc.emit('showSuccess', ['Updated Successfully'])
+      }
     })
     this.octokit.hook.error('request', async (error, _options) => {
       this.rpc.emit('showError', [JSON.stringify(error)])
@@ -224,7 +227,7 @@ export default class Service {
         })
       )
     )
-    if (!err)
+    if (!err) {
       return {
         issueCount: res.search.issueCount,
         issues: res.search.edges.map(({node}) => ({
@@ -232,6 +235,7 @@ export default class Service {
           labels: node.labels.nodes,
         })),
       }
+    }
     return []
   }
 
@@ -321,8 +325,9 @@ export default class Service {
         ref: `heads/${this.config.branch}`,
       })
     )
-    if (res === undefined)
+    if (res === undefined) {
       throw new Error(`Please check if the ${this.config.branch} branch exists`)
+    }
     if (!err) return res.data.object.sha
     throw err
   }
