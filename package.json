@@ -61,10 +61,10 @@
     "build:ext": "vite build",
     "start:webview-ui": "cd webview-ui && pnpm start",
     "build:webview-ui": "cd webview-ui && pnpm build",
-    "lint": "run-s lint:eslint lint:prettier",
+    "lint": "run-s lint:eslint lint:prettier lint:stylelint",
     "lint:eslint": "eslint 'src/**/*.{js,jxs}' --cache --fix",
     "lint:prettier": "prettier . '!**/pnpm-lock.yaml' --cache --write",
-    "lint:stylelint": "stylelint 'src/**/*.css' --cache --fix"
+    "lint:stylelint": "stylelint 'webview-ui/**/*.css' --cache --fix"
   },
   "devDependencies": {
     "@ifanrx/eslint-config-standard": "^1.2.6",

@@ -58,6 +58,7 @@ code {
   margin-bottom: 8px;
 }
 
+/* stylelint-disable-next-line selector-max-compound-selectors */
 .app-action-box > .ant-btn > .ant-btn-icon {
   position: relative;
   top: 1px;
@@ -77,6 +78,7 @@ code {
   display: none;
 }
 
+/* stylelint-disable-next-line no-duplicate-selectors */
 .bytemd-toolbar-right div:nth-child(1) {
   display: none;
 }
