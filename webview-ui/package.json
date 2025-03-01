@@ -7,7 +7,7 @@
     "build": "vite build"
   },
   "dependencies": {
-    "@ant-design/icons": "^5.2.6",
+    "@ant-design/icons": "^5.6.1",
     "@bytemd/plugin-breaks": "^1.22.0",
     "@bytemd/plugin-frontmatter": "^1.22.0",
     "@bytemd/plugin-gemoji": "^1.22.0",
@@ -17,8 +17,8 @@
     "@bytemd/plugin-medium-zoom": "^1.22.0",
     "@bytemd/plugin-mermaid": "^1.22.0",
     "@bytemd/react": "^1.22.0",
-    "@octokit/core": "^5.0.1",
-    "antd": "^5.10.2",
+    "@octokit/core": "^6.1.4",
+    "antd": "^5.24.2",
     "buffer": "^6.0.3",
     "bytemd": "^1.22.0",
     "core-js": "^3.41.0",
@@ -29,16 +29,16 @@
     "licia": "^1.46.0",
     "mobx": "^6.13.6",
     "mobx-react-lite": "^4.1.0",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
     "vscode-webview-rpc": "^0.0.4"
   },
   "devDependencies": {
-    "@types/react": "^18.2.31",
-    "@types/react-dom": "^18.2.14",
+    "@types/react": "^18.3.18",
+    "@types/react-dom": "^18.3.5",
     "@types/vscode-webview": "^1.57.5",
     "@vitejs/plugin-react-swc": "^3.8.0",
-    "typescript": "^5.2.2",
-    "vite": "^5.0.2"
+    "typescript": "^5.8.2",
+    "vite": "^6.2.0"
   }
 }

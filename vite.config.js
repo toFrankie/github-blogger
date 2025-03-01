@@ -2,6 +2,7 @@ import {defineConfig} from 'vite'
 
 export default defineConfig({
   server: {
+    cors: true,
     host: true,
     port: 8942,
   },
