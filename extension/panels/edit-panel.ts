@@ -2,7 +2,7 @@ import {window, Uri, ViewColumn, ExtensionMode, commands, env} from 'vscode'
 
 import {getNonce, getUri} from '../utils'
 import Server from '../server'
-
+import {WebviewHelper} from '../utils/helper'
 export function getWebviewOptions(extensionUri) {
   return {
     // Enable javascript in the webview
@@ -56,10 +56,12 @@ export default class EditPanel {
     )
 
     // Set the HTML content for the webview panel
-    this._panel.webview.html = this._getWebviewContent(panel.webview, context.extensionUri)
+    // this._panel.webview.html = this._getWebviewContent(panel.webview, context.extensionUri)
+    this._panel.webview.html = WebviewHelper.setupHtml(this._panel.webview, context)
 
     // Set an event listener to listen for messages passed from the webview context
-    this._setWebviewMessageListener(this._panel.webview)
+    // this._setWebviewMessageListener(this._panel.webview)
+    WebviewHelper.setupWebviewHooks(this._panel.webview, this._disposables)
   }
 
   /**
@@ -110,7 +112,7 @@ export default class EditPanel {
 
     // Dispose of all disposables (i.e. commands) for the current webview panel
     while (this._disposables.length > 0) {
-      const disposable = this._disposables.pop()
+      const disposable: any = this._disposables.pop()
       if (disposable) {
         disposable.dispose()
       }
@@ -203,7 +205,9 @@ export default class EditPanel {
 
         switch (command) {
           case 'reload':
+            // @ts-ignore
             this.html = this.html.replace(/nonce="\w+?"/, `nonce="${getNonce()}"`)
+            // @ts-ignore
             this.panel.webview.html = this.html
             break
 

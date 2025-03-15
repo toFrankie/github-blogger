@@ -1,11 +1,11 @@
-import {debounce} from 'licia'
+import {debounce} from 'licia-es'
 import {useCallback} from 'react'
 import {Drawer, Select, Empty, Pagination, Input, Space} from 'antd'
 
 export default function List({store, visible, totalLabels, labels, totalCount, currentPage}) {
   const selectedOptions = labels.map(item => item.name)
 
-  const handleSelectChange = (e = []) => {
+  const handleSelectChange = (e: any = []) => {
     store.resetCurrentPage()
     store.setFilterLabels(totalLabels.filter(o => e.includes(o.name)))
     store.getIssues()

@@ -16,7 +16,7 @@ export default async function multiStepInput() {
 
   const title = 'Github Blogger Initialization'
 
-  async function inputToken(input, state) {
+  async function inputToken(input: any, state: any) {
     state.token = await input.showInputBox({
       title,
       step: 1,
@@ -29,7 +29,7 @@ export default async function multiStepInput() {
     return input => inputUser(input, state)
   }
 
-  async function inputUser(input, state) {
+  async function inputUser(input: any, state: any) {
     state.user = await input.showInputBox({
       title,
       step: 2,
@@ -42,7 +42,7 @@ export default async function multiStepInput() {
     return input => inputBranch(input, state)
   }
 
-  async function inputBranch(input, state) {
+  async function inputBranch(input: any, state: any) {
     state.branch = await input.showInputBox({
       title,
       step: 3,
@@ -56,7 +56,7 @@ export default async function multiStepInput() {
     return input => inputRepoForIssue(input, state)
   }
 
-  async function inputRepoForIssue(input, state) {
+  async function inputRepoForIssue(input: any, state: any) {
     state.repo = await input.showInputBox({
       title,
       step: 4,
@@ -73,11 +73,12 @@ export default async function multiStepInput() {
     // Could show a notification with the option to resume.
     return new Promise((_resolve, _reject) => {
       // noop
+      // @ts-ignore
       _resolve()
     })
   }
 
-  async function validateNameIsUnique(name) {
+  async function validateNameIsUnique(name: any) {
     // ...validate...
     return !name ? 'Can not be empty' : undefined
   }
@@ -114,7 +115,7 @@ export default async function multiStepInput() {
       try {
         await octokit.request(APIS.CREATE_REPO, {name: repoName})
         window.showInformationMessage('Github Blogger initialization is completed.')
-      } catch (e) {
+      } catch (e: any) {
         if (e.message.includes('already exists')) {
           window.showInformationMessage(
             `Github Blogger initialization is completed. The ${repoName} repo already exists, skip the creation step.`
@@ -144,7 +145,7 @@ class MultiStepInput {
   }
 
   current
-  steps = []
+  steps: any[] = []
 
   async stepThrough(start) {
     let step = start
@@ -175,7 +176,7 @@ class MultiStepInput {
   }
 
   async showInputBox({title, step, totalSteps, value, prompt, validate, buttons, shouldResume}) {
-    const disposables = []
+    const disposables: any = []
     try {
       return await new Promise((resolve, reject) => {
         const input = window.createInputBox()

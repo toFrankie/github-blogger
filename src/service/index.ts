@@ -11,6 +11,7 @@ import {cdnURL, to} from '../utils'
  * repo: 开启issues博客的仓库名
  * branch: 分支名
  */
+// @ts-ignore
 const {token = '', user = '', repo = '', branch = ''} = window.g_config || {}
 
 /**
@@ -52,7 +53,8 @@ const octokit = new Octokit({
   auth: token,
 })
 
-octokit.hook.after('request', async (_response, options) => {
+// @ts-ignore
+octokit.hook.after('request', async (_response: any, options: any) => {
   if (options.url.includes('/graphql')) return
   if (options.method === 'DELETE') return message.success('Removed Successfully')
   if (options.method === 'POST') return message.success('Created Successfully')
@@ -60,7 +62,8 @@ octokit.hook.after('request', async (_response, options) => {
 })
 
 // eslint-disable-next-line
-octokit.hook.error('request', async (error, options) => {
+// @ts-ignore
+octokit.hook.error('request', async (error: any, options: any) => {
   // message.error(JSON.stringify(error), 500000000)
 })
 
@@ -156,7 +159,7 @@ export const uploadImages = e => {
   const ext = img.name.split('.').pop().toLowerCase()
   const path = `images/${dayjsObj.year()}/${dayjsObj.month() + 1}/${dayjsObj.valueOf()}.${ext}`
 
-  const fileReader = new FileReader()
+  const fileReader:any = new FileReader()
   fileReader.readAsDataURL(img)
 
   return new Promise((resolve, reject) => {

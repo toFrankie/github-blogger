@@ -7,8 +7,8 @@ export default function LabelsManager({store, visible, labels}) {
   const [editValue, setEditValue] = useState('')
   const [editIndex, setEditIndex] = useState()
   const [inputVisible, setInputVisible] = useState(false)
-  const saveEditInputRef = useRef(null)
-  const saveInputRef = useRef(null)
+  const saveEditInputRef: any = useRef(null)
+  const saveInputRef: any = useRef(null)
 
   const handleEditInputConfirm = async label => {
     if (checkDuplicate(editValue) || checkEmpty(editValue)) return reset()

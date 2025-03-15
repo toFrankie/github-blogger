@@ -4,80 +4,42 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "run ext",
-      "type": "shell",
-      "command": "source ~/.nvm/nvm.sh && nvm use default && pnpm run start:ext",
+      "type": "npm",
+      "script": "dev",
+      "problemMatcher": {
+        "owner": "typescript",
+        "fileLocation": "relative",
+        "pattern": {
+          "regexp": "^([a-zA-Z]\\:/?([\\w\\-]/?)+\\.\\w+):(\\d+):(\\d+): (ERROR|WARNING)\\: (.*)$",
+          "file": 1,
+          "line": 3,
+          "column": 4,
+          "code": 5,
+          "message": 6
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "^.*extension build start*$",
+          "endsPattern": "^.*extension (build|rebuild) success.*$"
+        }
+      },
+      "isBackground": true,
       "presentation": {
-        "reveal": "never",
-        "group": "watchers"
+        "reveal": "never"
       },
       "group": {
-        "kind": "build"
-      },
-      // https://stackoverflow.com/a/54017304/14569218
-      "isBackground": true,
-      "problemMatcher": [
-        {
-          "pattern": [
-            {
-              "regexp": ".",
-              "file": 1,
-              "location": 2,
-              "message": 3
-            }
-          ],
-          "background": {
-            "activeOnStart": true,
-            "beginsPattern": ".",
-            "endsPattern": "."
-          }
-        }
-      ],
-      // https://code.visualstudio.com/docs/terminal/profiles#_common-questions
-      "options": {
-        "shell": {
-          "args": []
-        }
+        "kind": "build",
+        "isDefault": true
       }
     },
     {
-      "label": "run webview-ui",
-      "type": "shell",
-      "command": "source ~/.nvm/nvm.sh && nvm use default && pnpm run start:webview-ui",
-      "presentation": {
-        "reveal": "never",
-        "group": "watchers"
-      },
+      "type": "npm",
+      "script": "build",
       "group": {
-        "kind": "build"
+        "kind": "build",
+        "isDefault": true
       },
-      "isBackground": true,
-      "problemMatcher": [
-        {
-          "pattern": [
-            {
-              "regexp": ".",
-              "file": 1,
-              "location": 2,
-              "message": 3
-            }
-          ],
-          "background": {
-            "activeOnStart": true,
-            "beginsPattern": ".",
-            "endsPattern": "."
-          }
-        }
-      ],
-      "options": {
-        "shell": {
-          "args": []
-        }
-      }
-    },
-    {
-      "label": "run extension",
-      "dependsOn": ["run ext", "run webview-ui"]
+      "problemMatcher": []
     }
   ]
 }

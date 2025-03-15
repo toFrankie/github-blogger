@@ -6,7 +6,7 @@ import {useEffect} from 'react'
 import {observer, useLocalObservable} from 'mobx-react-lite'
 import {ConfigProvider, message} from 'antd'
 import {WebviewRPC} from 'vscode-webview-rpc'
-import {cloneDeep} from 'licia'
+import {cloneDeep} from 'licia-es'
 import {Buffer} from 'buffer'
 import dayjs from 'dayjs'
 import 'bytemd/dist/index.min.css'
@@ -23,6 +23,7 @@ import List from './components/list'
 import {getMilestones} from './service'
 import {compareIssue, generateMarkdown, getVscode} from './utils'
 
+// @ts-ignore
 window.Buffer = window.Buffer || Buffer
 
 let RPC
@@ -53,7 +54,7 @@ const SUBMIT_TYPE = {
 }
 
 const App = observer(() => {
-  const store = useLocalObservable(() => ({
+  const store: any = useLocalObservable(() => ({
     labels: [],
     milestones: [],
     issues: [],
@@ -255,7 +256,7 @@ const App = observer(() => {
     const ext = img.name.split('.').pop().toLowerCase()
     const path = `images/${dayjsObj.year()}/${dayjsObj.month() + 1}/${dayjsObj.valueOf()}.${ext}`
 
-    const fileReader = new FileReader()
+    const fileReader: any = new FileReader()
     fileReader.readAsDataURL(img)
 
     const hide = message.loading('Uploading Picture...', 0)
@@ -291,7 +292,6 @@ const App = observer(() => {
         />
         <List
           currentPage={store.currentPage}
-          issues={store.issues}
           labels={store.filterLabels}
           store={store}
           totalCount={store.totalCount}

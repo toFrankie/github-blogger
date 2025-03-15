@@ -1,75 +1,56 @@
-import {Uri, workspace} from 'vscode'
+import dayjs from 'dayjs'
+import matter from 'gray-matter'
 
-import {EXTENSION_NAME} from '../constants'
-
-/**
- * A helper function that returns a unique alphanumeric identifier called a nonce.
- *
- * @remarks This function is primarily used to help enforce content security
- * policies for resources/scripts being executed in a webview context.
- *
- * @returns A nonce
- */
-export function getNonce() {
-  let text = ''
-  const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
-  for (let i = 0; i < 32; i++) {
-    text += possible.charAt(Math.floor(Math.random() * possible.length))
-  }
-  return text
-}
-
-/**
- * A helper function which will get the webview URI of a given file or resource.
- *
- * @remarks This URI can be used within a webview's HTML as a link to the
- * given file/resource.
- *
- * @param webview A reference to the extension webview
- * @param extensionUri The URI of the directory containing the extension
- * @param pathList An array of strings representing the path to a file/resource
- * @returns A URI pointing to the file/resource
- */
-export function getUri(webview, extensionUri, pathList) {
-  return webview.asWebviewUri(Uri.joinPath(extensionUri, ...pathList))
-}
-
-export async function checkConfig() {
-  const [token, user, repo] = await Promise.all([
-    workspace.getConfiguration(EXTENSION_NAME).get('token'),
-    workspace.getConfiguration(EXTENSION_NAME).get('user'),
-    workspace.getConfiguration(EXTENSION_NAME).get('repo'),
-  ])
-  return Boolean(token && user && repo)
-}
-
-export async function getSetting() {
-  const [token, user, repo, branch] = await Promise.all([
-    workspace.getConfiguration(EXTENSION_NAME).get('token'),
-    workspace.getConfiguration(EXTENSION_NAME).get('user'),
-    workspace.getConfiguration(EXTENSION_NAME).get('repo'),
-    workspace.getConfiguration(EXTENSION_NAME).get('branch'),
-  ])
-  return {token, user, repo, branch}
-}
-
-export const cdnURL = ({user, repo, branch, filePath}) => {
+export const cdnURL = ({user, repo, branch, file}) => {
   const tag = branch ? `@${branch}` : ''
-  return `https://cdn.jsdelivr.net/gh/${user}/${repo}${tag}/${filePath}`
+  return `https://cdn.jsdelivr.net/gh/${user}/${repo}${tag}/${file}`
 }
 
 export async function to(promise, errorExt) {
   try {
     const data = await promise
-    const result = [null, data]
-    console.log('data', data)
-    return result
+    const res = [null, data]
+    return res
   } catch (err) {
-    console.log('err', err)
     if (errorExt) {
       Object.assign(err, errorExt)
     }
-    const resultWithError = [err, undefined]
-    return resultWithError
+    const res = [err, undefined]
+    return res
   }
+}
+
+export function getVscode() {
+  if (window.__vscode__) {
+    return window.__vscode__
+  }
+
+  const vscode = acquireVsCodeApi()
+  window.__vscode__ = vscode
+  return vscode
+}
+
+export function generateMarkdown(issue) {
+  return matter.stringify(issue.body, {
+    title: issue.title,
+    number: `#${issue.number}`,
+    link: issue.html_url || issue.url,
+    created_at: dayjs(issue.created_at || issue.createdAt).format('YYYY-MM-DD HH:mm:ss'),
+    updated_at: dayjs(issue.updated_at || issue.updatedAt).format('YYYY-MM-DD HH:mm:ss'),
+    labels: issue.labels?.map(({name}) => name) || [],
+  })
+}
+
+export function compareIssue(newIssue, oldIssue) {
+  if (newIssue.title !== oldIssue.title) return true
+  if (newIssue.body !== oldIssue.body) return true
+  if (newIssue.labels?.length !== oldIssue.labels?.length) return true
+
+  if (newIssue.labels && oldIssue.labels) {
+    for (const label of newIssue.labels) {
+      if (oldIssue.labels.findIndex(({id}) => id === label.id) === -1) return true
+    }
+  }
+
+  return false
 }

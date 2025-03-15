@@ -1,5 +1,9 @@
 /* stylelint-disable */
 
+.markdown-body code {
+  color: var(--color-fg-default);
+}
+
 pre code.hljs {
   display: inline !important;
   padding: 0 !important;
