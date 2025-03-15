@@ -1,9 +1,17 @@
-import {window, Uri, ViewColumn, ExtensionMode, commands, env} from 'vscode'
+import {
+  window,
+  Uri,
+  ViewColumn,
+  commands,
+  type ExtensionContext,
+  type Disposable,
+  type WebviewPanel,
+} from 'vscode'
 
-import {getNonce, getUri} from '../utils'
 import Server from '../server'
 import {WebviewHelper} from '../utils/helper'
-export function getWebviewOptions(extensionUri) {
+
+export function getWebviewOptions(extensionUri: Uri) {
   return {
     // Enable javascript in the webview
     enableScripts: true,
@@ -27,12 +35,17 @@ export function getWebviewOptions(extensionUri) {
  * - Setting message listeners so data can be passed between the webview and extension
  */
 export default class EditPanel {
-  static currentPanel
-  static viewType = 'EditPanel'
-  _panel
-  _disposables = []
-  _context
-  _server
+  public static currentPanel: EditPanel | undefined
+
+  public static readonly viewType = 'EditPanel'
+
+  private readonly _context: ExtensionContext
+
+  private readonly _panel: WebviewPanel
+
+  private _disposables: Disposable[] = []
+
+  private _server: Server
 
   /**
    * The EditPanel class private constructor (called only from the render method).
@@ -40,7 +53,7 @@ export default class EditPanel {
    * @param panel A reference to the webview panel
    * @param context A reference to the extension context
    */
-  constructor(panel, context) {
+  constructor(panel: WebviewPanel, context: ExtensionContext) {
     this._panel = panel
     this._context = context
     this._server = new Server(panel.webview)
@@ -56,11 +69,9 @@ export default class EditPanel {
     )
 
     // Set the HTML content for the webview panel
-    // this._panel.webview.html = this._getWebviewContent(panel.webview, context.extensionUri)
     this._panel.webview.html = WebviewHelper.setupHtml(this._panel.webview, context)
 
     // Set an event listener to listen for messages passed from the webview context
-    // this._setWebviewMessageListener(this._panel.webview)
     WebviewHelper.setupWebviewHooks(this._panel.webview, this._disposables)
   }
 
@@ -70,7 +81,7 @@ export default class EditPanel {
    *
    * @param context A reference to the extension context
    */
-  static render(context) {
+  static render(context: ExtensionContext) {
     const {extensionUri} = context
 
     // If the webview panel already exists reveal it
@@ -97,8 +108,8 @@ export default class EditPanel {
     commands.executeCommand('workbench.action.closePanel')
   }
 
-  static revive(panel, extensionUri) {
-    EditPanel.currentPanel = new EditPanel(panel, extensionUri)
+  static revive(panel: WebviewPanel, context: ExtensionContext) {
+    EditPanel.currentPanel = new EditPanel(panel, context)
   }
 
   /**
@@ -117,112 +128,5 @@ export default class EditPanel {
         disposable.dispose()
       }
     }
-  }
-
-  /**
-   * Defines and returns the HTML that should be rendered within the webview panel.
-   *
-   * @remarks This is also the place where references to the React webview build files
-   * are created and inserted into the webview HTML.
-   *
-   * @param webview A reference to the extension webview
-   * @param extensionUri The URI of the directory containing the extension
-   * @returns A template string literal containing the HTML that should be
-   * rendered within the webview panel
-   */
-  // eslint-disable-next-line class-methods-use-this
-  _getWebviewContent(webview, extensionUri) {
-    const isProduction = this._context.extensionMode === ExtensionMode.Production
-
-    let scriptUri = ''
-    let stylesUri = ''
-    if (isProduction) {
-      scriptUri = getUri(webview, extensionUri, ['dist', 'webview-ui', 'assets', 'index.js'])
-      stylesUri = getUri(webview, extensionUri, ['dist', 'webview-ui', 'assets', 'style.css'])
-    } else {
-      scriptUri = `http://localhost:8932/src/index.jsx`
-    }
-
-    const nonce = getNonce()
-
-    // Tip: Install the es6-string-html VS Code extension to enable code highlighting below
-    return /* html */ `
-      <!DOCTYPE html>
-      <html lang="en">
-        <head>
-          <meta charset="UTF-8" />
-          <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-          <title>Github Blogger</title>
-          ${isProduction ? `<link rel="stylesheet" type="text/css" href="${stylesUri}">` : ''}
-          <style>
-            .markdown-body {
-              box-sizing: border-box;
-              min-width: 200px;
-              max-width: 980px;
-              padding: 45px;
-              margin: 0 auto;
-            }
-
-            @media (max-width: 767px) {
-              .markdown-body {
-                padding: 15px;
-              }
-            }
-          </style>
-        </head>
-        <body style="background-color: #F6F8FA">
-          <div id="root"></div>
-          ${
-            !isProduction
-              ? `
-                <script type="module">
-                  import RefreshRuntime from "http://localhost:8932/@react-refresh"
-                  RefreshRuntime.injectIntoGlobalHook(window)
-                  window.$RefreshReg$ = () => {}
-                  window.$RefreshSig$ = () => (type) => type
-                  window.__vite_plugin_react_preamble_installed__ = true
-                </script>
-              `
-              : ''
-          }
-          <script type="module" nonce="${nonce}" src="${scriptUri}"></script>
-        </body>
-      </html>
-    `
-  }
-
-  /**
-   * Sets up an event listener to listen for messages passed from the webview context and
-   * executes code based on the message that is recieved.
-   *
-   * @param webview A reference to the extension webview
-   * @param context A reference to the extension context
-   */
-  _setWebviewMessageListener(webview) {
-    webview.onDidReceiveMessage(
-      message => {
-        const {command, externalLink} = message
-
-        switch (command) {
-          case 'reload':
-            // @ts-ignore
-            this.html = this.html.replace(/nonce="\w+?"/, `nonce="${getNonce()}"`)
-            // @ts-ignore
-            this.panel.webview.html = this.html
-            break
-
-          case 'openExternalLink':
-            env.openExternal(Uri.parse(externalLink))
-            break
-
-          // Add more switch case statements here as more webview message commands
-          // are created within the webview context (i.e. inside media/main.js)
-
-          default:
-        }
-      },
-      undefined,
-      this._disposables
-    )
   }
 }

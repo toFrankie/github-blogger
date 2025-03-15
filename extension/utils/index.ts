@@ -36,29 +36,39 @@ export function getUri(webview, extensionUri, pathList) {
 
 export async function checkConfig() {
   const [token, user, repo] = await Promise.all([
-    workspace.getConfiguration(EXTENSION_NAME).get('token'),
-    workspace.getConfiguration(EXTENSION_NAME).get('user'),
-    workspace.getConfiguration(EXTENSION_NAME).get('repo'),
+    workspace.getConfiguration(EXTENSION_NAME).get<string>('token'),
+    workspace.getConfiguration(EXTENSION_NAME).get<string>('user'),
+    workspace.getConfiguration(EXTENSION_NAME).get<string>('repo'),
   ])
   return Boolean(token && user && repo)
 }
 
 export async function getSetting() {
   const [token, user, repo, branch] = await Promise.all([
-    workspace.getConfiguration(EXTENSION_NAME).get('token'),
-    workspace.getConfiguration(EXTENSION_NAME).get('user'),
-    workspace.getConfiguration(EXTENSION_NAME).get('repo'),
-    workspace.getConfiguration(EXTENSION_NAME).get('branch'),
+    workspace.getConfiguration(EXTENSION_NAME).get<string>('token'),
+    workspace.getConfiguration(EXTENSION_NAME).get<string>('user'),
+    workspace.getConfiguration(EXTENSION_NAME).get<string>('repo'),
+    workspace.getConfiguration(EXTENSION_NAME).get<string>('branch'),
   ])
   return {token, user, repo, branch}
 }
 
-export const cdnURL = ({user, repo, branch, filePath}) => {
+export const cdnURL = ({
+  user,
+  repo,
+  branch,
+  filePath,
+}: {
+  user: string
+  repo: string
+  branch: string
+  filePath: string
+}) => {
   const tag = branch ? `@${branch}` : ''
   return `https://cdn.jsdelivr.net/gh/${user}/${repo}${tag}/${filePath}`
 }
 
-export async function to(promise, errorExt) {
+export async function to(promise: Promise<any>, errorExt: any) {
   try {
     const data = await promise
     const result = [null, data]

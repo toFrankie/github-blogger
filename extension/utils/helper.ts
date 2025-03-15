@@ -1,12 +1,22 @@
 import {Uri, env, type Disposable, type ExtensionContext, type Webview} from 'vscode'
 
 export class WebviewHelper {
+  /**
+   * Defines and returns the HTML that should be rendered within the webview panel.
+   *
+   * @remarks This is also the place where references to the React webview build files
+   * are created and inserted into the webview HTML.
+   */
   public static setupHtml(webview: Webview, context: ExtensionContext) {
     return process.env.VITE_DEV_SERVER_URL
       ? __getWebviewHtml__(process.env.VITE_DEV_SERVER_URL)
       : __getWebviewHtml__(webview, context)
   }
 
+  /**
+   * Sets up an event listener to listen for messages passed from the webview context and
+   * executes code based on the message that is recieved.
+   */
   public static setupWebviewHooks(webview: Webview, disposables: Disposable[]) {
     webview.onDidReceiveMessage(
       (message: any) => {
@@ -14,7 +24,7 @@ export class WebviewHelper {
 
         switch (command) {
           case 'openExternalLink':
-            env.openExternal(Uri.parse(externalLink))
+            void env.openExternal(Uri.parse(externalLink))
             break
 
           // Add more switch case statements here as more webview message commands

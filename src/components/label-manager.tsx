@@ -11,7 +11,10 @@ export default function LabelsManager({store, visible, labels}) {
   const saveInputRef: any = useRef(null)
 
   const handleEditInputConfirm = async label => {
-    if (checkDuplicate(editValue) || checkEmpty(editValue)) return reset()
+    if (checkDuplicate(editValue) || checkEmpty(editValue)) {
+      reset()
+      return
+    }
     await store.updateLabel(label.name, editValue)
     reset()
   }
@@ -21,8 +24,11 @@ export default function LabelsManager({store, visible, labels}) {
   }
 
   const handleInputConfirm = async () => {
-    if (checkDuplicate(text)) return message.error(`Label: "${text}" already exists!`)
-    if (checkEmpty(text)) return reset()
+    if (checkDuplicate(text)) return await message.error(`Label: "${text}" already exists!`)
+    if (checkEmpty(text)) {
+      reset()
+      return
+    }
     await store.createLabel(text)
     reset()
   }
@@ -45,9 +51,9 @@ export default function LabelsManager({store, visible, labels}) {
   return (
     <Drawer
       closable={false}
+      open={visible}
       placement="right"
       title="Labels Management"
-      open={visible}
       onClose={() => store.setLabelVisible(false)}
     >
       <Space wrap size={[0, 'small']}>
@@ -60,16 +66,28 @@ export default function LabelsManager({store, visible, labels}) {
                 className="label-input"
                 size="small"
                 value={editValue}
-                onBlur={() => handleEditInputConfirm(label)}
-                onChange={e => setEditValue(e.target.value)}
-                onPressEnter={() => handleEditInputConfirm(label)}
+                onBlur={async () => {
+                  await handleEditInputConfirm(label)
+                }}
+                onChange={e => {
+                  setEditValue(e.target.value)
+                }}
+                onPressEnter={async () => {
+                  await handleEditInputConfirm(label)
+                }}
               />
             )
           }
 
           const isLongLabel = label.name.length > 20
           const tagElem = (
-            <Tag key={label.name} closable onClose={() => handleClose(label)}>
+            <Tag
+              key={label.name}
+              closable
+              onClose={() => {
+                handleClose(label)
+              }}
+            >
               <span
                 onDoubleClick={e => {
                   setEditIndex(label.id)
@@ -101,8 +119,10 @@ export default function LabelsManager({store, visible, labels}) {
             type="text"
             value={text}
             onBlur={handleInputConfirm}
-            onChange={e => setText(e.target.value)}
             onPressEnter={handleInputConfirm}
+            onChange={e => {
+              setText(e.target.value)
+            }}
           />
         )}
 

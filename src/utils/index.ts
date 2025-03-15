@@ -6,16 +6,19 @@ export const cdnURL = ({user, repo, branch, file}) => {
   return `https://cdn.jsdelivr.net/gh/${user}/${repo}${tag}/${file}`
 }
 
-export async function to(promise, errorExt) {
+export async function to<T, U = Error>(
+  promise: Promise<T>,
+  errorExt?: object
+): Promise<[U | null, T | undefined]> {
   try {
     const data = await promise
-    const res = [null, data]
+    const res: [null, T] = [null, data]
     return res
   } catch (err) {
     if (errorExt) {
       Object.assign(err, errorExt)
     }
-    const res = [err, undefined]
+    const res: [U, undefined] = [err, undefined]
     return res
   }
 }

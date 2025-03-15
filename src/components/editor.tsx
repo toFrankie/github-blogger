@@ -81,7 +81,9 @@ export default function ContentEditor({
             <Tag.CheckableTag
               key={item.id}
               checked={labels.some(label => label.id === item.id || label.id === item.node_id)}
-              onChange={checked => handleChange(item, checked)}
+              onChange={checked => {
+                handleChange(item, checked)
+              }}
             >
               {item.name}
             </Tag.CheckableTag>

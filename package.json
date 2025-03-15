@@ -60,13 +60,13 @@
     "preview": "vite preview",
     "package": "vsce package --no-dependencies",
     "prepackage": "build",
-    "lint": "run-s lint:eslint lint:prettier lint:stylelint",
-    "lint:eslint": "eslint 'src/**/*.{js,jxs}' --cache --fix",
+    "lint": "run-s lint:eslint lint:prettier lint:stylelint tsc",
+    "lint:eslint": "eslint 'src/**/*.{js,ts,tsx}' --cache --fix",
     "lint:prettier": "prettier . '!**/pnpm-lock.yaml' --cache --write",
-    "lint:stylelint": "stylelint 'src/**/*.css' --cache --fix"
+    "lint:stylelint": "stylelint 'src/**/*.css' --cache --fix",
+    "tsc": "tsc --noEmit"
   },
   "devDependencies": {
-    "@ifanrx/eslint-config-standard": "^1.3.0",
     "@ifanrx/eslint-config-standard-react": "^1.3.0",
     "@ifanrx/eslint-config-standard-ts": "^1.3.0",
     "@ifanrx/prettier-config-standard": "^1.2.0",
@@ -85,7 +85,7 @@
     "npm-run-all2": "^7.0.2",
     "prettier": "^3.5.2",
     "stylelint": "^16.15.0",
-    "typescript": "^5.8.2",
+    "typescript": "^5.3.3",
     "vite": "^6.2.0"
   },
   "dependencies": {

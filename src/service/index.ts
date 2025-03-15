@@ -11,7 +11,7 @@ import {cdnURL, to} from '../utils'
  * repo: 开启issues博客的仓库名
  * branch: 分支名
  */
-// @ts-ignore
+// @ts-expect-error
 const {token = '', user = '', repo = '', branch = ''} = window.g_config || {}
 
 /**
@@ -53,12 +53,12 @@ const octokit = new Octokit({
   auth: token,
 })
 
-// @ts-ignore
+// @ts-expect-error
 octokit.hook.after('request', async (_response: any, options: any) => {
   if (options.url.includes('/graphql')) return
-  if (options.method === 'DELETE') return message.success('Removed Successfully')
-  if (options.method === 'POST') return message.success('Created Successfully')
-  if (options.method === 'PATCH') return message.success('Updated Successfully')
+  if (options.method === 'DELETE') return await message.success('Removed Successfully')
+  if (options.method === 'POST') return await message.success('Created Successfully')
+  if (options.method === 'PATCH') return await message.success('Updated Successfully')
 })
 
 // eslint-disable-next-line
@@ -136,22 +136,22 @@ export const getIssues = async (page, labels, milestone) => {
  * 获取筛选后的issues总数
  * @param param0
  */
-export const queryFilterIssueCount = ({label, milestone}) =>
-  octokit.graphql(
+export const queryFilterIssueCount = async ({label, milestone}) =>
+  await octokit.graphql(
     documents.getFilterIssueCount({username: user, repository: repo, label, milestone})
   )
 
 /**
  * 获取仓库issues总数
  */
-export const queryIssueTotalCount = () =>
-  octokit.graphql(documents.getIssueCount({username: user, repository: repo}))
+export const queryIssueTotalCount = async () =>
+  await octokit.graphql(documents.getIssueCount({username: user, repository: repo}))
 
 /**
  * 提供给Markdown编辑器的图片上传接口
  * @param
  */
-export const uploadImages = e => {
+export const uploadImages = async e => {
   const hide = message.loading('Uploading Picture...', 0)
   const img = e[0]
 
@@ -159,10 +159,10 @@ export const uploadImages = e => {
   const ext = img.name.split('.').pop().toLowerCase()
   const path = `images/${dayjsObj.year()}/${dayjsObj.month() + 1}/${dayjsObj.valueOf()}.${ext}`
 
-  const fileReader:any = new FileReader()
+  const fileReader: any = new FileReader()
   fileReader.readAsDataURL(img)
 
-  return new Promise((resolve, reject) => {
+  return await new Promise((resolve, reject) => {
     fileReader.onloadend = () => {
       const content = fileReader.result.split(',')[1]
       uploadImage(content, path)

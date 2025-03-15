@@ -1,5 +1,3 @@
-/* eslint-disable max-classes-per-file, no-await-in-loop */
-
 import * as vscode from 'vscode'
 import {window, QuickInputButtons} from 'vscode'
 import {Octokit} from '@octokit/core'
@@ -7,9 +5,21 @@ import {Octokit} from '@octokit/core'
 import {APIS, EXTENSION_NAME} from '../constants'
 import {getSetting} from '../utils'
 
+interface State {
+  title: string
+  step: number
+  totalSteps: number
+  token: string
+  user: string
+  repo: string
+  branch: string
+}
+
+interface PartialState extends Partial<State> {}
+
 export default async function multiStepInput() {
   async function collectInputs() {
-    const state = await getSetting()
+    const state: PartialState = await getSetting()
     await MultiStepInput.run(input => inputToken(input, state))
     return state
   }
@@ -82,7 +92,9 @@ export default async function multiStepInput() {
     // ...validate...
     return !name ? 'Can not be empty' : undefined
   }
-  const state = await collectInputs()
+
+  const state: PartialState = await collectInputs()
+
   await vscode.workspace
     .getConfiguration(EXTENSION_NAME)
     .update('token', state.token, vscode.ConfigurationTarget.Global)
@@ -110,13 +122,15 @@ export default async function multiStepInput() {
     async progress => {
       progress.report({increment: 0})
 
-      const repoName = state.repo
+      const repoName = state.repo!
 
       try {
         await octokit.request(APIS.CREATE_REPO, {name: repoName})
         window.showInformationMessage('Github Blogger initialization is completed.')
-      } catch (e: any) {
-        if (e.message.includes('already exists')) {
+      } catch (e: unknown) {
+        const errorMsg = e instanceof Error ? e.message : 'Unknown error'
+
+        if (errorMsg.includes('already exists')) {
           window.showInformationMessage(
             `Github Blogger initialization is completed. The ${repoName} repo already exists, skip the creation step.`
           )
@@ -124,7 +138,7 @@ export default async function multiStepInput() {
         }
 
         window.showErrorMessage(
-          `Github Blogger initialization failed, please check the config.\n${e.message}`
+          `Github Blogger initialization failed, please check the config.\n${errorMsg}`
         )
       }
       progress.report({increment: 100})
@@ -138,17 +152,20 @@ class InputFlowAction {
   static resume = new InputFlowAction()
 }
 
+type InputStep = (input: MultiStepInput) => Thenable<InputStep | void>
+
 class MultiStepInput {
-  static async run(start) {
+  static async run<T>(start: InputStep) {
     const input = new MultiStepInput()
     return input.stepThrough(start)
   }
 
-  current
-  steps: any[] = []
+  private current?: vscode.QuickInput
 
-  async stepThrough(start) {
-    let step = start
+  private steps: InputStep[] = []
+
+  async stepThrough<T>(start: InputStep) {
+    let step: InputStep | void = start
     while (step) {
       this.steps.push(step)
       if (this.current) {

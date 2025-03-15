@@ -20,4 +20,4 @@ export const APIS = {
   CREATE_COMMIT: 'POST /repos/{owner}/{repo}/git/commits',
   CREATE_BLOB: 'POST /repos/{owner}/{repo}/git/blobs',
   CREATE_TREE: 'POST /repos/{owner}/{repo}/git/trees',
-}
+} as const

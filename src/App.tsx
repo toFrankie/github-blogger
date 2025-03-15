@@ -2,12 +2,13 @@
 /* eslint-disable no-restricted-globals */
 /* eslint-disable react-hooks/exhaustive-deps */
 
+import {Buffer} from 'buffer'
+
 import {useEffect} from 'react'
 import {observer, useLocalObservable} from 'mobx-react-lite'
 import {ConfigProvider, message} from 'antd'
 import {WebviewRPC} from 'vscode-webview-rpc'
 import {cloneDeep} from 'licia-es'
-import {Buffer} from 'buffer'
 import dayjs from 'dayjs'
 import 'bytemd/dist/index.min.css'
 import 'github-markdown-css'
@@ -23,21 +24,20 @@ import List from './components/list'
 import {getMilestones} from './service'
 import {compareIssue, generateMarkdown, getVscode} from './utils'
 
-// @ts-ignore
-window.Buffer = window.Buffer || Buffer
+window.Buffer = window.Buffer ?? Buffer
 
 let RPC
 
 const vscode = getVscode()
 
-const showError = res => {
+const showError = async (res: string) => {
   message.error(res)
-  return Promise.resolve()
+  await Promise.resolve()
 }
 
-const showSuccess = res => {
+const showSuccess = async (res: string) => {
   message.success(res)
-  return Promise.resolve()
+  await Promise.resolve()
 }
 
 const theme = {
@@ -79,7 +79,7 @@ const App = observer(() => {
     },
     getLabels: async () => {
       const labels = await RPC.emit('getLabels', [])
-      store.labels = labels || []
+      store.labels = labels ?? []
     },
     createLabel: async e => {
       await RPC.emit('createLabel', [e])
@@ -166,7 +166,7 @@ const App = observer(() => {
     updateIssue: async () => {
       const {number = undefined, title = '', body = '', labels = []} = store.current
       if (!title || !body) {
-        return message.error('Please enter the content...')
+        return await message.error('Please enter the content...')
       }
 
       if (!number) {
@@ -183,7 +183,7 @@ const App = observer(() => {
 
       const isDiff = compareIssue(store.current, store.originalCurrent)
       if (!isDiff) {
-        return message.warning('No changes made.')
+        return await message.warning('No changes made.')
       }
 
       const data = await RPC.emit('updateIssue', [number, title, body, JSON.stringify(labels)])
@@ -246,11 +246,11 @@ const App = observer(() => {
     return isLt2M
   }
 
-  const uploadImages = e => {
-    if (e.length === 0) return Promise.reject(new Error('Please select a image'))
+  const uploadImages = async e => {
+    if (e.length === 0) return await Promise.reject(new Error('Please select a image'))
 
     const img = e[0]
-    if (!checkFile(img)) return Promise.reject(new Error('Image maxsize is 2MB'))
+    if (!checkFile(img)) return await Promise.reject(new Error('Image maxsize is 2MB'))
 
     const dayjsObj = dayjs()
     const ext = img.name.split('.').pop().toLowerCase()
@@ -260,7 +260,7 @@ const App = observer(() => {
     fileReader.readAsDataURL(img)
 
     const hide = message.loading('Uploading Picture...', 0)
-    return new Promise((resolve, reject) => {
+    return await new Promise((resolve, reject) => {
       fileReader.onloadend = () => {
         const content = fileReader.result.split(',')[1]
         RPC.emit('uploadImage', [content, path])
