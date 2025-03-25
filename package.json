@@ -82,6 +82,7 @@
     "@vitejs/plugin-react-swc": "^3.8.0",
     "@vscode/vsce": "^3.2.2",
     "eslint": "^8.57.1",
+    "eslint-plugin-primer-react": "^6.1.6",
     "npm-run-all2": "^7.0.2",
     "prettier": "^3.5.2",
     "stylelint": "^16.15.0",
@@ -100,12 +101,15 @@
     "@bytemd/plugin-mermaid": "^1.22.0",
     "@bytemd/react": "^1.22.0",
     "@octokit/core": "^5.2.0",
+    "@primer/primitives": "^10.5.0",
+    "@primer/react": "^37.16.0",
     "@vscode/webview-ui-toolkit": "^1.4.0",
     "antd": "^5.24.3",
     "buffer": "^6.0.3",
     "bytemd": "^1.22.0",
     "core-js": "^3.41.0",
     "dayjs": "^1.11.13",
+    "deepmerge": "^4.3.1",
     "github-markdown-css": "^5.8.1",
     "gray-matter": "^4.0.3",
     "highlight.js": "^11.11.1",
@@ -115,6 +119,7 @@
     "mobx-react-lite": "^4.1.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "styled-components": "^6.1.16",
     "vscode-webview-rpc": "^0.0.4"
   }
 }

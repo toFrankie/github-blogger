@@ -1,5 +1,5 @@
 import {Editor, Viewer} from '@bytemd/react'
-import {Input, Tag, Space, message} from 'antd'
+import {Input, message} from 'antd'
 import frontmatter from '@bytemd/plugin-frontmatter'
 import gfm from '@bytemd/plugin-gfm'
 import highlight from '@bytemd/plugin-highlight'
@@ -8,6 +8,7 @@ import gemoji from '@bytemd/plugin-gemoji'
 import math from '@bytemd/plugin-math'
 import mediumZoom from '@bytemd/plugin-medium-zoom'
 import mermaid from '@bytemd/plugin-mermaid'
+import {Label, Stack} from '@primer/react'
 
 const plugins = [
   frontmatter(),
@@ -76,26 +77,30 @@ export default function ContentEditor({
         )}
       </div>
       <div className="app-labels">
-        <Space wrap size={[0, 'small']}>
-          {totalLabels.map(item => (
-            <Tag.CheckableTag
-              key={item.id}
-              checked={labels.some(label => label.id === item.id || label.id === item.node_id)}
-              onChange={checked => {
-                handleChange(item, checked)
-              }}
-            >
-              {item.name}
-            </Tag.CheckableTag>
-          ))}
-        </Space>
+        <Stack direction="horizontal" gap="condensed" wrap="wrap">
+          {totalLabels.map((label: any) => {
+            const checked = labels.some(l => l.id === label.id || l.node_id === label.node_id)
+            return (
+              <Label
+                key={label.id}
+                size="small"
+                variant={checked ? 'accent' : 'secondary'}
+                onClick={() => {
+                  handleChange(label, !checked)
+                }}
+              >
+                {label.name}
+              </Label>
+            )
+          })}
+        </Stack>
       </div>
       <Editor
         placeholder={placeholder}
         plugins={plugins}
         previewDebounce={50}
         uploadImages={uploadImages}
-        value={content || ''}
+        value={content ?? ''}
         onChange={v => store.setCurrentIssueBody(v)}
       />
     </>

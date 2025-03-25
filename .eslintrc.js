@@ -13,5 +13,8 @@ module.exports = init({
     'no-param-reassign': 'off',
     '@typescript-eslint/strict-boolean-expressions': ['error', {allowString: true}],
     '@typescript-eslint/ban-ts-comment': 'off',
+    '@typescript-eslint/lines-between-class-members': 'off',
+    '@typescript-eslint/strict-boolean-expressions': 'off',
+    '@typescript-eslint/no-throw-literal': 'off',
   },
 })

@@ -1,17 +1,14 @@
-/* eslint-disable import/no-unresolved */
-/* eslint-disable no-restricted-globals */
-/* eslint-disable react-hooks/exhaustive-deps */
-
 import {Buffer} from 'buffer'
 
 import {useEffect} from 'react'
 import {observer, useLocalObservable} from 'mobx-react-lite'
-import {ConfigProvider, message} from 'antd'
+import {message} from 'antd'
 import {WebviewRPC} from 'vscode-webview-rpc'
 import {cloneDeep} from 'licia-es'
 import dayjs from 'dayjs'
 import 'bytemd/dist/index.min.css'
 import 'github-markdown-css'
+import {BaseStyles, ThemeProvider} from '@primer/react'
 
 import './App.css'
 import './github.custom.css'
@@ -38,14 +35,6 @@ const showError = async (res: string) => {
 const showSuccess = async (res: string) => {
   message.success(res)
   await Promise.resolve()
-}
-
-const theme = {
-  token: {
-    colorPrimary: '#00b96b',
-    colorInfo: '#00b96b',
-    borderRadius: 6,
-  },
 }
 
 const SUBMIT_TYPE = {
@@ -278,30 +267,32 @@ const App = observer(() => {
   }
 
   return (
-    <ConfigProvider theme={theme}>
-      <div className="app">
-        <Editor
-          content={store.current.body || ''}
-          labels={store.current.labels || []}
-          number={store.current.number}
-          placeholder="Leave your thought..."
-          store={store}
-          title={store.current.title || ''}
-          totalLabels={store.labels || []}
-          uploadImages={uploadImages}
-        />
-        <List
-          currentPage={store.currentPage}
-          labels={store.filterLabels}
-          store={store}
-          totalCount={store.totalCount}
-          totalLabels={store.labels}
-          visible={store.listVisible}
-        />
-        <LabelManager labels={store.labels} store={store} visible={store.labelsVisible} />
-        <ActionBox number={store.current.number} store={store} />
-      </div>
-    </ConfigProvider>
+    <ThemeProvider>
+      <BaseStyles>
+        <div className="app">
+          <Editor
+            content={store.current.body || ''}
+            labels={store.current.labels || []}
+            number={store.current.number}
+            placeholder="Leave your thought..."
+            store={store}
+            title={store.current.title || ''}
+            totalLabels={store.labels || []}
+            uploadImages={uploadImages}
+          />
+          <List
+            currentPage={store.currentPage}
+            labels={store.filterLabels}
+            store={store}
+            totalCount={store.totalCount}
+            totalLabels={store.labels}
+            visible={store.listVisible}
+          />
+          <LabelManager labels={store.labels} store={store} visible={store.labelsVisible} />
+          <ActionBox number={store.current.number} store={store} />
+        </div>
+      </BaseStyles>
+    </ThemeProvider>
   )
 })
 
