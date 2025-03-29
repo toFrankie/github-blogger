@@ -1,3 +1,3 @@
 module.exports = {
-  extends: ['@ifanrx/stylelint-config-standard'],
+  extends: [require.resolve('@tomjs/stylelint')],
 }

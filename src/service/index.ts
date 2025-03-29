@@ -1,7 +1,6 @@
 import {Octokit} from '@octokit/core'
 import {message} from 'antd'
 import dayjs from 'dayjs'
-
 import {cdnURL, to} from '../utils'
 
 /**
@@ -61,9 +60,7 @@ octokit.hook.after('request', async (_response: any, options: any) => {
   if (options.method === 'PATCH') return await message.success('Updated Successfully')
 })
 
-// eslint-disable-next-line
-// @ts-ignore
-octokit.hook.error('request', async (error: any, options: any) => {
+octokit.hook.error('request', async (_error: any, _options: any) => {
   // message.error(JSON.stringify(error), 500000000)
 })
 
@@ -169,7 +166,7 @@ export const uploadImages = async e => {
         .then(() => {
           hide()
           message.success('Uploaded!')
-          resolve([{url: cdnURL({user, repo, branch, filePath: path})}])
+          resolve([{url: cdnURL({user, repo, branch, file: path})}])
         })
         .catch(err => {
           reject(err)

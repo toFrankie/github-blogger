@@ -1,4 +1,3 @@
-import {Button, Tooltip} from 'antd'
 import {
   CloudUploadOutlined,
   GithubOutlined,
@@ -6,7 +5,7 @@ import {
   PlusOutlined,
   TagOutlined,
 } from '@ant-design/icons'
-
+import {Button, Tooltip} from 'antd'
 import {getVscode} from '../utils'
 
 const vscode = getVscode()

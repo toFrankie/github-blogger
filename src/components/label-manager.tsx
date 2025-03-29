@@ -1,6 +1,6 @@
-import {useState, useRef} from 'react'
-import {Drawer, Input, Tooltip, Tag, message, Space} from 'antd'
 import {PlusOutlined} from '@ant-design/icons'
+import {Drawer, Input, message, Space, Tag, Tooltip} from 'antd'
+import {useRef, useState} from 'react'
 
 export default function LabelsManager({store, visible, labels}) {
   const [text, setText] = useState('')

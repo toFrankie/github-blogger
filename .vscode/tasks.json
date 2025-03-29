@@ -30,7 +30,8 @@
       "group": {
         "kind": "build",
         "isDefault": true
-      }
+      },
+      "dependsOn": ["source-zshrc"]
     },
     {
       "type": "npm",
@@ -40,6 +41,21 @@
         "isDefault": true
       },
       "problemMatcher": []
+    },
+    {
+      "label": "source-zshrc",
+      "type": "shell",
+      "command": "source ~/.zshrc",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "options": {
+        "shell": {
+          "executable": "/bin/zsh",
+          "args": ["-c"]
+        }
+      }
     }
   ]
 }

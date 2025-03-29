@@ -1,25 +1,24 @@
-import {Buffer} from 'buffer'
-
-import {useEffect} from 'react'
-import {observer, useLocalObservable} from 'mobx-react-lite'
-import {message} from 'antd'
-import {WebviewRPC} from 'vscode-webview-rpc'
-import {cloneDeep} from 'licia-es'
-import dayjs from 'dayjs'
-import 'bytemd/dist/index.min.css'
 import 'github-markdown-css'
+
 import {BaseStyles, ThemeProvider} from '@primer/react'
-
-import './App.css'
-import './github.custom.css'
-import './reset.css'
-
-import Editor from './components/editor'
+import {message} from 'antd'
+import {Buffer} from 'buffer'
+import dayjs from 'dayjs'
+import {cloneDeep} from 'licia-es'
+import {observer, useLocalObservable} from 'mobx-react-lite'
+import {useEffect} from 'react'
+import {WebviewRPC} from 'vscode-webview-rpc'
 import ActionBox from './components/action-box'
+import Editor from './components/editor'
 import LabelManager from './components/label-manager'
 import List from './components/list'
 import {getMilestones} from './service'
 import {compareIssue, generateMarkdown, getVscode} from './utils'
+
+import 'bytemd/dist/index.min.css'
+import './App.css'
+import './github.custom.css'
+import './reset.css'
 
 window.Buffer = window.Buffer ?? Buffer
 

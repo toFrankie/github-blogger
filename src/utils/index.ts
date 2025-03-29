@@ -14,12 +14,18 @@ export async function to<T, U = Error>(
     const data = await promise
     const res: [null, T] = [null, data]
     return res
-  } catch (err) {
+  } catch (err: unknown) {
     if (errorExt) {
-      Object.assign(err, errorExt)
+      Object.assign(err as object, errorExt)
     }
-    const res: [U, undefined] = [err, undefined]
+    const res: [U, undefined] = [err as U, undefined]
     return res
+  }
+}
+
+declare global {
+  interface Window {
+    __vscode__: any
   }
 }
 
