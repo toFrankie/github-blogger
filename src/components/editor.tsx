@@ -7,8 +7,8 @@ import math from '@bytemd/plugin-math'
 import mediumZoom from '@bytemd/plugin-medium-zoom'
 import mermaid from '@bytemd/plugin-mermaid'
 import {Editor, Viewer} from '@bytemd/react'
-import {Label, Stack} from '@primer/react'
-import {Input, message} from 'antd'
+import {Label, Stack, TextInput} from '@primer/react'
+import {message} from 'antd'
 
 const plugins = [
   frontmatter(),
@@ -65,7 +65,8 @@ export default function ContentEditor({
   return (
     <>
       <div className="app-title">
-        <Input
+        <TextInput
+          className="title-input"
           placeholder="Title"
           value={title}
           onChange={e => store.updateTitle(e.target.value)}

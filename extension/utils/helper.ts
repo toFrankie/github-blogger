@@ -8,9 +8,11 @@ export class WebviewHelper {
    * are created and inserted into the webview HTML.
    */
   public static setupHtml(webview: Webview, context: ExtensionContext) {
-    return process.env.VITE_DEV_SERVER_URL
-      ? __getWebviewHtml__(process.env.VITE_DEV_SERVER_URL)
-      : __getWebviewHtml__(webview, context)
+    return __getWebviewHtml__({
+      serverUrl: process.env.VITE_DEV_SERVER_URL,
+      webview,
+      context,
+    })
   }
 
   /**

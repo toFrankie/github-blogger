@@ -1,11 +1,11 @@
 import {
-  CloudUploadOutlined,
-  GithubOutlined,
-  MenuUnfoldOutlined,
-  PlusOutlined,
-  TagOutlined,
-} from '@ant-design/icons'
-import {Button, Tooltip} from 'antd'
+  CloudIcon,
+  LinkExternalIcon,
+  ListUnorderedIcon,
+  PlusIcon,
+  TagIcon,
+} from '@primer/octicons-react'
+import {IconButton, Stack} from '@primer/react'
 import {getVscode} from '../utils'
 
 const vscode = getVscode()
@@ -13,53 +13,51 @@ const vscode = getVscode()
 export default function ActionBox({store, number}) {
   return (
     <div className="app-action-box">
-      <Tooltip placement="left" title="Create new issue">
-        <Button
-          icon={<PlusOutlined />}
-          shape="circle"
-          type="primary"
-          onClick={() => store.setCurrentIssue({})}
-        />
-      </Tooltip>
-      <Tooltip placement="left" title="Update current issue">
-        <Button
-          icon={<CloudUploadOutlined />}
-          shape="circle"
-          type="primary"
+      <Stack gap="condensed">
+        <IconButton
+          icon={CloudIcon}
           onClick={() => store.updateIssue()}
+          description="Update current issue"
+          aria-label="Update current issue"
+          tooltipDirection="w"
+          variant="primary"
         />
-      </Tooltip>
-      {!!number && (
-        <Tooltip placement="left" title="Open in default browser">
-          <Button
-            icon={<GithubOutlined />}
-            shape="circle"
-            type="primary"
+        <IconButton
+          icon={PlusIcon}
+          onClick={() => store.setCurrentIssue({})}
+          description="Create new issue"
+          aria-label="Create new issue"
+          tooltipDirection="w"
+        />
+        {!!number && (
+          <IconButton
+            icon={LinkExternalIcon}
             onClick={() => {
               vscode.postMessage({
                 command: 'openExternalLink',
                 externalLink: store.current.html_url || store.current.url,
               })
             }}
+            description="Open in default browser"
+            aria-label="Open in default browser"
+            tooltipDirection="w"
           />
-        </Tooltip>
-      )}
-      <Tooltip placement="left" title="Labels">
-        <Button
-          icon={<TagOutlined />}
-          shape="circle"
-          type="primary"
+        )}
+        <IconButton
+          icon={TagIcon}
           onClick={() => store.setLabelVisible(true)}
+          description="Labels"
+          aria-label="Labels"
+          tooltipDirection="w"
         />
-      </Tooltip>
-      <Tooltip placement="left" title="Issue List">
-        <Button
-          icon={<MenuUnfoldOutlined />}
-          shape="circle"
-          type="primary"
+        <IconButton
+          icon={ListUnorderedIcon}
           onClick={() => store.setListVisible(true)}
+          description="Issue List"
+          aria-label="Issue List"
+          tooltipDirection="w"
         />
-      </Tooltip>
+      </Stack>
     </div>
   )
 }

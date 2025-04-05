@@ -38,7 +38,7 @@ export function activate(context: ExtensionContext) {
       async deserializeWebviewPanel(webviewPanel) {
         // Reset the webview options so we use latest uri for `localResourceRoots`.
         webviewPanel.webview.options = getWebviewOptions(context.extensionUri)
-        EditPanel.revive(webviewPanel, context.extensionUri)
+        EditPanel.revive(webviewPanel, context)
       },
     })
   }

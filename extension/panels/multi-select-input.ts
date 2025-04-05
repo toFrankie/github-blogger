@@ -1,5 +1,5 @@
 import * as vscode from 'vscode'
-import {window, QuickInputButtons} from 'vscode'
+import {window, QuickInputButtons, type ExtensionContext} from 'vscode'
 import {Octokit} from '@octokit/core'
 
 import {APIS, EXTENSION_NAME} from '../constants'
@@ -17,7 +17,7 @@ interface State {
 
 interface PartialState extends Partial<State> {}
 
-export default async function multiStepInput() {
+export default async function multiStepInput(context: ExtensionContext) {
   async function collectInputs() {
     const state: PartialState = await getSetting()
     await MultiStepInput.run(input => inputToken(input, state))

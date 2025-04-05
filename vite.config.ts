@@ -10,6 +10,7 @@ export default defineConfig({
       extension: {
         sourcemap: 'inline',
       },
+      devtools: false,
     }),
   ],
 })
