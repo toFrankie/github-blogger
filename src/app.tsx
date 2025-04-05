@@ -16,7 +16,7 @@ import {getMilestones} from './service'
 import {compareIssue, generateMarkdown, getVscode} from './utils'
 
 import 'bytemd/dist/index.min.css'
-import './App.css'
+import './app.css'
 import './github.custom.css'
 import './reset.css'
 
