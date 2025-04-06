@@ -46,7 +46,7 @@ code {
 }
 
 .app-labels {
-  padding: 8px;
+  padding: 0 8px 8px;
   user-select: none;
 }
 
@@ -110,6 +110,34 @@ code {
   width: 100%;
 }
 
+.drawer-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.drawer-mask {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.drawer-content {
+  position: absolute;
+  top: 0;
+  left: -100vw;
+  width: 378px;
+  height: 100%;
+  padding: 16px;
+  background-color: #fff;
+  transition: left 0.5s linear;
+}
+
 .app-issue-list {
   display: flex;
   flex-direction: column;
@@ -118,6 +146,10 @@ code {
 
 .issue-filter {
   margin-bottom: 16px;
+}
+
+.title-filter {
+  width: 100%;
 }
 
 .app-issue-list-item {
