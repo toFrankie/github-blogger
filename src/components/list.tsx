@@ -1,7 +1,7 @@
 import {TriangleDownIcon, XCircleFillIcon} from '@primer/octicons-react'
-import {Button, SelectPanel, Stack, TextInput} from '@primer/react'
+import {Button, Pagination, SelectPanel, Stack, TextInput} from '@primer/react'
 import {type ActionListItemInput} from '@primer/react/deprecated'
-import {Empty, Pagination} from 'antd'
+import {Empty} from 'antd'
 import {debounce} from 'licia-es'
 import {useCallback, useMemo, useState} from 'react'
 
@@ -11,6 +11,7 @@ export default function List({store, visible, totalLabels, totalCount, currentPa
   const [selected, setSelected] = useState<ActionListItemInput[]>([])
   const [filter, setFilter] = useState('')
   const [open, setOpen] = useState(false)
+  const [current, setCurrent] = useState(currentPage)
 
   const items = useMemo(() => {
     return totalLabels.map(item => ({text: item.name}))
@@ -100,7 +101,6 @@ export default function List({store, visible, totalLabels, totalCount, currentPa
                   )
                 }
               />
-
               <SelectPanel
                 renderAnchor={({children, ...anchorProps}) => (
                   <Button
@@ -143,17 +143,16 @@ export default function List({store, visible, totalLabels, totalCount, currentPa
             )}
           </div>
           <div className="issue-pagination">
-            {totalCount > 20 ? (
-              <Pagination
-                showQuickJumper
-                current={currentPage}
-                pageSize={20}
-                showSizeChanger={false}
-                size="small"
-                total={totalCount}
-                onChange={page => store.setCurrentPage(page)}
-              />
-            ) : null}
+            <Pagination
+              currentPage={current}
+              pageCount={Math.ceil(totalCount / 20)}
+              surroundingPageCount={1}
+              showPages={{narrow: false}}
+              onPageChange={(_event, number) => {
+                setCurrent(number)
+                store.setCurrentPage(number)
+              }}
+            />
           </div>
         </div>
       </div>
