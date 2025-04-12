@@ -1,0 +1,54 @@
+import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query'
+import {message} from 'antd'
+import {createLabel, deleteLabel, getLabels, updateLabel} from '@/service/api'
+
+export default function useLabels() {
+  const queryClient = useQueryClient()
+
+  const {data: labels = [], isLoading: labelsLoading} = useQuery({
+    queryKey: ['labels'],
+    queryFn: getLabels,
+  })
+
+  const createLabelMutation = useMutation({
+    mutationFn: (label: any) => createLabel(label),
+    onSuccess: () => {
+      queryClient.invalidateQueries({queryKey: ['labels']})
+      message.success('Label created successfully')
+    },
+    onError: () => {
+      message.error('Failed to create label')
+    },
+  })
+
+  const deleteLabelMutation = useMutation({
+    mutationFn: (label: any) => deleteLabel(label),
+    onSuccess: () => {
+      queryClient.invalidateQueries({queryKey: ['labels']})
+      message.success('Label deleted successfully')
+    },
+    onError: () => {
+      message.error('Failed to delete label')
+    },
+  })
+
+  const updateLabelMutation = useMutation({
+    mutationFn: ({oldLabel, newLabel}: {oldLabel: any; newLabel: any}) =>
+      updateLabel(oldLabel, newLabel),
+    onSuccess: () => {
+      queryClient.invalidateQueries({queryKey: ['labels']})
+      message.success('Label updated successfully')
+    },
+    onError: () => {
+      message.error('Failed to update label')
+    },
+  })
+
+  return {
+    labels,
+    labelsLoading,
+    createLabel: createLabelMutation.mutate,
+    deleteLabel: deleteLabelMutation.mutate,
+    updateLabel: updateLabelMutation.mutate,
+  }
+}

@@ -6,58 +6,50 @@ import highlight from '@bytemd/plugin-highlight'
 import math from '@bytemd/plugin-math'
 import mediumZoom from '@bytemd/plugin-medium-zoom'
 import mermaid from '@bytemd/plugin-mermaid'
-import {Editor, Viewer} from '@bytemd/react'
+import {Editor as BytemdEditor} from '@bytemd/react'
 import {Label, Stack, TextInput} from '@primer/react'
 import {message} from 'antd'
 
-const plugins = [
-  frontmatter(),
-  breaks(),
-  gfm(),
-  highlight(),
-  gemoji(),
-  math(),
-  mediumZoom(),
-  mermaid(),
-]
+import 'bytemd/dist/index.min.css'
 
-export function MDEditor({value, setValue, uploadImages, placeholder}) {
-  return (
-    <Editor
-      placeholder={placeholder}
-      plugins={plugins}
-      previewDebounce={50}
-      uploadImages={uploadImages}
-      value={value}
-      onChange={v => setValue(v)}
-    />
-  )
+interface EditorProps {
+  title: string
+  number: number
+  content: string
+  labels: any[]
+  totalLabels: any[]
+  placeholder: string
+  onUpdateTitle: (title: string) => void
+  onUpdateBody: (body: string) => void
+  onAddLabel: (label: any) => void
+  onRemoveLabel: (label: any) => void
+  onUpload: (files: FileList) => Promise<any>
+  isUploading: boolean
 }
 
-export function MDViewer({value}) {
-  return <Viewer value={value} />
-}
-
-export default function ContentEditor({
+export default function Editor({
   title,
   number,
   content,
   labels,
   totalLabels,
   placeholder,
-  uploadImages,
-  store,
-}) {
+  onUpdateTitle,
+  onUpdateBody,
+  onAddLabel,
+  onRemoveLabel,
+  onUpload,
+}: EditorProps) {
   const handleChange = (item, checked) => {
     if (checked) {
-      store.addLabel(item)
+      onAddLabel(item)
     } else {
-      store.removeLabel(item)
+      onRemoveLabel(item)
     }
   }
 
   const copyLink = () => {
-    const link = store.current.html_url || store.current.url
+    const link = content || ''
     navigator.clipboard.writeText(link)
     message.success('Link copied.')
   }
@@ -69,7 +61,7 @@ export default function ContentEditor({
           className="title-input"
           placeholder="Title"
           value={title}
-          onChange={e => store.updateTitle(e.target.value)}
+          onChange={e => onUpdateTitle(e.target.value)}
         />
         {!!number && (
           <div className="number" onClick={copyLink}>
@@ -96,14 +88,36 @@ export default function ContentEditor({
           })}
         </Stack>
       </div>
-      <Editor
+      <MDEditor
+        value={content}
+        onChange={onUpdateBody}
+        uploadImages={onUpload}
         placeholder={placeholder}
-        plugins={plugins}
-        previewDebounce={50}
-        uploadImages={uploadImages}
-        value={content ?? ''}
-        onChange={v => store.setCurrentIssueBody(v)}
       />
     </>
+  )
+}
+
+const plugins = [
+  frontmatter(),
+  breaks(),
+  gfm(),
+  highlight(),
+  gemoji(),
+  math(),
+  mediumZoom(),
+  mermaid(),
+]
+
+function MDEditor({value, onChange, uploadImages, placeholder}) {
+  return (
+    <BytemdEditor
+      placeholder={placeholder}
+      plugins={plugins}
+      previewDebounce={50}
+      uploadImages={uploadImages}
+      value={value}
+      onChange={onChange}
+    />
   )
 }

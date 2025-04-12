@@ -1,7 +1,8 @@
 import {Octokit} from '@octokit/core'
 import {message} from 'antd'
 import dayjs from 'dayjs'
-import {cdnURL, to} from '../utils'
+import {WebviewRPC} from 'vscode-webview-rpc'
+import {cdnURL, getVscode, to} from '@/utils'
 
 /**
  * 全局获取配置信息
@@ -12,6 +13,9 @@ import {cdnURL, to} from '../utils'
  */
 // @ts-expect-error
 const {token = '', user = '', repo = '', branch = ''} = window.g_config || {}
+
+const vscode = getVscode()
+export const RPC = new WebviewRPC(window, vscode)
 
 /**
  * 构建GraphQL
@@ -69,7 +73,7 @@ octokit.hook.error('request', async (_error: any, _options: any) => {
  * @param content
  * @param path
  */
-export const uploadImage = async (content, path) => {
+export async function uploadImage(content, path) {
   const res = await octokit.request('PUT /repos/{owner}/{repo}/contents/{path}', {
     owner: user,
     repo,
@@ -84,7 +88,7 @@ export const uploadImage = async (content, path) => {
 /**
  * 获取 labels 标签
  */
-export const getLabels = async () => {
+export async function getLabels() {
   const [err, res] = await to(
     octokit.request('GET /repos/{owner}/{repo}/labels', {
       owner: user,
@@ -100,7 +104,7 @@ export const getLabels = async () => {
 /**
  * 获取 milestone 分类
  */
-export const getMilestones = async () => {
+export async function getMilestones() {
   const {data} = await octokit.request('GET /repos/{owner}/{repo}/milestones', {
     owner: user,
     repo,
@@ -115,7 +119,7 @@ export const getMilestones = async () => {
  * @param [milestone]
  */
 
-export const getIssues = async (page, labels, milestone) => {
+export async function getIssues(page, labels, milestone) {
   const [err, res] = await to(
     octokit.request('GET /repos/{owner}/{repo}/issues', {
       owner: user,
@@ -133,22 +137,24 @@ export const getIssues = async (page, labels, milestone) => {
  * 获取筛选后的issues总数
  * @param param0
  */
-export const queryFilterIssueCount = async ({label, milestone}) =>
+export async function queryFilterIssueCount({label, milestone}) {
   await octokit.graphql(
     documents.getFilterIssueCount({username: user, repository: repo, label, milestone})
   )
+}
 
 /**
  * 获取仓库issues总数
  */
-export const queryIssueTotalCount = async () =>
+export async function queryIssueTotalCount() {
   await octokit.graphql(documents.getIssueCount({username: user, repository: repo}))
+}
 
 /**
  * 提供给Markdown编辑器的图片上传接口
  * @param
  */
-export const uploadImages = async e => {
+export async function uploadImages(e) {
   const hide = message.loading('Uploading Picture...', 0)
   const img = e[0]
 
@@ -181,7 +187,7 @@ export const uploadImages = async e => {
  * @param name
  * @returns
  */
-export const createLabel = async name => {
+export async function createLabel(name) {
   const [err, res] = await to(
     octokit.request('POST /repos/{owner}/{repo}/labels', {
       owner: user,
@@ -197,7 +203,7 @@ export const createLabel = async name => {
  * @param name
  * @returns
  */
-export const deleteLabel = async name => {
+export async function deleteLabel(name) {
   const {data} = await octokit.request('DELETE /repos/{owner}/{repo}/labels/{name}', {
     owner: user,
     repo,
@@ -212,7 +218,7 @@ export const deleteLabel = async name => {
  * @param newName
  * @returns
  */
-export const updateLabel = async (name, newName) => {
+export async function updateLabel(name, newName) {
   const {data} = await octokit.request('PATCH /repos/{owner}/{repo}/labels/{name}', {
     owner: user,
     repo,
@@ -229,7 +235,7 @@ export const updateLabel = async (name, newName) => {
  * @param labels
  * @returns
  */
-export const createIssue = async (title, body, labels) => {
+export async function createIssue(title, body, labels) {
   const {data} = await octokit.request('POST /repos/{owner}/{repo}/issues', {
     owner: user,
     repo,
@@ -240,7 +246,7 @@ export const createIssue = async (title, body, labels) => {
   return data
 }
 
-export const updateIssue = async (issueNumber, title, body, labels) => {
+export async function updateIssue(issueNumber, title, body, labels) {
   const {data} = await octokit.request('PATCH /repos/{owner}/{repo}/issues/{issue_number}', {
     owner: user,
     repo,

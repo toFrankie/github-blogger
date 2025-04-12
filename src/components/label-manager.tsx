@@ -2,7 +2,24 @@ import {PlusOutlined} from '@ant-design/icons'
 import {Drawer, Input, message, Space, Tag, Tooltip} from 'antd'
 import {useRef, useState} from 'react'
 
-export default function LabelsManager({store, visible, labels}) {
+interface LabelManagerProps {
+  labels: any[]
+  visible: boolean
+  loading: boolean
+  onCreateLabel: (label: any) => Promise<void>
+  onDeleteLabel: (label: any) => Promise<void>
+  onUpdateLabel: (oldLabel: any, newLabel: any) => Promise<void>
+  onSetLabelsVisible: (visible: boolean) => void
+}
+
+export default function LabelManager({
+  labels,
+  visible,
+  onCreateLabel,
+  onDeleteLabel,
+  onUpdateLabel,
+  onSetLabelsVisible,
+}: LabelManagerProps) {
   const [text, setText] = useState('')
   const [editValue, setEditValue] = useState('')
   const [editIndex, setEditIndex] = useState()
@@ -15,12 +32,12 @@ export default function LabelsManager({store, visible, labels}) {
       reset()
       return
     }
-    await store.updateLabel(label.name, editValue)
+    await onUpdateLabel(label.name, editValue)
     reset()
   }
 
   const handleClose = label => {
-    store.deleteLabel(label.name)
+    onDeleteLabel(label.name)
   }
 
   const handleInputConfirm = async () => {
@@ -29,7 +46,7 @@ export default function LabelsManager({store, visible, labels}) {
       reset()
       return
     }
-    await store.createLabel(text)
+    await onCreateLabel(text)
     reset()
   }
 
@@ -48,13 +65,15 @@ export default function LabelsManager({store, visible, labels}) {
     return name.trim() === ''
   }
 
+  if (!visible) return null
+
   return (
     <Drawer
       closable={false}
       open={visible}
       placement="right"
       title="Labels Management"
-      onClose={() => store.setLabelVisible(false)}
+      onClose={() => onSetLabelsVisible(false)}
     >
       <Space wrap size={[0, 'small']}>
         {labels.map(label => {

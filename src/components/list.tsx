@@ -5,8 +5,32 @@ import {Empty} from 'antd'
 import {debounce} from 'licia-es'
 import {useCallback, useMemo, useState} from 'react'
 
-// TODO: labels
-export default function List({store, visible, totalLabels, totalCount, currentPage}) {
+interface ListProps {
+  currentPage: number
+  totalCount: number
+  totalLabels: any[]
+  visible: boolean
+  issues: any[]
+  loading: boolean
+  onSetCurrentPage: (page: number) => void
+  onSetFilterTitle: (title: string) => void
+  onSetFilterLabels: (labels: any[]) => void
+  onSetCurrentIssue: (issue: any) => void
+  onSetListVisible: (visible: boolean) => void
+}
+
+export default function List({
+  currentPage,
+  totalCount,
+  totalLabels,
+  visible,
+  issues,
+  onSetCurrentPage,
+  onSetFilterTitle,
+  onSetFilterLabels,
+  onSetCurrentIssue,
+  onSetListVisible,
+}: ListProps) {
   const [titleValue, setTitleValue] = useState('')
   const [selected, setSelected] = useState<ActionListItemInput[]>([])
   const [filter, setFilter] = useState('')
@@ -46,21 +70,21 @@ export default function List({store, visible, totalLabels, totalCount, currentPa
 
   const searchByTitle = useCallback(
     debounce((title: string) => {
-      store.setFilterTitle(title)
-      store.resetCurrentPage()
-      store.getIssues()
+      onSetFilterTitle(title)
+      onSetCurrentPage(1)
     }, 500),
     []
   )
 
   const searchByLabel = useCallback(
     debounce((labels: string[]) => {
-      store.resetCurrentPage()
-      store.setFilterLabels(totalLabels.filter(l => labels.includes(l.name)))
-      store.getIssues()
+      onSetCurrentPage(1)
+      onSetFilterLabels(totalLabels.filter(l => labels.includes(l.name)))
     }, 500),
     []
   )
+
+  if (!visible) return null
 
   return (
     <div
@@ -73,7 +97,7 @@ export default function List({store, visible, totalLabels, totalCount, currentPa
         className="drawer-mask"
         onClick={e => {
           e.stopPropagation()
-          store.setListVisible(false)
+          onSetListVisible(false)
         }}
       />
       <div
@@ -124,14 +148,14 @@ export default function List({store, visible, totalLabels, totalCount, currentPa
             </Stack>
           </div>
           <div className="list">
-            {store.issues.length > 0 ? (
-              store.issues.map(item => (
+            {issues.length > 0 ? (
+              issues.map(item => (
                 <div
                   key={item.id}
                   className="app-issue-list-item"
                   onClick={() => {
-                    store.setListVisible(false)
-                    store.setCurrentIssue(item)
+                    onSetListVisible(false)
+                    onSetCurrentIssue(item)
                   }}
                 >
                   <div className="title">{item.title}</div>
@@ -150,7 +174,7 @@ export default function List({store, visible, totalLabels, totalCount, currentPa
               showPages={{narrow: false}}
               onPageChange={(_event, number) => {
                 setCurrent(number)
-                store.setCurrentPage(number)
+                onSetCurrentPage(number)
               }}
             />
           </div>

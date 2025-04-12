@@ -6,17 +6,34 @@ import {
   TagIcon,
 } from '@primer/octicons-react'
 import {IconButton, Stack} from '@primer/react'
-import {getVscode} from '../utils'
+import {RPC_COMMANDS} from '@/constants'
+import {getVscode} from '@/utils'
 
 const vscode = getVscode()
 
-export default function ActionBox({store, number}) {
+interface ActionBoxProps {
+  number: number
+  onUpdateIssue: () => Promise<void>
+  onSetCurrentIssue: (issue: any) => void
+  onSetLabelVisible: (visible: boolean) => void
+  onSetListVisible: (visible: boolean) => void
+  currentIssue: any
+}
+
+export default function ActionBox({
+  number,
+  onUpdateIssue,
+  onSetCurrentIssue,
+  onSetLabelVisible,
+  onSetListVisible,
+  currentIssue,
+}: ActionBoxProps) {
   return (
     <div className="app-action-box">
       <Stack gap="condensed">
         <IconButton
           icon={CloudIcon}
-          onClick={() => store.updateIssue()}
+          onClick={onUpdateIssue}
           description="Update current issue"
           aria-label="Update current issue"
           tooltipDirection="w"
@@ -24,7 +41,7 @@ export default function ActionBox({store, number}) {
         />
         <IconButton
           icon={PlusIcon}
-          onClick={() => store.setCurrentIssue({})}
+          onClick={() => onSetCurrentIssue({})}
           description="Create new issue"
           aria-label="Create new issue"
           tooltipDirection="w"
@@ -34,8 +51,8 @@ export default function ActionBox({store, number}) {
             icon={LinkExternalIcon}
             onClick={() => {
               vscode.postMessage({
-                command: 'openExternalLink',
-                externalLink: store.current.html_url || store.current.url,
+                command: RPC_COMMANDS.OPEN_EXTERNAL_LINK,
+                externalLink: currentIssue.html_url || currentIssue.url,
               })
             }}
             description="Open in default browser"
@@ -45,14 +62,14 @@ export default function ActionBox({store, number}) {
         )}
         <IconButton
           icon={TagIcon}
-          onClick={() => store.setLabelVisible(true)}
+          onClick={() => onSetLabelVisible(true)}
           description="Labels"
           aria-label="Labels"
           tooltipDirection="w"
         />
         <IconButton
           icon={ListUnorderedIcon}
-          onClick={() => store.setListVisible(true)}
+          onClick={() => onSetListVisible(true)}
           description="Issue List"
           aria-label="Issue List"
           tooltipDirection="w"

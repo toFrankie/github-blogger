@@ -1,24 +1,19 @@
 import 'github-markdown-css'
 
-import {BaseStyles, ThemeProvider} from '@primer/react'
 import {message} from 'antd'
 import {Buffer} from 'buffer'
-import dayjs from 'dayjs'
 import {cloneDeep} from 'licia-es'
-import {observer, useLocalObservable} from 'mobx-react-lite'
-import {useEffect} from 'react'
+import {useEffect, useState} from 'react'
 import {WebviewRPC} from 'vscode-webview-rpc'
-import ActionBox from './components/action-box'
-import Editor from './components/editor'
-import LabelManager from './components/label-manager'
-import List from './components/list'
-import {getMilestones} from './service'
-import {compareIssue, generateMarkdown, getVscode} from './utils'
+import {ActionBox, Editor, LabelManager, List} from '@/components'
+import {RPC_COMMANDS} from '@/constants'
+import {useIssues, useLabels, useUpload} from '@/hooks'
+import {compareIssue, getVscode} from '@/utils'
 
 import 'bytemd/dist/index.min.css'
-import './app.css'
-import './github.custom.css'
-import './reset.css'
+import '@/app.css'
+import '@/github.custom.css'
+import '@/reset.css'
 
 window.Buffer = window.Buffer ?? Buffer
 
@@ -36,263 +31,198 @@ const showSuccess = async (res: string) => {
   await Promise.resolve()
 }
 
-const SUBMIT_TYPE = {
-  CREATE: 'create',
-  UPDATE: 'update',
+interface IssueData {
+  number: number
+  html_url: string
+  created_at: string
+  updated_at: string
 }
 
-const App = observer(() => {
-  const store: any = useLocalObservable(() => ({
-    labels: [],
-    milestones: [],
-    issues: [],
-    filterTitle: '',
-    filterLabels: [],
-    filterMilestones: [],
-    current: {},
-    originalCurrent: {},
-    totalCount: 1,
-    currentPage: 1,
-    listVisible: false,
-    labelsVisible: false,
-    loading: false,
-    setLoading: loading => {
-      store.loading = loading
-    },
-    setFilterTitle: title => {
-      store.filterTitle = title
-    },
-    setFilterLabels: labels => {
-      store.filterLabels = labels
-    },
-    getLabels: async () => {
-      const labels = await RPC.emit('getLabels', [])
-      store.labels = labels ?? []
-    },
-    createLabel: async e => {
-      await RPC.emit('createLabel', [e])
-      store.getLabels()
-    },
-    deleteLabel: async e => {
-      await RPC.emit('deleteLabel', [e])
-      store.getLabels()
-    },
-    updateLabel: async (a, b) => {
-      await RPC.emit('updateLabel', [a, b])
-      store.getLabels()
-    },
-    getMilestones: async () => {
-      const milestones = await getMilestones()
-      store.milestones = milestones
-    },
-    getIssueTotalCount: async () => {
-      let count
-      if (store.filterLabels.length > 0) {
-        count = await RPC.emit('getFilterCount', [
-          store.filterLabels.map(label => label.name).join(','),
-        ])
-      } else {
-        count = await RPC.emit('getTotalCount')
-      }
-      store.totalCount = count
-    },
-    getIssues: async () => {
-      store.setLoading(true)
-      if (store.filterLabels.length < 2 && !store.filterTitle) {
-        store.getIssueTotalCount()
-        const issues = await RPC.emit('getIssues', [
-          store.currentPage,
-          store.filterLabels.map(label => label.name).join(','),
-        ])
-        store.issues = issues || []
-      } else {
-        const {issueCount, issues} = await RPC.emit('getFilterIssues', [
-          store.filterTitle,
-          store.filterLabels.map(label => label.name).join(','),
-          store.currentPage,
-        ])
+export default function App() {
+  const [currentPage, setCurrentPage] = useState(1)
+  const [filterTitle, setFilterTitle] = useState('')
+  const [filterLabels, setFilterLabels] = useState<any[]>([])
+  const [current, setCurrent] = useState<any>({})
+  const [originalCurrent, setOriginalCurrent] = useState<any>({})
+  const [listVisible, setListVisible] = useState(false)
+  const [labelsVisible, setLabelsVisible] = useState(false)
 
-        store.totalCount = issueCount
-        store.issues = issues
-      }
-      store.setLoading(false)
-    },
-    resetCurrentPage: () => {
-      store.currentPage = 1
-    },
-    setCurrentPage(page) {
-      store.currentPage = page
-      store.getIssues()
-    },
-    updateTitle: title => {
-      store.current.title = title
-    },
-    setListVisible: visible => {
-      store.listVisible = visible
-      store.getIssues()
-    },
-    setLabelVisible: visible => {
-      store.labelsVisible = visible
-    },
-    setCurrentIssue: issue => {
-      store.current = issue
-      store.originalCurrent = cloneDeep(issue)
-    },
-    setCurrentIssueBody: body => {
-      store.current.body = body
-    },
-    addLabel: label => {
-      if (!store.current.labels) store.current.labels = []
-      store.current.labels = store.current.labels.concat(label)
-    },
-    removeLabel: label => {
-      if (!store.current.labels) store.current.labels = []
-      store.current.labels = store.current.labels.filter(
-        item => item.id !== label.id && item.id !== label.node_id
-      )
-    },
-    updateIssue: async () => {
-      const {number = undefined, title = '', body = '', labels = []} = store.current
-      if (!title || !body) {
-        return await message.error('Please enter the content...')
-      }
-
-      if (!number) {
-        const data = await RPC.emit('createIssue', [title, body, JSON.stringify(labels)])
-        store.current.number = data.number
-        store.current.html_url = data.html_url
-        store.current.created_at = data.created_at
-        store.current.updated_at = data.updated_at
-        store.originalCurrent = cloneDeep(store.current)
-
-        await store.archiveIssue(SUBMIT_TYPE.CREATE)
-        return
-      }
-
-      const isDiff = compareIssue(store.current, store.originalCurrent)
-      if (!isDiff) {
-        return await message.warning('No changes made.')
-      }
-
-      const data = await RPC.emit('updateIssue', [number, title, body, JSON.stringify(labels)])
-      store.current.updated_at = data.updated_at
-      store.originalCurrent = cloneDeep(store.current)
-
-      await store.archiveIssue(SUBMIT_TYPE.UPDATE)
-    },
-    archiveIssue: async (type = SUBMIT_TYPE.UPDATE) => {
-      try {
-        const {number = undefined} = store.current
-        const createdAt = store.current.created_at || store.current.createdAt
-
-        if (!Number.isInteger(number)) return
-
-        // 获取 Ref
-        const commitSha = await RPC.emit('getRef')
-
-        // 获取当前 Commit 的 Tree SHA
-        const treeSha = await RPC.emit('getCommit', [commitSha])
-
-        // 生成 Blob
-        const markdown = generateMarkdown(store.current)
-        const blobSha = await RPC.emit('createBlob', [markdown])
-
-        // 生成 Tree
-        const year = dayjs(createdAt).year()
-        const filePath = `archives/${year}/${number}.md`
-        const newTreeSha = await RPC.emit('createTree', [treeSha, filePath, blobSha])
-
-        // 生成 Commit
-        const commitMessage =
-          type === SUBMIT_TYPE.CREATE
-            ? `docs: create issue ${number}`
-            : `docs: update issue ${number}`
-        const newCommitSha = await RPC.emit('createCommit', [commitSha, newTreeSha, commitMessage])
-
-        //  更新 Ref
-        await RPC.emit('updateRef', [newCommitSha])
-      } catch (e) {
-        console.log('--> archiveIssue failed', e)
-        message.error('Issue Archive Failed')
-      }
-    },
-  }))
+  const {issues, totalCount, issuesLoading, createIssue, updateIssue} = useIssues(
+    currentPage,
+    filterLabels,
+    filterTitle
+  )
+  const {labels, labelsLoading, createLabel, deleteLabel, updateLabel} = useLabels()
+  const {upload, isUploading} = useUpload()
 
   useEffect(() => {
     RPC = new WebviewRPC(window, vscode)
-    RPC.on('showSuccess', showSuccess)
-    RPC.on('showError', showError)
-    store.getLabels()
-    store.getIssues()
+    RPC.on(RPC_COMMANDS.SHOW_SUCCESS, showSuccess)
+    RPC.on(RPC_COMMANDS.SHOW_ERROR, showError)
   }, [])
 
-  const checkFile = file => {
-    const isLt2M = file.size / 1024 / 1024 < 2
-    if (!isLt2M) {
-      message.error('Image maxsize is 2MB')
+  const handleUpdateIssue = async () => {
+    const {number = undefined, title = '', body = '', labels = []} = current
+    if (!title || !body) {
+      message.error('Please enter the content...')
+      return
     }
-    return isLt2M
+
+    if (!number) {
+      const data = (await createIssue({title, body, labels})) as IssueData | undefined
+      if (data) {
+        setCurrent(prev => ({
+          ...prev,
+          number: data.number,
+          html_url: data.html_url,
+          created_at: data.created_at,
+          updated_at: data.updated_at,
+        }))
+        setOriginalCurrent(cloneDeep(current))
+      }
+      return
+    }
+
+    const isDiff = compareIssue(current, originalCurrent)
+    if (!isDiff) {
+      message.warning('No changes made.')
+      return
+    }
+
+    const data = (await updateIssue({number, title, body, labels})) as IssueData | undefined
+    if (data) {
+      setCurrent(prev => ({
+        ...prev,
+        updated_at: data.updated_at,
+      }))
+      setOriginalCurrent(cloneDeep(current))
+    }
   }
 
-  const uploadImages = async e => {
-    if (e.length === 0) return await Promise.reject(new Error('Please select a image'))
+  const handleAddLabel = (label: any) => {
+    setCurrent(prev => ({
+      ...prev,
+      labels: [...(prev.labels || []), label],
+    }))
+  }
 
-    const img = e[0]
-    if (!checkFile(img)) return await Promise.reject(new Error('Image maxsize is 2MB'))
+  const handleRemoveLabel = (label: any) => {
+    setCurrent(prev => ({
+      ...prev,
+      labels: (prev.labels || []).filter(item => item.id !== label.id && item.id !== label.node_id),
+    }))
+  }
 
-    const dayjsObj = dayjs()
-    const ext = img.name.split('.').pop().toLowerCase()
-    const path = `images/${dayjsObj.year()}/${dayjsObj.month() + 1}/${dayjsObj.valueOf()}.${ext}`
+  const handleSetCurrentIssue = (issue: any) => {
+    setCurrent(issue)
+    setOriginalCurrent(cloneDeep(issue))
+  }
 
-    const fileReader: any = new FileReader()
-    fileReader.readAsDataURL(img)
+  const handleSetCurrentIssueBody = (body: string) => {
+    setCurrent(prev => ({
+      ...prev,
+      body,
+    }))
+  }
 
-    const hide = message.loading('Uploading Picture...', 0)
-    return await new Promise((resolve, reject) => {
-      fileReader.onloadend = () => {
-        const content = fileReader.result.split(',')[1]
-        RPC.emit('uploadImage', [content, path])
-          .then(res => {
-            hide()
-            message.success('Uploaded Successfully')
-            resolve(res)
-          })
-          .catch(err => {
-            reject(err)
-            message.error('Upload Failed')
-          })
-      }
-    })
+  const handleSetListVisible = (visible: boolean) => {
+    setListVisible(visible)
+  }
+
+  const handleSetLabelsVisible = (visible: boolean) => {
+    setLabelsVisible(visible)
+  }
+
+  const handleSetCurrentPage = (page: number) => {
+    setCurrentPage(page)
+  }
+
+  const handleSetFilterTitle = (title: string) => {
+    setFilterTitle(title)
+  }
+
+  const handleSetFilterLabels = (labels: any[]) => {
+    setFilterLabels(labels)
+  }
+
+  const handleUpload = async (files: FileList) => {
+    try {
+      await upload(files)
+    } catch (error) {
+      console.error('Upload failed:', error)
+    }
+  }
+
+  const handleCreateLabel = async (label: any) => {
+    try {
+      await createLabel(label)
+    } catch (error) {
+      console.error('Create label failed:', error)
+    }
+  }
+
+  const handleDeleteLabel = async (label: any) => {
+    try {
+      await deleteLabel(label)
+    } catch (error) {
+      console.error('Delete label failed:', error)
+    }
+  }
+
+  const handleUpdateLabel = async (oldLabel: any, newLabel: any) => {
+    try {
+      await updateLabel({oldLabel, newLabel})
+    } catch (error) {
+      console.error('Update label failed:', error)
+    }
   }
 
   return (
-    <ThemeProvider>
-      <BaseStyles>
-        <div className="app">
-          <Editor
-            content={store.current.body || ''}
-            labels={store.current.labels || []}
-            number={store.current.number}
-            placeholder="Leave your thought..."
-            store={store}
-            title={store.current.title || ''}
-            totalLabels={store.labels || []}
-            uploadImages={uploadImages}
-          />
-          <List
-            currentPage={store.currentPage}
-            labels={store.filterLabels}
-            store={store}
-            totalCount={store.totalCount}
-            totalLabels={store.labels}
-            visible={store.listVisible}
-          />
-          <LabelManager labels={store.labels} store={store} visible={store.labelsVisible} />
-          <ActionBox number={store.current.number} store={store} />
-        </div>
-      </BaseStyles>
-    </ThemeProvider>
+    <div className="app">
+      <Editor
+        content={current.body || ''}
+        labels={current.labels || []}
+        number={current.number}
+        placeholder="Leave your thought..."
+        title={current.title || ''}
+        totalLabels={labels || []}
+        onUpdateTitle={title => setCurrent(prev => ({...prev, title}))}
+        onUpdateBody={handleSetCurrentIssueBody}
+        onAddLabel={handleAddLabel}
+        onRemoveLabel={handleRemoveLabel}
+        onUpload={handleUpload}
+        isUploading={isUploading}
+      />
+      <List
+        currentPage={currentPage}
+        totalCount={totalCount}
+        totalLabels={labels}
+        visible={listVisible}
+        issues={issues}
+        loading={issuesLoading}
+        onSetCurrentPage={handleSetCurrentPage}
+        onSetFilterTitle={handleSetFilterTitle}
+        onSetFilterLabels={handleSetFilterLabels}
+        onSetCurrentIssue={handleSetCurrentIssue}
+        onSetListVisible={handleSetListVisible}
+      />
+      <LabelManager
+        labels={labels}
+        visible={labelsVisible}
+        loading={labelsLoading}
+        onCreateLabel={handleCreateLabel}
+        onDeleteLabel={handleDeleteLabel}
+        onUpdateLabel={handleUpdateLabel}
+        onSetLabelsVisible={handleSetLabelsVisible}
+      />
+      <ActionBox
+        number={current.number}
+        onUpdateIssue={handleUpdateIssue}
+        onSetCurrentIssue={handleSetCurrentIssue}
+        onSetLabelVisible={handleSetLabelsVisible}
+        onSetListVisible={handleSetListVisible}
+        currentIssue={current}
+      />
+    </div>
   )
-})
-
-export default App
+}
