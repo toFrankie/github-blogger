@@ -1,7 +1,7 @@
 import dayjs from 'dayjs'
 import matter from 'gray-matter'
 
-export const cdnURL = ({user, repo, branch, file}) => {
+export function cdnURL({user, repo, branch, file}) {
   const tag = branch ? `@${branch}` : ''
   return `https://cdn.jsdelivr.net/gh/${user}/${repo}${tag}/${file}`
 }

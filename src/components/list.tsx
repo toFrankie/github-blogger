@@ -2,7 +2,7 @@ import {TriangleDownIcon, XCircleFillIcon} from '@primer/octicons-react'
 import {Button, Pagination, SelectPanel, Stack, TextInput} from '@primer/react'
 import {type ActionListItemInput} from '@primer/react/deprecated'
 import {Empty} from 'antd'
-import {debounce} from 'licia-es'
+import {debounce, intersect} from 'licia-es'
 import {useCallback, useMemo, useState} from 'react'
 
 interface ListProps {
@@ -14,7 +14,7 @@ interface ListProps {
   loading: boolean
   onSetCurrentPage: (page: number) => void
   onSetFilterTitle: (title: string) => void
-  onSetFilterLabels: (labels: any[]) => void
+  onSetFilterLabels: (labels: string[]) => void
   onSetCurrentIssue: (issue: any) => void
   onSetListVisible: (visible: boolean) => void
 }
@@ -78,13 +78,13 @@ export default function List({
 
   const searchByLabel = useCallback(
     debounce((labels: string[]) => {
+      const allName = totalLabels.map(l => l.name)
+      const filteredNames: string[] = intersect(allName, labels)
       onSetCurrentPage(1)
-      onSetFilterLabels(totalLabels.filter(l => labels.includes(l.name)))
+      onSetFilterLabels(filteredNames)
     }, 500),
     []
   )
-
-  if (!visible) return null
 
   return (
     <div
@@ -118,7 +118,10 @@ export default function List({
                     <TextInput.Action
                       icon={XCircleFillIcon}
                       aria-label="Clear input"
-                      onClick={() => setTitleValue('')}
+                      onClick={() => {
+                        setTitleValue('')
+                        searchByTitle('')
+                      }}
                     />
                   ) : (
                     <></>

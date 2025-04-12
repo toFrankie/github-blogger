@@ -49,8 +49,8 @@
         "title": "Open Github Blogger (Dev)"
       },
       {
-        "command": "github-blogger.config",
-        "title": "Config Github Blogger"
+        "command": "github-blogger.config-dev",
+        "title": "Config Github Blogger (Dev)"
       }
     ]
   },

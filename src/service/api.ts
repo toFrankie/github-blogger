@@ -4,28 +4,28 @@ import {RPC_COMMANDS, SUBMIT_TYPE} from '@/constants'
 import {RPC} from '@/service/index'
 import {generateMarkdown} from '@/utils'
 
-export const getLabels = async () => {
+export async function getLabels() {
   const labels = await RPC.emit(RPC_COMMANDS.GET_LABELS, [])
   return labels ?? []
 }
 
-export const createLabel = async (label: any) => {
+export async function createLabel(label: any) {
   await RPC.emit(RPC_COMMANDS.CREATE_LABEL, [label])
 }
 
-export const deleteLabel = async (label: any) => {
+export async function deleteLabel(label: any) {
   await RPC.emit(RPC_COMMANDS.DELETE_LABEL, [label])
 }
 
-export const updateLabel = async (oldLabel: any, newLabel: any) => {
+export async function updateLabel(oldLabel: any, newLabel: any) {
   await RPC.emit(RPC_COMMANDS.UPDATE_LABEL, [oldLabel, newLabel])
 }
 
-export const getMilestones = async () => {
+export async function getMilestones() {
   return await RPC.emit(RPC_COMMANDS.GET_MILESTONES, [])
 }
 
-export const getIssueTotalCount = async (filterLabels: any[] = []) => {
+export async function getIssueTotalCount(filterLabels: any[] = []) {
   if (filterLabels.length > 0) {
     return await RPC.emit(RPC_COMMANDS.GET_FILTER_COUNT, [
       filterLabels.map(label => label.name).join(','),
@@ -34,11 +34,7 @@ export const getIssueTotalCount = async (filterLabels: any[] = []) => {
   return await RPC.emit(RPC_COMMANDS.GET_TOTAL_COUNT)
 }
 
-export const getIssues = async (
-  page: number,
-  filterLabels: any[] = [],
-  filterTitle: string = ''
-) => {
+export async function getIssues(page: number, filterLabels: any[] = [], filterTitle: string = '') {
   if (filterLabels.length < 2 && !filterTitle) {
     const issues = await RPC.emit(RPC_COMMANDS.GET_ISSUES, [
       page,
@@ -52,21 +48,22 @@ export const getIssues = async (
     filterLabels.map(label => label.name).join(','),
     page,
   ])
+
   return issues
 }
 
-export const createIssue = async (title: string, body: string, labels: any[]) => {
+export async function createIssue(title: string, body: string, labels: any[]) {
   return await RPC.emit(RPC_COMMANDS.CREATE_ISSUE, [title, body, JSON.stringify(labels)])
 }
 
-export const updateIssue = async (number: number, title: string, body: string, labels: any[]) => {
+export async function updateIssue(number: number, title: string, body: string, labels: any[]) {
   return await RPC.emit(RPC_COMMANDS.UPDATE_ISSUE, [number, title, body, JSON.stringify(labels)])
 }
 
-export const archiveIssue = async (
+export async function archiveIssue(
   issue: any,
   type: (typeof SUBMIT_TYPE)[keyof typeof SUBMIT_TYPE]
-) => {
+) {
   try {
     const {number = undefined} = issue
     const createdAt = issue.created_at || issue.createdAt

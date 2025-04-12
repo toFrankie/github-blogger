@@ -1,5 +1,10 @@
 export const EXTENSION_NAME = 'github-blogger'
 
+export const EXTENSION_COMMAND = {
+  OPEN: `${EXTENSION_NAME}.open-dev`,
+  CONFIG: `${EXTENSION_NAME}.config-dev`,
+} as const
+
 export const DEFAULT_LABEL_COLOR = 'f5fee6' // without leading #
 
 export const DEFAULT_PAGINATION_SIZE = 20

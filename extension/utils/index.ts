@@ -34,26 +34,43 @@ export function getUri(webview, extensionUri, pathList) {
   return webview.asWebviewUri(Uri.joinPath(extensionUri, ...pathList))
 }
 
-export async function checkConfig() {
+type settingKeys = 'token' | 'user' | 'repo' | 'branch'
+
+type settingValueMap = {
+  token: string | undefined
+  user: string | undefined
+  repo: string | undefined
+  branch: string | undefined
+}
+
+export type Settings = {
+  [K in settingKeys]: settingValueMap[K]
+}
+
+async function getSettingValue<K extends settingKeys>(key: K): Promise<settingValueMap[K]> {
+  return workspace.getConfiguration(EXTENSION_NAME).get<settingValueMap[K]>(key)!
+}
+
+export async function checkSettings() {
   const [token, user, repo] = await Promise.all([
-    workspace.getConfiguration(EXTENSION_NAME).get<string>('token'),
-    workspace.getConfiguration(EXTENSION_NAME).get<string>('user'),
-    workspace.getConfiguration(EXTENSION_NAME).get<string>('repo'),
+    getSettingValue('token'),
+    getSettingValue('user'),
+    getSettingValue('repo'),
   ])
   return Boolean(token && user && repo)
 }
 
-export async function getSetting() {
+export async function getSettings(): Promise<Settings> {
   const [token, user, repo, branch] = await Promise.all([
-    workspace.getConfiguration(EXTENSION_NAME).get<string>('token'),
-    workspace.getConfiguration(EXTENSION_NAME).get<string>('user'),
-    workspace.getConfiguration(EXTENSION_NAME).get<string>('repo'),
-    workspace.getConfiguration(EXTENSION_NAME).get<string>('branch'),
+    getSettingValue('token'),
+    getSettingValue('user'),
+    getSettingValue('repo'),
+    getSettingValue('branch'),
   ])
   return {token, user, repo, branch}
 }
 
-export const cdnURL = ({
+export function cdnURL({
   user,
   repo,
   branch,
@@ -63,23 +80,26 @@ export const cdnURL = ({
   repo: string
   branch: string
   filePath: string
-}) => {
+}) {
   const tag = branch ? `@${branch}` : ''
   return `https://cdn.jsdelivr.net/gh/${user}/${repo}${tag}/${filePath}`
 }
 
-export async function to(promise: Promise<any>, errorExt: any) {
+export async function to<T, U = Error>(
+  promise: Promise<T>,
+  errorExt?: object
+): Promise<[U | null, T | undefined]> {
   try {
     const data = await promise
-    const result = [null, data]
-    console.log('data', data)
+    const result: [null, T] = [null, data]
+    console.log('🚀 to ~ data:', data)
     return result
-  } catch (err: any) {
-    console.log('err', err)
+  } catch (err) {
+    console.log('🚀 to ~ err:', err)
     if (errorExt) {
-      Object.assign(err, errorExt)
+      Object.assign(err as object, errorExt)
     }
-    const resultWithError = [err, undefined]
+    const resultWithError: [U, undefined] = [err as U, undefined]
     return resultWithError
   }
 }

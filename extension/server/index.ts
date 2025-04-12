@@ -1,127 +1,28 @@
-/* eslint-disable no-return-await */
-
 import {Octokit} from '@octokit/core'
 import {ExtensionRPC} from 'vscode-webview-rpc'
 import {encode} from 'js-base64'
+import * as vscode from 'vscode'
 
 import {APIS, DEFAULT_LABEL_COLOR, DEFAULT_PAGINATION_SIZE} from '../constants'
-import {getSetting, to, cdnURL} from '../utils'
-
-/**
- * 构建 GraphQL
- */
-const documents = {
-  /**
-   * 获取 issues 总数
-   * @param {object} params
-   * @param {string} params.username 用户名
-   * @param {string} params.repository 仓库名
-   */
-  getIssueCount: ({username, repository}) => `
-    query {
-      repository(
-        owner: "${username}"
-        name: "${repository}"
-      ) {
-        issues(states: OPEN) {
-          totalCount
-        }
-      }
-    }
-  `,
-
-  /**
-   * 过滤器来获取 issue 数量
-   * @param {object} params
-   * @param {string} params.username 用户名
-   * @param {string} params.repository 仓库名
-   * @param {string} [params.label] 标签
-   * @param {string} [params.milestone] 里程碑
-   */
-  getFilterIssueCount: ({username, repository, label, milestone}) => `
-    {
-      search(
-        type: ISSUE
-        query: "user:${username} repo:${repository} state:open ${
-          milestone ? `milestone:${milestone}` : ''
-        } ${label ? `label:${label}` : ''}"
-      ) {
-        issueCount
-      }
-    }
-  `,
-
-  /**
-   * 过滤器来获取 issue
-   * @param {object} params
-   * @param {string} params.username 用户名
-   * @param {string} params.repository 仓库名
-   * @param {string} [params.label] 标签
-   * @param {string} [params.milestone] 里程碑
-   */
-  getFilterIssue: ({username, repository, first, labels, title, cursor}) => `
-    {
-      search(
-        type: ISSUE
-        first: ${first}
-        ${cursor ? `after: "${cursor}"` : ''}
-        query: "user:${username} repo:${repository} state:open ${labels ? `label:${labels}` : ''} ${
-          title ? `in:title ${title}` : ''
-        }"
-      ) {
-        issueCount
-        edges {
-          node {
-            ... on Issue {
-              url
-              id
-              title
-              url
-              body
-              createdAt
-              updatedAt
-              number
-              state
-              milestone {
-                id
-                title
-              }
-              labels(first: 100) {
-                nodes {
-                  id
-                  url
-                  name
-                  color
-                  description
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  `,
-}
+import {getSettings, to, cdnURL, type Settings} from '../utils'
+import * as graphqlQueries from './graphql-queries'
 
 export default class Service {
-  config
-  octokit
-  webview
-  rpc
+  config: Settings
+  octokit: Octokit
+  webview: vscode.Webview
+  rpc: ExtensionRPC
 
-  constructor(webview) {
-    this.config = {}
+  constructor(webview: vscode.Webview) {
+    this.config = null!
     this.webview = webview
-    this.octokit = null
+    this.octokit = null!
     this.rpc = new ExtensionRPC(this.webview)
     this.init()
   }
 
-  /**
-   * 初始化octokit
-   */
   async init() {
-    this.config = await getSetting()
+    this.config = await getSettings()
     this.octokit = new Octokit({
       auth: this.config.token,
     })
@@ -145,7 +46,7 @@ export default class Service {
     })
   }
 
-  async getLabels(params) {
+  async getLabels(params: {page: number; per_page: number}) {
     const [err, res] = await to(
       this.octokit.request(APIS.GET_LABELS, {
         owner: this.config.user,
@@ -159,7 +60,7 @@ export default class Service {
     return []
   }
 
-  async createLabel(params) {
+  async createLabel(params: {name: string}) {
     const [err, res] = await to(
       this.octokit.request(APIS.CREATE_LABEL, {
         owner: this.config.user,
@@ -171,10 +72,10 @@ export default class Service {
     if (!err) {
       return res?.data || {}
     }
-    return []
+    return {}
   }
 
-  async deleteLabel(params) {
+  async deleteLabel(params: {name: string}) {
     const [err, res] = await to(
       this.octokit.request(APIS.DELETE_LABEL, {
         owner: this.config.user,
@@ -188,7 +89,7 @@ export default class Service {
     return []
   }
 
-  async updateLabel(params) {
+  async updateLabel(params: {name: string; new_name: string}) {
     const [err, res] = await to(
       this.octokit.request(APIS.UPDATE_LABEL, {
         owner: this.config.user,
@@ -202,7 +103,7 @@ export default class Service {
     return []
   }
 
-  async getIssues(params) {
+  async getIssues(params: {per_page: number}) {
     const [err, res] = await to(
       this.octokit.request(APIS.GET_ISSUES, {
         owner: this.config.user,
@@ -217,10 +118,10 @@ export default class Service {
     return []
   }
 
-  async getFilterIssues(params) {
+  async getFilterIssues(params: {title: string; labels: string; cursor: string}) {
     const [err, res] = await to(
       this.octokit.graphql(
-        documents.getFilterIssue({
+        graphqlQueries.getFilterIssue({
           username: this.config.user,
           repository: this.config.repo,
           ...params,
@@ -239,7 +140,7 @@ export default class Service {
     return []
   }
 
-  async updateIssue(params) {
+  async updateIssue(params: {issue_number: number; title: string; body: string; labels: string}) {
     const [err, res] = await to(
       this.octokit.request(APIS.UPDATE_ISSUE, {
         owner: this.config.user,
@@ -253,7 +154,7 @@ export default class Service {
     return []
   }
 
-  async createIssue(params) {
+  async createIssue(params: {title: string; body: string; labels: string}) {
     const [err, res] = await to(
       this.octokit.request(APIS.CREATE_ISSUE, {
         owner: this.config.user,
@@ -267,7 +168,7 @@ export default class Service {
     return []
   }
 
-  async uploadImage(params) {
+  async uploadImage(params: {content: string; path: string}) {
     const [err] = await to(
       this.octokit.request(APIS.UPLOAD_IMAGE, {
         owner: this.config.user,
@@ -292,10 +193,10 @@ export default class Service {
     return []
   }
 
-  async queryFilterIssueCount(label) {
+  async queryFilterIssueCount(label: string) {
     const [err, res] = await to(
       this.octokit.graphql(
-        documents.getFilterIssueCount({
+        graphqlQueries.getFilterIssueCount({
           username: this.config.user,
           repository: this.config.repo,
           label,
@@ -310,7 +211,7 @@ export default class Service {
   async queryTotalCount() {
     const [err, res] = await to(
       this.octokit.graphql(
-        documents.getIssueCount({username: this.config.user, repository: this.config.repo})
+        graphqlQueries.getIssueCount({username: this.config.user, repository: this.config.repo})
       )
     )
     if (!err) return res.repository.issues.totalCount
@@ -332,7 +233,7 @@ export default class Service {
     throw err
   }
 
-  async getCommit(params) {
+  async getCommit(params: {commit_sha: string}) {
     const [err, res] = await to(
       this.octokit.request(APIS.GET_COMMIT, {
         owner: this.config.user,
@@ -344,7 +245,7 @@ export default class Service {
     throw err
   }
 
-  async createBlob(params) {
+  async createBlob(params: {content: string}) {
     const [err, res] = await to(
       this.octokit.request(APIS.CREATE_BLOB, {
         owner: this.config.user,
@@ -356,7 +257,10 @@ export default class Service {
     throw err
   }
 
-  async createTree(params) {
+  async createTree(params: {
+    base_tree: string
+    tree: {path: string; mode: string; type: string; sha: string}[]
+  }) {
     const [err, res] = await to(
       this.octokit.request(APIS.CREATE_TREE, {
         owner: this.config.user,
@@ -368,7 +272,7 @@ export default class Service {
     throw err
   }
 
-  async createCommit(params) {
+  async createCommit(params: {message: string; tree: string; parents: string[]}) {
     const [err, res] = await to(
       this.octokit.request(APIS.CREATE_COMMIT, {
         owner: this.config.user,
@@ -380,7 +284,7 @@ export default class Service {
     throw err
   }
 
-  async updateRef(params) {
+  async updateRef(params: {sha: string}) {
     const [err, res] = await to(
       this.octokit.request(APIS.UPDATE_REF, {
         owner: this.config.user,
@@ -402,7 +306,7 @@ export default class Service {
       return data
     }
 
-    const getIssues = async (page, labels) => {
+    const getIssues = async (page: number, labels: string) => {
       return await this.getIssues({page, labels})
     }
 

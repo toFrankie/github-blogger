@@ -41,7 +41,7 @@ interface IssueData {
 export default function App() {
   const [currentPage, setCurrentPage] = useState(1)
   const [filterTitle, setFilterTitle] = useState('')
-  const [filterLabels, setFilterLabels] = useState<any[]>([])
+  const [filterLabels, setFilterLabels] = useState<string[]>([])
   const [current, setCurrent] = useState<any>({})
   const [originalCurrent, setOriginalCurrent] = useState<any>({})
   const [listVisible, setListVisible] = useState(false)
@@ -141,7 +141,7 @@ export default function App() {
     setFilterTitle(title)
   }
 
-  const handleSetFilterLabels = (labels: any[]) => {
+  const handleSetFilterLabels = (labels: string[]) => {
     setFilterLabels(labels)
   }
 
