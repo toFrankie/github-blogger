@@ -47,11 +47,11 @@ export default function App() {
   const [listVisible, setListVisible] = useState(false)
   const [labelsVisible, setLabelsVisible] = useState(false)
 
-  const {issues, totalCount, issuesLoading, createIssue, updateIssue} = useIssues(
-    currentPage,
-    filterLabels,
-    filterTitle
-  )
+  const {issues, totalCount, issuesLoading, createIssue, updateIssue} = useIssues({
+    page: currentPage,
+    labels: filterLabels,
+    title: filterTitle,
+  })
   const {labels, labelsLoading, createLabel, deleteLabel, updateLabel} = useLabels()
   const {upload, isUploading} = useUpload()
 

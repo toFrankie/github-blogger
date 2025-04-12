@@ -3,8 +3,13 @@ import {message} from 'antd'
 import {SUBMIT_TYPE} from '@/constants'
 import {archiveIssue, createIssue, getIssues, getIssueTotalCount, updateIssue} from '@/service/api'
 
-export default function useIssues(page: number, labels: string[] = [], title: string = '') {
-  console.log('🚀 ~ useIssues:', page, labels, title)
+interface UseIssuesProps {
+  page: number
+  labels?: string[]
+  title?: string
+}
+
+export default function useIssues({page, labels = [], title = ''}: UseIssuesProps) {
   const queryClient = useQueryClient()
 
   const {data: issues = [], isLoading: issuesLoading} = useQuery({

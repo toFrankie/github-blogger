@@ -2,8 +2,10 @@ import {TriangleDownIcon, XCircleFillIcon} from '@primer/octicons-react'
 import {Button, Pagination, SelectPanel, Stack, TextInput} from '@primer/react'
 import {type ActionListItemInput} from '@primer/react/deprecated'
 import {Empty} from 'antd'
-import {debounce, intersect} from 'licia-es'
+import {debounce, intersect, unique} from 'licia-es'
 import {useCallback, useMemo, useState} from 'react'
+
+const SELECT_PANEL_PLACEHOLDER = 'Filter by label'
 
 interface ListProps {
   currentPage: number
@@ -47,18 +49,11 @@ export default function List({
       item.text?.toLowerCase().includes(filter.trim().toLowerCase())
   )
 
-  const selectedItemsSortedFirst = filteredItems.sort((a, b) => {
-    const aIsSelected = selected.some(selectedItem => selectedItem.text === a.text)
-    const bIsSelected = selected.some(selectedItem => selectedItem.text === b.text)
-    if (aIsSelected && !bIsSelected) return -1
-    if (!aIsSelected && bIsSelected) return 1
-    return 0
-  })
+  const selectedItemsSortedFirst = sortBySelected<ActionListItemInput>(filteredItems, selected)
 
   const handleSelectedChange = (items: ActionListItemInput[]) => {
     setSelected(items)
-    // TODO:
-    const labels = [...new Set(items.map(item => item.text as string).filter(Boolean))]
+    const labels = items.map(item => item.text).filter(Boolean) as string[]
     searchByLabel(labels)
   }
 
@@ -131,16 +126,30 @@ export default function List({
               <SelectPanel
                 renderAnchor={({children, ...anchorProps}) => (
                   <Button
-                    style={{width: '100%'}}
                     {...anchorProps}
                     alignContent="start"
                     trailingAction={TriangleDownIcon}
                     aria-haspopup="dialog"
+                    labelWrap
                   >
-                    {children}
+                    {sortSelectedItems(children as string, selectedItemsSortedFirst)}
                   </Button>
                 )}
-                placeholder="Filter by label"
+                footer={
+                  <Button
+                    style={{width: '100%'}}
+                    onClick={() => {
+                      setFilter('')
+                      setSelected([])
+                      searchByLabel([])
+                    }}
+                  >
+                    Clear filters
+                  </Button>
+                }
+                title="Select labels"
+                placeholder={SELECT_PANEL_PLACEHOLDER}
+                placeholderText="Filter label"
                 open={open}
                 onOpenChange={setOpen}
                 items={selectedItemsSortedFirst}
@@ -185,4 +194,25 @@ export default function List({
       </div>
     </div>
   )
+}
+
+function sortBySelected<T extends {text?: string}>(allItem: T[], selectedItems: T[]) {
+  return [...allItem].sort((a, b) => {
+    const aIsSelected = selectedItems.some(i => i.text === a.text)
+    const bIsSelected = selectedItems.some(i => i.text === b.text)
+    if (aIsSelected && !bIsSelected) return -1
+    if (!aIsSelected && bIsSelected) return 1
+    return 0
+  })
+}
+
+function sortSelectedItems(selectedStr: string, sortedItems: ActionListItemInput[]) {
+  // 未选择任何标签
+  if (selectedStr === SELECT_PANEL_PLACEHOLDER) return selectedStr
+
+  const selectedItems = unique(selectedStr.split(', '))
+  return sortedItems
+    .filter(item => selectedItems.includes(item.text))
+    .map(item => item.text)
+    .join(', ')
 }
