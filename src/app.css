@@ -152,32 +152,22 @@ code {
   width: 100%;
 }
 
-.app-issue-list-item {
-  display: flex;
+.app-issue-list .list-item {
+  width: 100%;
+  margin: 4px 0;
+}
+
+.app-issue-list .list-item > div > div,
+.app-issue-list .list-item > div > div > div {
   align-items: center;
-  padding: 9px 8px;
-  font-size: 14px;
-  color: #1f2328;
-  cursor: pointer;
-  border-radius: 6px;
-  transition: all 0.3s cubic-bezier(0.7, 0.3, 0.1, 1);
 }
 
-.app-issue-list-item .title {
-  width: auto;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+.app-issue-list .list-title {
+  font-weight: 400;
 }
 
-.app-issue-list-item .number {
-  margin-left: 6px;
-  color: #808080;
-}
-
-.app-issue-list-item:hover {
-  color: #00b96b;
-  background-color: #f4f5f5;
+.app-issue-list .list-number {
+  flex-shrink: 0;
 }
 
 .label-input {

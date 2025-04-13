@@ -1,7 +1,12 @@
-import {TriangleDownIcon, XCircleFillIcon} from '@primer/octicons-react'
-import {Button, Pagination, SelectPanel, Stack, TextInput} from '@primer/react'
+import {
+  ChevronRightIcon,
+  SparkleFillIcon,
+  TriangleDownIcon,
+  XCircleFillIcon,
+} from '@primer/octicons-react'
+import {ActionList, Button, Pagination, SelectPanel, Stack, TextInput} from '@primer/react'
+import {Blankslate} from '@primer/react/experimental'
 import {type ActionListItemInput} from '@primer/react/deprecated'
-import {Empty} from 'antd'
 import {debounce, intersect, unique} from 'licia-es'
 import {useCallback, useMemo, useState} from 'react'
 
@@ -161,21 +166,39 @@ export default function List({
           </div>
           <div className="list">
             {issues.length > 0 ? (
-              issues.map(item => (
-                <div
-                  key={item.id}
-                  className="app-issue-list-item"
-                  onClick={() => {
-                    onSetListVisible(false)
-                    onSetCurrentIssue(item)
-                  }}
-                >
-                  <div className="title">{item.title}</div>
-                  <div className="number">#{item.number}</div>
-                </div>
-              ))
+              <ActionList className="list" variant="full">
+                {issues.map(item => (
+                  <ActionList.Item
+                    key={item.id}
+                    className="list-item"
+                    onClick={() => {
+                      onSetListVisible(false)
+                      onSetCurrentIssue(item)
+                    }}
+                  >
+                    <span className="list-title">{item.title}</span>
+                    <ActionList.Description className="list-number">
+                      #{item.number}
+                    </ActionList.Description>
+                    <ActionList.TrailingVisual>
+                      <ChevronRightIcon size={16} />
+                    </ActionList.TrailingVisual>
+                  </ActionList.Item>
+                ))}
+              </ActionList>
             ) : (
-              <Empty />
+              <Blankslate spacious>
+                <Blankslate.Visual>
+                  <SparkleFillIcon size="medium" />
+                </Blankslate.Visual>
+                <Blankslate.Heading>Welcome to GitHub Blogger</Blankslate.Heading>
+                <Blankslate.Description>
+                  Create and manage blog posts with GitHub Issues.
+                </Blankslate.Description>
+                <Blankslate.PrimaryAction onClick={() => onSetListVisible(false)}>
+                  Create Your First Post
+                </Blankslate.PrimaryAction>
+              </Blankslate>
             )}
           </div>
           <div className="issue-pagination">
