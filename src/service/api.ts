@@ -34,20 +34,13 @@ export async function getIssueTotalCount(filterLabels: any[] = []) {
   return await RPC.emit(RPC_COMMANDS.GET_TOTAL_COUNT)
 }
 
-export async function getIssues(page: number, filterLabels: any[] = [], filterTitle: string = '') {
-  if (filterLabels.length < 2 && !filterTitle) {
-    const issues = await RPC.emit(RPC_COMMANDS.GET_ISSUES, [
-      page,
-      filterLabels.map(label => label.name).join(','),
-    ])
+export async function getIssues(page: number, labels: string[] = [], title: string = '') {
+  if (labels.length < 2 && !title) {
+    const issues = await RPC.emit(RPC_COMMANDS.GET_ISSUES, [page, labels.join(',')])
     return issues || []
   }
 
-  const {issues} = await RPC.emit(RPC_COMMANDS.GET_FILTER_ISSUES, [
-    filterTitle,
-    filterLabels.map(label => label.name).join(','),
-    page,
-  ])
+  const {issues} = await RPC.emit(RPC_COMMANDS.GET_FILTER_ISSUES, [title, labels.join(','), page])
 
   return issues
 }

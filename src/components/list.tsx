@@ -1,12 +1,22 @@
 import {
   ChevronRightIcon,
+  SearchIcon,
   SparkleFillIcon,
   TriangleDownIcon,
   XCircleFillIcon,
 } from '@primer/octicons-react'
-import {ActionList, Button, Pagination, SelectPanel, Stack, TextInput} from '@primer/react'
-import {Blankslate} from '@primer/react/experimental'
+import {
+  ActionList,
+  Button,
+  PageHeader,
+  Pagination,
+  SelectPanel,
+  Stack,
+  Text,
+  TextInput,
+} from '@primer/react'
 import {type ActionListItemInput} from '@primer/react/deprecated'
+import {Blankslate} from '@primer/react/experimental'
 import {debounce, intersect, unique} from 'licia-es'
 import {useCallback, useMemo, useState} from 'react'
 
@@ -43,6 +53,8 @@ export default function List({
   const [filter, setFilter] = useState('')
   const [open, setOpen] = useState(false)
   const [current, setCurrent] = useState(currentPage)
+
+  const hasFilter = titleValue.trim() || selected.length > 0
 
   const items = useMemo(() => {
     return totalLabels.map(item => ({text: item.name}))
@@ -108,6 +120,15 @@ export default function List({
         <div className="app-issue-list">
           <div className="issue-filter">
             <Stack>
+              <PageHeader role="banner" aria-label="Add-pageheader-docs">
+                <PageHeader.TitleArea>
+                  <PageHeader.Title>Posts</PageHeader.Title>
+                </PageHeader.TitleArea>
+                <PageHeader.Description>
+                  <Text sx={{fontSize: 1, color: 'fg.muted'}}>totals: {totalCount}</Text>
+                </PageHeader.Description>
+              </PageHeader>
+
               <TextInput
                 className="title-filter"
                 placeholder="Filter by title"
@@ -186,6 +207,14 @@ export default function List({
                   </ActionList.Item>
                 ))}
               </ActionList>
+            ) : hasFilter ? (
+              <Blankslate spacious>
+                <Blankslate.Visual>
+                  <SearchIcon size="medium" />
+                </Blankslate.Visual>
+                <Blankslate.Heading>No results</Blankslate.Heading>
+                <Blankslate.Description>Try adjusting your search filters.</Blankslate.Description>
+              </Blankslate>
             ) : (
               <Blankslate spacious>
                 <Blankslate.Visual>
