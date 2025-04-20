@@ -1,6 +1,5 @@
 {
   "extends": "@tomjs/tsconfig/react.json",
-  "include": ["./src"],
   "references": [{"path": "./tsconfig.node.json"}],
   "compilerOptions": {
     "baseUrl": "./",
@@ -8,5 +7,6 @@
       "@/*": ["./src/*"]
     },
     "strict": true
-  }
+  },
+  "include": ["src", "types"]
 }

@@ -6,7 +6,7 @@ import {
   TagIcon,
 } from '@primer/octicons-react'
 import {IconButton, Stack} from '@primer/react'
-import {RPC_COMMANDS} from '@/constants'
+import {MESSAGE_TYPE} from '@/constants'
 import {getVscode} from '@/utils'
 
 const vscode = getVscode()
@@ -51,7 +51,7 @@ export default function ActionBox({
             icon={LinkExternalIcon}
             onClick={() => {
               vscode.postMessage({
-                command: RPC_COMMANDS.OPEN_EXTERNAL_LINK,
+                command: MESSAGE_TYPE.OPEN_EXTERNAL_LINK,
                 externalLink: currentIssue.html_url || currentIssue.url,
               })
             }}

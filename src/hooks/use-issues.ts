@@ -1,7 +1,7 @@
 import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query'
 import {message} from 'antd'
 import {SUBMIT_TYPE} from '@/constants'
-import {archiveIssue, createIssue, getIssues, getIssueTotalCount, updateIssue} from '@/service/api'
+import {archiveIssue, createIssue, getIssues, getIssueTotalCount, updateIssue} from '@/utils/rpc'
 
 interface UseIssuesProps {
   page: number

@@ -2,9 +2,10 @@ import {Octokit} from '@octokit/core'
 import {ExtensionRPC} from 'vscode-webview-rpc'
 import {encode} from 'js-base64'
 import * as vscode from 'vscode'
+import {MESSAGE_TYPE} from '../constants'
 
 import {APIS, DEFAULT_LABEL_COLOR, DEFAULT_PAGINATION_SIZE} from '../constants'
-import {getSettings, to, cdnURL, type Settings} from '../utils'
+import {getSettings, to, cdnURL} from '../utils'
 import * as graphqlQueries from './graphql-queries'
 
 export default class Service {
@@ -32,17 +33,17 @@ export default class Service {
       if (options.url.includes('/git')) return
 
       if (options.method === 'DELETE') {
-        return await this.rpc.emit('showSuccess', ['Removed Successfully'])
+        return await this.rpc.emit(MESSAGE_TYPE.SHOW_SUCCESS, ['Removed Successfully'])
       }
       if (options.method === 'POST') {
-        return await this.rpc.emit('showSuccess', ['Created Successfully'])
+        return await this.rpc.emit(MESSAGE_TYPE.SHOW_SUCCESS, ['Created Successfully'])
       }
       if (options.method === 'PATCH') {
-        return await this.rpc.emit('showSuccess', ['Updated Successfully'])
+        return await this.rpc.emit(MESSAGE_TYPE.SHOW_SUCCESS, ['Updated Successfully'])
       }
     })
     this.octokit.hook.error('request', async (error, _options) => {
-      this.rpc.emit('showError', [JSON.stringify(error)])
+      this.rpc.emit(MESSAGE_TYPE.SHOW_ERROR, [JSON.stringify(error)])
     })
   }
 
@@ -391,22 +392,21 @@ export default class Service {
       })
     }
 
-    this.rpc.on('getLabels', getLabels)
-    this.rpc.on('deleteLabel', deleteLabel)
-    this.rpc.on('createLabel', createLabel)
-    this.rpc.on('updateLabel', updateLabel)
-    this.rpc.on('getIssues', getIssues)
-    this.rpc.on('getFilterIssues', getFilterIssues)
-    this.rpc.on('updateIssue', updateIssue)
-    this.rpc.on('createIssue', createIssue)
-    this.rpc.on('uploadImage', uploadImage)
-    this.rpc.on('getFilterCount', getFilterCount)
-    this.rpc.on('getTotalCount', getTotalCount)
-    this.rpc.on('getRef', getRef)
-    this.rpc.on('updateRef', updateRef)
-    this.rpc.on('getCommit', getCommit)
-    this.rpc.on('createCommit', createCommit)
-    this.rpc.on('createBlob', createBlob)
-    this.rpc.on('createTree', createTree)
+    this.rpc.on(MESSAGE_TYPE.GET_LABELS, getLabels)
+    this.rpc.on(MESSAGE_TYPE.DELETE_LABEL, deleteLabel)
+    this.rpc.on(MESSAGE_TYPE.CREATE_LABEL, createLabel)
+    this.rpc.on(MESSAGE_TYPE.UPDATE_LABEL, updateLabel)
+    this.rpc.on(MESSAGE_TYPE.GET_ISSUES, getIssues)
+    this.rpc.on(MESSAGE_TYPE.GET_FILTER_ISSUES, getFilterIssues)
+    this.rpc.on(MESSAGE_TYPE.UPDATE_ISSUE, updateIssue)
+    this.rpc.on(MESSAGE_TYPE.CREATE_ISSUE, createIssue)
+    this.rpc.on(MESSAGE_TYPE.UPLOAD_IMAGE, uploadImage)
+    this.rpc.on(MESSAGE_TYPE.GET_FILTER_COUNT, getFilterCount)
+    this.rpc.on(MESSAGE_TYPE.GET_TOTAL_COUNT, getTotalCount)
+    this.rpc.on(MESSAGE_TYPE.UPDATE_REF, updateRef)
+    this.rpc.on(MESSAGE_TYPE.GET_COMMIT, getCommit)
+    this.rpc.on(MESSAGE_TYPE.CREATE_COMMIT, createCommit)
+    this.rpc.on(MESSAGE_TYPE.CREATE_BLOB, createBlob)
+    this.rpc.on(MESSAGE_TYPE.CREATE_TREE, createTree)
   }
 }

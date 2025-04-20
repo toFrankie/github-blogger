@@ -1,26 +1,41 @@
 import dayjs from 'dayjs'
 import matter from 'gray-matter'
+import {MESSAGE_TYPE} from '@/constants'
 
 export function cdnURL({user, repo, branch, file}) {
   const tag = branch ? `@${branch}` : ''
   return `https://cdn.jsdelivr.net/gh/${user}/${repo}${tag}/${file}`
 }
 
-export async function to<T, U = Error>(
-  promise: Promise<T>,
-  errorExt?: object
-): Promise<[U | null, T | undefined]> {
-  try {
-    const data = await promise
-    const res: [null, T] = [null, data]
-    return res
-  } catch (err: unknown) {
-    if (errorExt) {
-      Object.assign(err as object, errorExt)
-    }
-    const res: [U, undefined] = [err as U, undefined]
-    return res
+declare global {
+  interface Window {
+    __vscode__: any
+    __settings__: Settings
   }
+}
+
+let settings: Settings
+
+export async function getSettings() {
+  if (settings) return settings
+
+  const vscode = getVscode()
+
+  return new Promise<Settings>(resolve => {
+    const onMessage = (event: MessageEvent) => {
+      const message = event.data
+
+      if (message.type === MESSAGE_TYPE.GET_SETTINGS) {
+        window.removeEventListener('message', onMessage)
+        settings = message.payload
+        resolve(settings)
+      }
+    }
+
+    window.addEventListener('message', onMessage)
+
+    vscode.postMessage({command: MESSAGE_TYPE.GET_SETTINGS})
+  })
 }
 
 declare global {

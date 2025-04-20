@@ -1,4 +1,6 @@
 import {Uri, env, type Disposable, type ExtensionContext, type Webview} from 'vscode'
+import {getSettings} from './index'
+import {MESSAGE_TYPE} from '@/constants'
 
 export class WebviewHelper {
   /**
@@ -25,9 +27,16 @@ export class WebviewHelper {
         const {command, externalLink} = message
 
         switch (command) {
-          case 'openExternalLink':
+          case MESSAGE_TYPE.OPEN_EXTERNAL_LINK:
             void env.openExternal(Uri.parse(externalLink))
             break
+
+          case MESSAGE_TYPE.GET_SETTINGS: {
+            const settings = getSettings()
+            webview.postMessage({command: MESSAGE_TYPE.GET_SETTINGS, payload: settings})
+
+            break
+          }
 
           // Add more switch case statements here as more webview message commands
           // are created within the webview context (i.e. inside media/main.js)

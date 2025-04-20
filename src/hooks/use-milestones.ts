@@ -1,5 +1,5 @@
 import {useQuery} from '@tanstack/react-query'
-import {getMilestones} from '@/service/api'
+import {getMilestones} from '@/utils/rpc'
 
 export default function useMilestones() {
   const {data: milestones = [], isLoading: milestonesLoading} = useQuery({

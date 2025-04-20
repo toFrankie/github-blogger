@@ -1,7 +1,8 @@
 import {useMutation} from '@tanstack/react-query'
 import {message} from 'antd'
 import dayjs from 'dayjs'
-import {RPC} from '@/service/index'
+import {MESSAGE_TYPE} from '@/constants'
+import {RPC} from '@/utils/rpc'
 
 function checkFile(file: File) {
   const isLt2M = file.size / 1024 / 1024 < 2
@@ -37,7 +38,7 @@ export default function useUpload() {
             reject(new Error('Failed to read file'))
             return
           }
-          RPC.emit('uploadImage', [content, path]).then(resolve).catch(reject)
+          RPC.emit(MESSAGE_TYPE.UPLOAD_IMAGE, [content, path]).then(resolve).catch(reject)
         }
       })
     },

@@ -1,4 +1,4 @@
-export {default as useIssues} from './useIssues'
-export {default as useLabels} from './useLabels'
-export {default as useMilestones} from './useMilestones'
-export {default as useUpload} from './useUpload'
+export {default as useIssues} from './use-issues'
+export {default as useLabels} from './use-labels'
+export {default as useMilestones} from './use-milestones'
+export {default as useUpload} from './use-upload'

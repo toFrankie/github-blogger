@@ -4,11 +4,11 @@ import {message} from 'antd'
 import {Buffer} from 'buffer'
 import {cloneDeep} from 'licia-es'
 import {useEffect, useState} from 'react'
-import {WebviewRPC} from 'vscode-webview-rpc'
 import {ActionBox, Editor, LabelManager, List} from '@/components'
-import {RPC_COMMANDS} from '@/constants'
+import {MESSAGE_TYPE} from '@/constants'
 import {useIssues, useLabels, useUpload} from '@/hooks'
-import {compareIssue, getVscode} from '@/utils'
+import {compareIssue, getSettings} from '@/utils'
+import {RPC} from '@/utils/rpc'
 
 import 'bytemd/dist/index.min.css'
 import '@/app.css'
@@ -16,10 +16,6 @@ import '@/github.custom.css'
 import '@/reset.css'
 
 window.Buffer = window.Buffer ?? Buffer
-
-let RPC
-
-const vscode = getVscode()
 
 const showError = async (res: string) => {
   message.error(res)
@@ -56,9 +52,8 @@ export default function App() {
   const {upload, isUploading} = useUpload()
 
   useEffect(() => {
-    RPC = new WebviewRPC(window, vscode)
-    RPC.on(RPC_COMMANDS.SHOW_SUCCESS, showSuccess)
-    RPC.on(RPC_COMMANDS.SHOW_ERROR, showError)
+    RPC.on(MESSAGE_TYPE.SHOW_SUCCESS, showSuccess)
+    RPC.on(MESSAGE_TYPE.SHOW_ERROR, showError)
   }, [])
 
   const handleUpdateIssue = async () => {

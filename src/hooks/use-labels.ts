@@ -1,6 +1,6 @@
 import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query'
 import {message} from 'antd'
-import {createLabel, deleteLabel, getLabels, updateLabel} from '@/service/api'
+import {createLabel, deleteLabel, getLabels, updateLabel} from '@/utils/rpc'
 
 export default function useLabels() {
   const queryClient = useQueryClient()

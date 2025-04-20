@@ -34,40 +34,31 @@ export function getUri(webview, extensionUri, pathList) {
   return webview.asWebviewUri(Uri.joinPath(extensionUri, ...pathList))
 }
 
-type settingKeys = 'token' | 'user' | 'repo' | 'branch'
-
-type settingValueMap = {
-  token: string | undefined
-  user: string | undefined
-  repo: string | undefined
-  branch: string | undefined
+function getSettingValue<K extends SettingKey>(key: K): Settings[K] {
+  return workspace.getConfiguration(EXTENSION_NAME).get<Settings[K]>(key) ?? ''
 }
 
-export type Settings = {
-  [K in settingKeys]: settingValueMap[K]
-}
-
-async function getSettingValue<K extends settingKeys>(key: K): Promise<settingValueMap[K]> {
-  return workspace.getConfiguration(EXTENSION_NAME).get<settingValueMap[K]>(key)!
-}
-
-export async function checkSettings() {
-  const [token, user, repo] = await Promise.all([
-    getSettingValue('token'),
-    getSettingValue('user'),
-    getSettingValue('repo'),
-  ])
+export function checkSettings() {
+  const token = getSettingValue('token')
+  const user = getSettingValue('user')
+  const repo = getSettingValue('repo')
   return Boolean(token && user && repo)
 }
 
-export async function getSettings(): Promise<Settings> {
-  const [token, user, repo, branch] = await Promise.all([
-    getSettingValue('token'),
-    getSettingValue('user'),
-    getSettingValue('repo'),
-    getSettingValue('branch'),
-  ])
-  return {token, user, repo, branch}
+let settings: Settings
+
+const DEFAULT_BRANCH = 'main'
+
+export function getSettings(): Settings {
+  if (settings) return settings
+
+  const token = getSettingValue('token')
+  const user = getSettingValue('user')
+  const repo = getSettingValue('repo')
+  const branch = getSettingValue('branch') || DEFAULT_BRANCH
+
+  settings = {token, user, repo, branch}
+  return settings
 }
 
 export function cdnURL({
