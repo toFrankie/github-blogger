@@ -29,9 +29,9 @@ export const APIS = {
 
 export const MESSAGE_TYPE = {
   GET_ISSUES: 'get_issues',
-  GET_FILTER_ISSUES: 'get_filter_issues',
-  GET_TOTAL_COUNT: 'get_total_count',
-  GET_FILTER_COUNT: 'get_filter_count',
+  GET_ISSUES_WITH_FILTER: 'get_issues_with_filter',
+  GET_ISSUE_COUNT: 'get_issue_count',
+  GET_ISSUE_COUNT_WITH_FILTER: 'get_issue_count_with_filter',
   CREATE_ISSUE: 'create_issue',
   UPDATE_ISSUE: 'update_issue',
   OPEN_EXTERNAL_LINK: 'open_external_link',

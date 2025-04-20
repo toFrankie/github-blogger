@@ -5,27 +5,22 @@ interface IssueCountParams {
   repository: string
 }
 
-interface FilterIssueCountParams extends IssueCountParams {
+interface IssueCountParamsWithFilter extends IssueCountParams {
   /** 标签名称 */
   label: string
-  /** 里程碑名称 */
-  milestone: string
 }
 
-interface FilterIssueParams extends IssueCountParams {
+interface IssueParamsWithFilter extends IssueCountParams {
   /** 每页数量 */
-  first: number
+  first?: number
   /** 标签名称列表 */
-  labels: string
+  labels?: string
   /** 标题关键词 */
-  title: string
+  title?: string
   /** 分页游标 */
-  cursor: string
+  cursor?: string
 }
 
-/**
- * 获取 issues 总数
- */
 export function getIssueCount({username, repository}: IssueCountParams) {
   return `
     query {
@@ -41,21 +36,12 @@ export function getIssueCount({username, repository}: IssueCountParams) {
   `
 }
 
-/**
- * 过滤器来获取 issue 数量
- */
-export function getFilterIssueCount({
-  username,
-  repository,
-  label,
-  milestone,
-}: FilterIssueCountParams) {
+export function getIssueCountWithFilter({username, repository, label}: IssueCountParamsWithFilter) {
   return `
     {
       search(
         type: ISSUE
-        query: "user:${username} repo:${repository} state:open ${
-          milestone ? `milestone:${milestone}` : ''
+        query: "user:${username} repo:${repository} state:open : ''
         } ${label ? `label:${label}` : ''}"
       ) {
         issueCount
@@ -64,17 +50,14 @@ export function getFilterIssueCount({
   `
 }
 
-/**
- * 过滤器来获取 issue
- */
-export function getFilterIssue({
+export function getIssuesWithFilter({
   username,
   repository,
   first,
   labels,
   title,
   cursor,
-}: FilterIssueParams) {
+}: IssueParamsWithFilter) {
   return `
     {
       search(

@@ -29,13 +29,13 @@ export async function getMilestones() {
   return await RPC.emit(MESSAGE_TYPE.GET_MILESTONES, [])
 }
 
-export async function getIssueTotalCount(filterLabels: any[] = []) {
+export async function getIssueCount(filterLabels: any[] = []) {
   if (filterLabels.length > 0) {
-    return await RPC.emit(MESSAGE_TYPE.GET_FILTER_COUNT, [
+    return (await RPC.emit(MESSAGE_TYPE.GET_ISSUE_COUNT_WITH_FILTER, [
       filterLabels.map(label => label.name).join(','),
-    ])
+    ])) as Promise<number>
   }
-  return await RPC.emit(MESSAGE_TYPE.GET_TOTAL_COUNT)
+  return (await RPC.emit(MESSAGE_TYPE.GET_ISSUE_COUNT)) as Promise<number>
 }
 
 export async function getIssues(page: number, labels: string[] = [], title: string = '') {
@@ -44,7 +44,11 @@ export async function getIssues(page: number, labels: string[] = [], title: stri
     return issues || []
   }
 
-  const {issues} = await RPC.emit(MESSAGE_TYPE.GET_FILTER_ISSUES, [title, labels.join(','), page])
+  const {issues} = await RPC.emit(MESSAGE_TYPE.GET_ISSUES_WITH_FILTER, [
+    title,
+    labels.join(','),
+    page,
+  ])
 
   return issues
 }

@@ -79,7 +79,7 @@ export function cdnURL({
 export async function to<T, U = Error>(
   promise: Promise<T>,
   errorExt?: object
-): Promise<[U | null, T | undefined]> {
+): Promise<[U, null] | [null, T]> {
   try {
     const data = await promise
     const result: [null, T] = [null, data]
@@ -90,7 +90,7 @@ export async function to<T, U = Error>(
     if (errorExt) {
       Object.assign(err as object, errorExt)
     }
-    const resultWithError: [U, undefined] = [err as U, undefined]
+    const resultWithError: [U, null] = [err as U, null]
     return resultWithError
   }
 }

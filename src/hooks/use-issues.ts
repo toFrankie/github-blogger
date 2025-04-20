@@ -1,7 +1,7 @@
 import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query'
 import {message} from 'antd'
 import {SUBMIT_TYPE} from '@/constants'
-import {archiveIssue, createIssue, getIssues, getIssueTotalCount, updateIssue} from '@/utils/rpc'
+import {archiveIssue, createIssue, getIssueCount, getIssues, updateIssue} from '@/utils/rpc'
 
 interface UseIssuesProps {
   page: number
@@ -18,8 +18,8 @@ export default function useIssues({page, labels = [], title = ''}: UseIssuesProp
   })
 
   const {data: totalCount = 1} = useQuery({
-    queryKey: ['totalCount', labels],
-    queryFn: () => getIssueTotalCount(labels),
+    queryKey: ['issue', 'count', labels],
+    queryFn: () => getIssueCount(labels),
   })
 
   const createIssueMutation = useMutation({

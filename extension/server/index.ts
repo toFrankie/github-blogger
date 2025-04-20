@@ -119,10 +119,15 @@ export default class Service {
     return []
   }
 
-  async getFilterIssues(params: {title: string; labels: string; cursor: string}) {
-    const [err, res] = await to(
+  async getIssuesWithFilter(params: {
+    title: string
+    labels: string
+    cursor?: string
+    first?: number
+  }) {
+    const [err, res] = await to<SearchResponse>(
       this.octokit.graphql(
-        graphqlQueries.getFilterIssue({
+        graphqlQueries.getIssuesWithFilter({
           username: this.config.user,
           repository: this.config.repo,
           ...params,
@@ -195,13 +200,12 @@ export default class Service {
   }
 
   async queryFilterIssueCount(label: string) {
-    const [err, res] = await to(
+    const [err, res] = await to<IssueCountResponseWithFilter>(
       this.octokit.graphql(
-        graphqlQueries.getFilterIssueCount({
+        graphqlQueries.getIssueCountWithFilter({
           username: this.config.user,
           repository: this.config.repo,
           label,
-          milestone: undefined,
         })
       )
     )
@@ -210,7 +214,7 @@ export default class Service {
   }
 
   async queryTotalCount() {
-    const [err, res] = await to(
+    const [err, res] = await to<IssueCountResponse>(
       this.octokit.graphql(
         graphqlQueries.getIssueCount({username: this.config.user, repository: this.config.repo})
       )
@@ -311,8 +315,8 @@ export default class Service {
       return await this.getIssues({page, labels})
     }
 
-    const getFilterIssues = async (title, labels, page) => {
-      return await this.getFilterIssues({
+    const getIssuesWithFilter = async (title: string, labels: string, page: number) => {
+      return await this.getIssuesWithFilter({
         title,
         labels,
         cursor: page > 1 ? encode(`cursor:${(page - 1) * 20}`) : undefined,
@@ -397,12 +401,12 @@ export default class Service {
     this.rpc.on(MESSAGE_TYPE.CREATE_LABEL, createLabel)
     this.rpc.on(MESSAGE_TYPE.UPDATE_LABEL, updateLabel)
     this.rpc.on(MESSAGE_TYPE.GET_ISSUES, getIssues)
-    this.rpc.on(MESSAGE_TYPE.GET_FILTER_ISSUES, getFilterIssues)
+    this.rpc.on(MESSAGE_TYPE.GET_ISSUES_WITH_FILTER, getIssuesWithFilter)
     this.rpc.on(MESSAGE_TYPE.UPDATE_ISSUE, updateIssue)
     this.rpc.on(MESSAGE_TYPE.CREATE_ISSUE, createIssue)
     this.rpc.on(MESSAGE_TYPE.UPLOAD_IMAGE, uploadImage)
-    this.rpc.on(MESSAGE_TYPE.GET_FILTER_COUNT, getFilterCount)
-    this.rpc.on(MESSAGE_TYPE.GET_TOTAL_COUNT, getTotalCount)
+    this.rpc.on(MESSAGE_TYPE.GET_ISSUE_COUNT, getTotalCount)
+    this.rpc.on(MESSAGE_TYPE.GET_ISSUE_COUNT_WITH_FILTER, getFilterCount)
     this.rpc.on(MESSAGE_TYPE.UPDATE_REF, updateRef)
     this.rpc.on(MESSAGE_TYPE.GET_COMMIT, getCommit)
     this.rpc.on(MESSAGE_TYPE.CREATE_COMMIT, createCommit)

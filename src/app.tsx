@@ -7,7 +7,7 @@ import {useEffect, useState} from 'react'
 import {ActionBox, Editor, LabelManager, List} from '@/components'
 import {MESSAGE_TYPE} from '@/constants'
 import {useIssues, useLabels, useUpload} from '@/hooks'
-import {compareIssue, getSettings} from '@/utils'
+import {compareIssue} from '@/utils'
 import {RPC} from '@/utils/rpc'
 
 import 'bytemd/dist/index.min.css'
