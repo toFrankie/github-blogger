@@ -27,13 +27,6 @@ const showSuccess = async (res: string) => {
   await Promise.resolve()
 }
 
-interface IssueData {
-  number: number
-  html_url: string
-  created_at: string
-  updated_at: string
-}
-
 export default function App() {
   const [currentPage, setCurrentPage] = useState(1)
   const [filterTitle, setFilterTitle] = useState('')
@@ -45,7 +38,7 @@ export default function App() {
 
   const {issues, totalCount, issuesLoading, createIssue, updateIssue} = useIssues({
     page: currentPage,
-    labels: filterLabels,
+    LabelNames: filterLabels,
     title: filterTitle,
   })
   const {labels, labelsLoading, createLabel, deleteLabel, updateLabel} = useLabels()
@@ -64,7 +57,7 @@ export default function App() {
     }
 
     if (!number) {
-      const data = (await createIssue({title, body, labels})) as IssueData | undefined
+      const data = await createIssue({title, body, labelNames: labels})
       if (data) {
         setCurrent(prev => ({
           ...prev,
@@ -84,7 +77,8 @@ export default function App() {
       return
     }
 
-    const data = (await updateIssue({number, title, body, labels})) as IssueData | undefined
+    const data = await updateIssue({number, title, body, labelNames: labels})
+
     if (data) {
       setCurrent(prev => ({
         ...prev,

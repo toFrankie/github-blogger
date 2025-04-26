@@ -95,7 +95,7 @@ export default function List({
       onSetCurrentPage(1)
       onSetFilterLabels(filteredNames)
     }, 500),
-    []
+    [totalLabels]
   )
 
   return (

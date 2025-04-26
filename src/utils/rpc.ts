@@ -2,6 +2,7 @@ import {message} from 'antd'
 import dayjs from 'dayjs'
 import {WebviewRPC} from 'vscode-webview-rpc'
 import {MESSAGE_TYPE, SUBMIT_TYPE} from '@/constants'
+import type {CreateIssueParams, UpdateIssueParams} from '@/types/issues'
 import {generateMarkdown, getVscode} from '@/utils'
 
 const vscode = getVscode()
@@ -29,10 +30,11 @@ export async function getMilestones() {
   return await RPC.emit(MESSAGE_TYPE.GET_MILESTONES, [])
 }
 
-export async function getIssueCount(filterLabels: any[] = []) {
-  if (filterLabels.length > 0) {
+export async function getIssueCount(filterTitle: string, filterLabelNames: string[] = []) {
+  if (filterTitle || filterLabelNames.length > 0) {
     return (await RPC.emit(MESSAGE_TYPE.GET_ISSUE_COUNT_WITH_FILTER, [
-      filterLabels.map(label => label.name).join(','),
+      filterTitle,
+      filterLabelNames.join(','),
     ])) as Promise<number>
   }
   return (await RPC.emit(MESSAGE_TYPE.GET_ISSUE_COUNT)) as Promise<number>
@@ -40,7 +42,7 @@ export async function getIssueCount(filterLabels: any[] = []) {
 
 export async function getIssues(page: number, labels: string[] = [], title: string = '') {
   if (labels.length < 2 && !title) {
-    const issues = await RPC.emit(MESSAGE_TYPE.GET_ISSUES, [page, labels.join(',')])
+    const issues = (await RPC.emit(MESSAGE_TYPE.GET_ISSUES, [page, labels.join(',')])) as Issues
     return issues || []
   }
 
@@ -53,12 +55,21 @@ export async function getIssues(page: number, labels: string[] = [], title: stri
   return issues
 }
 
-export async function createIssue(title: string, body: string, labels: any[]) {
-  return await RPC.emit(MESSAGE_TYPE.CREATE_ISSUE, [title, body, JSON.stringify(labels)])
+export async function createIssue(params: CreateIssueParams): Promise<Issue> {
+  return await RPC.emit(MESSAGE_TYPE.CREATE_ISSUE, [
+    params.title,
+    params.body,
+    JSON.stringify(params.labelNames),
+  ])
 }
 
-export async function updateIssue(number: number, title: string, body: string, labels: any[]) {
-  return await RPC.emit(MESSAGE_TYPE.UPDATE_ISSUE, [number, title, body, JSON.stringify(labels)])
+export async function updateIssue(params: UpdateIssueParams): Promise<Issue> {
+  return await RPC.emit(MESSAGE_TYPE.UPDATE_ISSUE, [
+    params.number,
+    params.title,
+    params.body,
+    JSON.stringify(params.labelNames),
+  ])
 }
 
 export async function archiveIssue(

@@ -48,21 +48,18 @@ export default class Service {
   }
 
   async getLabels(params: {page: number; per_page: number}) {
-    const [err, res] = await to(
+    const [_err, res] = await to(
       this.octokit.request(APIS.GET_LABELS, {
         owner: this.config.user,
         repo: this.config.repo,
         ...params,
       })
     )
-    if (!err) {
-      return res?.data || []
-    }
-    return []
+    return res?.data ?? []
   }
 
   async createLabel(params: {name: string}) {
-    const [err, res] = await to(
+    const [_err, res] = await to(
       this.octokit.request(APIS.CREATE_LABEL, {
         owner: this.config.user,
         repo: this.config.repo,
@@ -70,42 +67,33 @@ export default class Service {
         ...params,
       })
     )
-    if (!err) {
-      return res?.data || {}
-    }
-    return {}
+    return res?.data ?? {}
   }
 
   async deleteLabel(params: {name: string}) {
-    const [err, res] = await to(
+    const [_err, res] = await to(
       this.octokit.request(APIS.DELETE_LABEL, {
         owner: this.config.user,
         repo: this.config.repo,
         ...params,
       })
     )
-    if (!err) {
-      return res?.data
-    }
-    return []
+    return res?.data ?? []
   }
 
   async updateLabel(params: {name: string; new_name: string}) {
-    const [err, res] = await to(
+    const [_err, res] = await to(
       this.octokit.request(APIS.UPDATE_LABEL, {
         owner: this.config.user,
         repo: this.config.repo,
         ...params,
       })
     )
-    if (!err) {
-      return res?.data
-    }
-    return []
+    return res?.data ?? []
   }
 
-  async getIssues(params: {per_page: number}) {
-    const [err, res] = await to(
+  async getIssues(params: {page: number; label: string}) {
+    const [_err, res] = await to(
       this.octokit.request(APIS.GET_ISSUES, {
         owner: this.config.user,
         repo: this.config.repo,
@@ -113,10 +101,7 @@ export default class Service {
         ...params,
       })
     )
-    if (!err) {
-      return res?.data
-    }
-    return []
+    return res?.data ?? []
   }
 
   async getIssuesWithFilter(params: {
@@ -125,8 +110,8 @@ export default class Service {
     cursor?: string
     first?: number
   }) {
-    const [err, res] = await to<SearchResponse>(
-      this.octokit.graphql(
+    const [err, res] = await to(
+      this.octokit.graphql<GraphqlSearchIssuesResponse>(
         graphqlQueries.getIssuesWithFilter({
           username: this.config.user,
           repository: this.config.repo,
@@ -146,32 +131,26 @@ export default class Service {
     return []
   }
 
-  async updateIssue(params: {issue_number: number; title: string; body: string; labels: string}) {
-    const [err, res] = await to(
+  async updateIssue(params: {issue_number: number; title: string; body: string; labels: string[]}) {
+    const [_err, res] = await to(
       this.octokit.request(APIS.UPDATE_ISSUE, {
         owner: this.config.user,
         repo: this.config.repo,
         ...params,
       })
     )
-    if (!err) {
-      return res?.data
-    }
-    return []
+    return res?.data ?? []
   }
 
-  async createIssue(params: {title: string; body: string; labels: string}) {
-    const [err, res] = await to(
+  async createIssue(params: {title: string; body: string; labelNames: string[]}) {
+    const [_err, res] = await to(
       this.octokit.request(APIS.CREATE_ISSUE, {
         owner: this.config.user,
         repo: this.config.repo,
         ...params,
       })
     )
-    if (!err) {
-      return res?.data
-    }
-    return []
+    return res?.data ?? undefined
   }
 
   async uploadImage(params: {content: string; path: string}) {
@@ -199,28 +178,29 @@ export default class Service {
     return []
   }
 
-  async queryFilterIssueCount(label: string) {
-    const [err, res] = await to<IssueCountResponseWithFilter>(
+  async queryIssueCount() {
+    const [err, res] = await to(
+      this.octokit.graphql<GraphqlIssueCountResponse>(
+        graphqlQueries.getIssueCount({username: this.config.user, repository: this.config.repo})
+      )
+    )
+    if (!err) return res.repository.issues.totalCount
+    return 0
+  }
+
+  async queryIssuceCountWithFilter(title: string, label: string) {
+    const [err, res] = await to<GraphqlIssueCountWithFilterResponse>(
       this.octokit.graphql(
         graphqlQueries.getIssueCountWithFilter({
           username: this.config.user,
           repository: this.config.repo,
+          title,
           label,
         })
       )
     )
     if (!err) return res.search.issueCount
-    return 1
-  }
-
-  async queryTotalCount() {
-    const [err, res] = await to<IssueCountResponse>(
-      this.octokit.graphql(
-        graphqlQueries.getIssueCount({username: this.config.user, repository: this.config.repo})
-      )
-    )
-    if (!err) return res.repository.issues.totalCount
-    return 1
+    return 0
   }
 
   async getRef() {
@@ -262,10 +242,7 @@ export default class Service {
     throw err
   }
 
-  async createTree(params: {
-    base_tree: string
-    tree: {path: string; mode: string; type: string; sha: string}[]
-  }) {
+  async createTree(params: CreateTreeParams) {
     const [err, res] = await to(
       this.octokit.request(APIS.CREATE_TREE, {
         owner: this.config.user,
@@ -311,8 +288,8 @@ export default class Service {
       return data
     }
 
-    const getIssues = async (page: number, labels: string) => {
-      return await this.getIssues({page, labels})
+    const getIssues = async (page: number, label: string) => {
+      return await this.getIssues({page, label})
     }
 
     const getIssuesWithFilter = async (title: string, labels: string, page: number) => {
@@ -336,15 +313,20 @@ export default class Service {
       return await this.updateLabel({name, new_name: newName})
     }
 
-    const createIssue = async (title, body, labels) => {
+    const createIssue = async (title: string, body: string, labelNamesStr: string) => {
       return await this.createIssue({
         title,
         body,
-        labels: JSON.parse(labels),
+        labelNames: JSON.parse(labelNamesStr),
       })
     }
 
-    const updateIssue = async (issueNumber, title, body, labels) => {
+    const updateIssue = async (
+      issueNumber: number,
+      title: string,
+      body: string,
+      labels: string
+    ) => {
       return await this.updateIssue({
         issue_number: issueNumber,
         title,
@@ -357,12 +339,12 @@ export default class Service {
       return await this.uploadImage({content, path})
     }
 
-    const getTotalCount = async () => {
-      return await this.queryTotalCount()
+    const getIssueCount = async () => {
+      return await this.queryIssueCount()
     }
 
-    const getFilterCount = async label => {
-      return await this.queryFilterIssueCount(label)
+    const getIssueCountWithFilter = async (title: string, label: string) => {
+      return await this.queryIssuceCountWithFilter(title, label)
     }
 
     const getRef = async () => {
@@ -389,7 +371,7 @@ export default class Service {
       return await this.createBlob({content})
     }
 
-    const createTree = async (baseTree, path, sha) => {
+    const createTree = async (baseTree: string, path: string, sha: string) => {
       return await this.createTree({
         base_tree: baseTree,
         tree: [{path, mode: '100644', type: 'blob', sha}],
@@ -405,8 +387,8 @@ export default class Service {
     this.rpc.on(MESSAGE_TYPE.UPDATE_ISSUE, updateIssue)
     this.rpc.on(MESSAGE_TYPE.CREATE_ISSUE, createIssue)
     this.rpc.on(MESSAGE_TYPE.UPLOAD_IMAGE, uploadImage)
-    this.rpc.on(MESSAGE_TYPE.GET_ISSUE_COUNT, getTotalCount)
-    this.rpc.on(MESSAGE_TYPE.GET_ISSUE_COUNT_WITH_FILTER, getFilterCount)
+    this.rpc.on(MESSAGE_TYPE.GET_ISSUE_COUNT, getIssueCount)
+    this.rpc.on(MESSAGE_TYPE.GET_ISSUE_COUNT_WITH_FILTER, getIssueCountWithFilter)
     this.rpc.on(MESSAGE_TYPE.UPDATE_REF, updateRef)
     this.rpc.on(MESSAGE_TYPE.GET_COMMIT, getCommit)
     this.rpc.on(MESSAGE_TYPE.CREATE_COMMIT, createCommit)

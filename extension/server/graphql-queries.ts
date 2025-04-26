@@ -6,15 +6,17 @@ interface IssueCountParams {
 }
 
 interface IssueCountParamsWithFilter extends IssueCountParams {
-  /** 标签名称 */
-  label: string
+  /** 标签名称，多个标签用逗号分隔 */
+  label?: string
+  /** 标题关键词 */
+  title?: string
 }
 
 interface IssueParamsWithFilter extends IssueCountParams {
   /** 每页数量 */
   first?: number
-  /** 标签名称列表 */
-  labels?: string
+  /** 标签名称，多个标签用逗号分隔 */
+  label?: string
   /** 标题关键词 */
   title?: string
   /** 分页游标 */
@@ -36,13 +38,27 @@ export function getIssueCount({username, repository}: IssueCountParams) {
   `
 }
 
-export function getIssueCountWithFilter({username, repository, label}: IssueCountParamsWithFilter) {
+export function getIssueCountWithFilter({
+  username,
+  repository,
+  title,
+  label,
+}: IssueCountParamsWithFilter) {
+  const queryParts = {
+    user: `user:${username}`,
+    repo: `repo:${repository}`,
+    state: 'state:open',
+    label: label ? `label:${label}` : '',
+    title: title ? `in:title ${title}` : '',
+  }
+
+  const query = Object.values(queryParts).filter(Boolean).join(' ')
+
   return `
     {
       search(
         type: ISSUE
-        query: "user:${username} repo:${repository} state:open : ''
-        } ${label ? `label:${label}` : ''}"
+        query: "${query}"
       ) {
         issueCount
       }
@@ -54,19 +70,27 @@ export function getIssuesWithFilter({
   username,
   repository,
   first,
-  labels,
+  label,
   title,
   cursor,
 }: IssueParamsWithFilter) {
+  const queryParts = {
+    user: `user:${username}`,
+    repo: `repo:${repository}`,
+    state: 'state:open',
+    label: label ? `label:${label}` : '',
+    title: title ? `in:title ${title}` : '',
+  }
+
+  const query = Object.values(queryParts).filter(Boolean).join(' ')
+
   return `
     {
       search(
         type: ISSUE
         first: ${first}
         ${cursor ? `after: "${cursor}"` : ''}
-        query: "user:${username} repo:${repository} state:open ${labels ? `label:${labels}` : ''} ${
-          title ? `in:title ${title}` : ''
-        }"
+        query: "${query}"
       ) {
         issueCount
         edges {

@@ -71,7 +71,7 @@ export default function Editor({
       </div>
       <div className="app-labels">
         <Stack direction="horizontal" gap="condensed" wrap="wrap">
-          {totalLabels.map((label: any) => {
+          {totalLabels.map(label => {
             const checked = labels.some(l => l.id === label.id || l.node_id === label.node_id)
             return (
               <Label

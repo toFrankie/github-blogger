@@ -1,30 +1,30 @@
 import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query'
 import {message} from 'antd'
 import {SUBMIT_TYPE} from '@/constants'
+import type {CreateIssueParams, UpdateIssueParams} from '@/types/issues'
 import {archiveIssue, createIssue, getIssueCount, getIssues, updateIssue} from '@/utils/rpc'
 
-interface UseIssuesProps {
+interface UseIssuesParams {
   page: number
-  labels?: string[]
+  LabelNames?: string[]
   title?: string
 }
 
-export default function useIssues({page, labels = [], title = ''}: UseIssuesProps) {
+export default function useIssues({page, LabelNames = [], title = ''}: UseIssuesParams) {
   const queryClient = useQueryClient()
 
   const {data: issues = [], isLoading: issuesLoading} = useQuery({
-    queryKey: ['issues', page, labels, title],
-    queryFn: () => getIssues(page, labels, title),
+    queryKey: ['issues', page, LabelNames, title],
+    queryFn: () => getIssues(page, LabelNames, title),
   })
 
   const {data: totalCount = 1} = useQuery({
-    queryKey: ['issue', 'count', labels],
-    queryFn: () => getIssueCount(labels),
+    queryKey: ['issue', 'count', LabelNames, title],
+    queryFn: () => getIssueCount(title, LabelNames),
   })
 
   const createIssueMutation = useMutation({
-    mutationFn: ({title, body, labels}: {title: string; body: string; labels: string[]}) =>
-      createIssue(title, body, labels),
+    mutationFn: (params: CreateIssueParams) => createIssue(params),
     onSuccess: async data => {
       await archiveIssue(data, SUBMIT_TYPE.CREATE)
       queryClient.invalidateQueries({queryKey: ['issues']})
@@ -36,17 +36,7 @@ export default function useIssues({page, labels = [], title = ''}: UseIssuesProp
   })
 
   const updateIssueMutation = useMutation({
-    mutationFn: ({
-      number,
-      title,
-      body,
-      labels,
-    }: {
-      number: number
-      title: string
-      body: string
-      labels: string[]
-    }) => updateIssue(number, title, body, labels),
+    mutationFn: (params: UpdateIssueParams) => updateIssue(params),
     onSuccess: async (data, variables) => {
       await archiveIssue({...variables, ...data}, SUBMIT_TYPE.UPDATE)
       queryClient.invalidateQueries({queryKey: ['issues']})
@@ -61,7 +51,7 @@ export default function useIssues({page, labels = [], title = ''}: UseIssuesProp
     issues,
     totalCount,
     issuesLoading,
-    createIssue: createIssueMutation.mutate,
-    updateIssue: updateIssueMutation.mutate,
+    createIssue: createIssueMutation.mutateAsync,
+    updateIssue: updateIssueMutation.mutateAsync,
   }
 }
