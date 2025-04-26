@@ -69,6 +69,7 @@
   },
   "devDependencies": {
     "@commitlint/cli": "19.8.0",
+    "@octokit/types": "13.10.0",
     "@tanstack/eslint-plugin-query": "5.73.3",
     "@tomjs/commitlint": "3.3.0",
     "@tomjs/eslint": "4.2.0",

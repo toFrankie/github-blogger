@@ -1,3 +1,5 @@
+import type {Endpoints} from '@octokit/types'
+
 export const EXTENSION_NAME = 'github-blogger'
 
 export const EXTENSION_COMMAND = {
@@ -25,7 +27,7 @@ export const APIS = {
   CREATE_COMMIT: 'POST /repos/{owner}/{repo}/git/commits',
   CREATE_BLOB: 'POST /repos/{owner}/{repo}/git/blobs',
   CREATE_TREE: 'POST /repos/{owner}/{repo}/git/trees',
-} as const
+} as const satisfies Record<string, keyof Endpoints>
 
 export const MESSAGE_TYPE = {
   GET_ISSUES: 'get_issues',

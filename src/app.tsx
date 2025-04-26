@@ -180,7 +180,7 @@ export default function App() {
         number={current.number}
         placeholder="Leave your thought..."
         title={current.title || ''}
-        totalLabels={labels || []}
+        totalLabels={labels}
         onUpdateTitle={title => setCurrent(prev => ({...prev, title}))}
         onUpdateBody={handleSetCurrentIssueBody}
         onAddLabel={handleAddLabel}

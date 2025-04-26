@@ -9,7 +9,7 @@ const vscode = getVscode()
 export const RPC = new WebviewRPC(window, vscode)
 
 export async function getLabels() {
-  const labels = await RPC.emit(MESSAGE_TYPE.GET_LABELS, [])
+  const labels = (await RPC.emit(MESSAGE_TYPE.GET_LABELS, [])) as Labels
   return labels ?? []
 }
 

@@ -16,13 +16,13 @@ interface EditorProps {
   title: string
   number: number
   content: string
-  labels: any[]
-  totalLabels: any[]
+  labels: Labels
+  totalLabels: Labels
   placeholder: string
   onUpdateTitle: (title: string) => void
   onUpdateBody: (body: string) => void
-  onAddLabel: (label: any) => void
-  onRemoveLabel: (label: any) => void
+  onAddLabel: (label: Label) => void
+  onRemoveLabel: (label: Label) => void
   onUpload: (files: FileList) => Promise<any>
   isUploading: boolean
 }

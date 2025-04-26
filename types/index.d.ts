@@ -1,109 +1,57 @@
-type SettingKey = 'token' | 'user' | 'repo' | 'branch'
+import type {Endpoints, Route, OctokitResponse} from '@octokit/types'
+import {APIS} from '@/constants'
 
-type Settings = {
-  [K in SettingKey]: string
-}
+export {}
 
-/**
- * GitHub GraphQL API 返回的 issue 总数查询结果
- */
-interface IssueCountResponse {
-  repository: {
-    issues: {
-      totalCount: number
+declare global {
+  type SettingKey = 'token' | 'user' | 'repo' | 'branch'
+
+  type Settings = {
+    [K in SettingKey]: string
+  }
+
+  interface IssueCountResponse {
+    repository: {
+      issues: {
+        totalCount: number
+      }
     }
   }
-}
 
-/**
- * GitHub GraphQL API 返回的过滤后 issue 数量查询结果
- */
-interface IssueCountResponseWithFilter {
-  search: {
-    issueCount: number
+  interface IssueCountResponseWithFilter {
+    search: {
+      issueCount: number
+    }
   }
-}
 
-interface Issue {
-  url: string
-  id: string
-  title: string
-  body: string
-  createdAt: string
-  updatedAt: string
-  number: number
-  state: 'open' | 'closed'
-  milestone?: {
-    id: string
-    title: string
+  interface SearchResponse {
+    search: {
+      issueCount: number
+      edges: Array<{
+        node: Issue
+      }>
+    }
   }
-  labels: {
-    nodes: Array<{
-      id: string
-      url: string
-      name: string
-      color: string
-      description: string | null
-    }>
-  }
-}
 
-interface SearchResponse {
-  search: {
-    issueCount: number
-    edges: Array<{
-      node: Issue
-    }>
-  }
-}
+  type APIMap = typeof APIS
 
-interface IssueParams {
-  owner: string
-  repo: string
-  issue_number?: number
-  title?: string
-  body?: string
-  labels?: Array<string | {name: string}>
-  state?: 'open' | 'closed'
-}
+  type APIUrl = APIMap[keyof APIMap]
 
-interface TreeEntry {
-  path: string
-  mode: '100644' | '100755' | '040000' | '160000' | '120000'
-  type: 'blob' | 'tree' | 'commit'
-  sha: string
-}
+  type RestApiResponseType<T extends APIUrl> = T extends keyof Endpoints
+    ? Endpoints[T]['response']
+    : OctokitResponse<any>
 
-interface CreateTreeParams {
-  owner: string
-  repo: string
-  base_tree?: string
-  tree: TreeEntry[]
-}
+  type RestApiResponse<T extends APIUrl> = Promise<RestApiResponseType<T>>
 
-interface IssueParamsWithFilter {
-  username: string
-  repository: string
-  first: number
-  labels?: string
-  title?: string
-  cursor?: string
-}
+  type RestApiData<T extends APIUrl> = RestApiResponseType<T>['data']
 
-interface UpdateIssueParams {
-  owner: string
-  repo: string
-  issue_number: number
-  title?: string
-  body?: string
-  labels?: Array<string | {name: string}>
-  state?: 'open' | 'closed'
-}
+  type RestApiDataItem<T> = T extends Array<infer U> ? U : never
 
-interface CreateIssueParams {
-  owner: string
-  repo: string
-  title: string
-  body?: string
-  labels?: Array<string | {name: string}>
+  type Labels = RestApiData<typeof APIS.GET_LABELS>
+
+  type Label = RestApiDataItem<Labels>
+
+  type Issues = RestApiData<typeof APIS.GET_ISSUES>
+
+  type Issue = RestApiDataItem<Issues>
 }

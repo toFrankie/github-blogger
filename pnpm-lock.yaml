@@ -105,6 +105,9 @@ importers:
       '@commitlint/cli':
         specifier: 19.8.0
         version: 19.8.0(@types/node@22.14.1)(typescript@5.3.3)
+      '@octokit/types':
+        specifier: 13.10.0
+        version: 13.10.0
       '@tanstack/eslint-plugin-query':
         specifier: 5.73.3
         version: 5.73.3(eslint@9.24.0(jiti@2.4.2))(typescript@5.3.3)

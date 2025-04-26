@@ -3,12 +3,12 @@ import {Drawer, Input, message, Space, Tag, Tooltip} from 'antd'
 import {useRef, useState} from 'react'
 
 interface LabelManagerProps {
-  labels: any[]
+  labels: Labels
   visible: boolean
   loading: boolean
-  onCreateLabel: (label: any) => Promise<void>
-  onDeleteLabel: (label: any) => Promise<void>
-  onUpdateLabel: (oldLabel: any, newLabel: any) => Promise<void>
+  onCreateLabel: (label: Label) => Promise<void>
+  onDeleteLabel: (label: Label) => Promise<void>
+  onUpdateLabel: (oldLabel: Label, newLabel: Label) => Promise<void>
   onSetLabelsVisible: (visible: boolean) => void
 }
 

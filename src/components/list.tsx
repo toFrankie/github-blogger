@@ -25,7 +25,7 @@ const SELECT_PANEL_PLACEHOLDER = 'Filter by label'
 interface ListProps {
   currentPage: number
   totalCount: number
-  totalLabels: any[]
+  totalLabels: Labels
   visible: boolean
   issues: any[]
   loading: boolean
