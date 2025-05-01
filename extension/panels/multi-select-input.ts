@@ -24,7 +24,7 @@ export default async function multiStepInput(context: ExtensionContext) {
     return state
   }
 
-  const title = 'Github Blogger Initialization'
+  const title = 'GitHub Blogger Initialization'
 
   async function inputToken(input: any, state: any) {
     state.token = await input.showInputBox({
@@ -126,19 +126,19 @@ export default async function multiStepInput(context: ExtensionContext) {
 
       try {
         await octokit.request(APIS.CREATE_REPO, {name: repoName})
-        window.showInformationMessage('Github Blogger initialization is completed.')
+        window.showInformationMessage('GitHub Blogger initialization is completed.')
       } catch (e: unknown) {
         const errorMsg = e instanceof Error ? e.message : 'Unknown error'
 
         if (errorMsg.includes('already exists')) {
           window.showInformationMessage(
-            `Github Blogger initialization is completed. The ${repoName} repo already exists, skip the creation step.`
+            `GitHub Blogger initialization is completed. The ${repoName} repo already exists, skip the creation step.`
           )
           return
         }
 
         window.showErrorMessage(
-          `Github Blogger initialization failed, please check the config.\n${errorMsg}`
+          `GitHub Blogger initialization failed, please check the config.\n${errorMsg}`
         )
       }
       progress.report({increment: 100})

@@ -1,6 +1,6 @@
 {
   "name": "github-blogger",
-  "displayName": "Github Blogger",
+  "displayName": "GitHub Blogger",
   "description": "Use GitHub Issue as your blog",
   "version": "1.0.0",
   "publisher": "Frankie",
@@ -46,11 +46,11 @@
     "commands": [
       {
         "command": "github-blogger.open-dev",
-        "title": "Open Github Blogger (Dev)"
+        "title": "Open GitHub Blogger (Dev)"
       },
       {
         "command": "github-blogger.config-dev",
-        "title": "Config Github Blogger (Dev)"
+        "title": "Config GitHub Blogger (Dev)"
       }
     ]
   },

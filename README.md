@@ -1,4 +1,4 @@
-# Github Blogger
+# GitHub Blogger
 
 > Inspired by [Aaronphy/Blogger](https://github.com/Aaronphy/Blogger).
 
@@ -9,9 +9,9 @@ Perhaps you can use it in conjunction with [github-issue-toc](https://github.com
 ## 📖 Quick Start
 
 1. Get the extension from the [Marketpalce](https://marketplace.visualstudio.com/items?itemName=Frankie.github-blogger).
-2. Prepare your [Github Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens).
-3. Open the command palette (`Command + Shift + P` on macOS, `Ctrl + Shift + P` on Windows/Linux), then type `Config Github Blogger` to finish the initial setup.
-4. Open the command palette, type `Open Github Blogger`, and start writing your blog.
+2. Prepare your [GitHub Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens).
+3. Open the command palette (`Command + Shift + P` on macOS, `Ctrl + Shift + P` on Windows/Linux), then type `Config GitHub Blogger` to finish the initial setup.
+4. Open the command palette, type `Open GitHub Blogger`, and start writing your blog.
 
 ```js
 {
