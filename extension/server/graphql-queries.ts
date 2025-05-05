@@ -7,7 +7,7 @@ interface IssueCountParams {
 
 interface IssueCountParamsWithFilter extends IssueCountParams {
   /** 标签名称，多个标签用逗号分隔 */
-  label?: string
+  labels?: string
   /** 标题关键词 */
   title?: string
 }
@@ -16,7 +16,7 @@ interface IssueParamsWithFilter extends IssueCountParams {
   /** 每页数量 */
   first?: number
   /** 标签名称，多个标签用逗号分隔 */
-  label?: string
+  labels?: string
   /** 标题关键词 */
   title?: string
   /** 分页游标 */
@@ -42,13 +42,13 @@ export function getIssueCountWithFilter({
   username,
   repository,
   title,
-  label,
+  labels,
 }: IssueCountParamsWithFilter) {
   const queryParts = {
     user: `user:${username}`,
     repo: `repo:${repository}`,
     state: 'state:open',
-    label: label ? `label:${label}` : '',
+    label: labels ? `label:${labels}` : '',
     title: title ? `in:title ${title}` : '',
   }
 
@@ -70,7 +70,7 @@ export function getIssuesWithFilter({
   username,
   repository,
   first,
-  label,
+  labels,
   title,
   cursor,
 }: IssueParamsWithFilter) {
@@ -78,7 +78,7 @@ export function getIssuesWithFilter({
     user: `user:${username}`,
     repo: `repo:${repository}`,
     state: 'state:open',
-    label: label ? `label:${label}` : '',
+    label: labels ? `label:${labels}` : '',
     title: title ? `in:title ${title}` : '',
   }
 

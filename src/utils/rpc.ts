@@ -35,13 +35,15 @@ export async function getIssueCount(filterTitle: string, filterLabelNames: strin
     return (await RPC.emit(MESSAGE_TYPE.GET_ISSUE_COUNT_WITH_FILTER, [
       filterTitle,
       filterLabelNames.join(','),
-    ])) as Promise<number>
+    ])) as number
   }
-  return (await RPC.emit(MESSAGE_TYPE.GET_ISSUE_COUNT)) as Promise<number>
+  return (await RPC.emit(MESSAGE_TYPE.GET_ISSUE_COUNT)) as number
 }
 
-export async function getIssues(page: number, labels: string[] = [], title: string = '') {
-  if (labels.length < 2 && !title) {
+export async function getIssues(page: number = 1, labels: string[] = [], title: string = '') {
+  // 注意 REST API 的 labels 字段 "2017,2018" 是且关系，而 GraphQL API 的 label:2017,2018 是或关系。
+  // 按 Label 筛选的功能，预期是或关系。
+  if (!title && labels.length < 2) {
     const issues = (await RPC.emit(MESSAGE_TYPE.GET_ISSUES, [
       page,
       labels.join(','),
@@ -51,9 +53,9 @@ export async function getIssues(page: number, labels: string[] = [], title: stri
   }
 
   const issues = (await RPC.emit(MESSAGE_TYPE.GET_ISSUES_WITH_FILTER, [
-    title,
-    labels.join(','),
     page,
+    labels.join(','),
+    title,
   ])) as MinimalIssues
 
   return issues

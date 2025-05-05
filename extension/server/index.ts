@@ -6,7 +6,7 @@ import {MESSAGE_TYPE} from '../constants'
 
 import {APIS, DEFAULT_LABEL_COLOR, DEFAULT_PAGINATION_SIZE} from '../constants'
 import {getSettings, to, cdnURL} from '../utils'
-import {normalizeIssueFromGraphql} from '../utils/normalize'
+import {normalizeIssueFromGraphql, normalizeIssueFromRest} from '../utils/normalize'
 import * as graphqlQueries from './graphql-queries'
 
 export default class Service {
@@ -93,8 +93,8 @@ export default class Service {
     return res?.data ?? []
   }
 
-  async getIssues(params: {page: number; label: string}) {
-    const [_err, res] = await to(
+  async getIssues(params: {page: number; labels: string}) {
+    const [err, res] = await to(
       this.octokit.request(APIS.GET_ISSUES, {
         owner: this.config.user,
         repo: this.config.repo,
@@ -102,7 +102,9 @@ export default class Service {
         ...params,
       })
     )
-    return res?.data ?? []
+
+    if (err) return []
+    return res.data.map(issue => normalizeIssueFromRest(issue))
   }
 
   async getIssuesWithFilter(params: {
@@ -111,7 +113,7 @@ export default class Service {
     cursor?: string
     first?: number
   }) {
-    const [_err, res] = await to(
+    const [err, res] = await to(
       this.octokit.graphql<GraphqlSearchIssuesResponse>(
         graphqlQueries.getIssuesWithFilter({
           username: this.config.user,
@@ -121,7 +123,8 @@ export default class Service {
       )
     )
 
-    return res?.search.edges.map(({node}) => normalizeIssueFromGraphql(node)) ?? []
+    if (err) return []
+    return res.search.edges.map(({node}) => normalizeIssueFromGraphql(node))
   }
 
   async updateIssue(params: {issue_number: number; title: string; body: string; labels: string[]}) {
@@ -181,14 +184,14 @@ export default class Service {
     return 0
   }
 
-  async getIssuceCountWithFilter(title: string, label: string) {
+  async getIssuceCountWithFilter(title: string, labels: string) {
     const [err, res] = await to<GraphqlIssueCountWithFilterResponse>(
       this.octokit.graphql(
         graphqlQueries.getIssueCountWithFilter({
           username: this.config.user,
           repository: this.config.repo,
           title,
-          label,
+          labels,
         })
       )
     )
@@ -281,11 +284,11 @@ export default class Service {
       return data
     }
 
-    const getIssues = async (page: number, label: string) => {
-      return await this.getIssues({page, label})
+    const getIssues = async (page: number, labels: string) => {
+      return await this.getIssues({page, labels})
     }
 
-    const getIssuesWithFilter = async (title: string, labels: string, page: number) => {
+    const getIssuesWithFilter = async (page: number, labels: string, title: string) => {
       return await this.getIssuesWithFilter({
         title,
         labels,
@@ -336,8 +339,8 @@ export default class Service {
       return await this.getIssueCount()
     }
 
-    const getIssueCountWithFilter = async (title: string, label: string) => {
-      return await this.getIssuceCountWithFilter(title, label)
+    const getIssueCountWithFilter = async (title: string, labels: string) => {
+      return await this.getIssuceCountWithFilter(title, labels)
     }
 
     const getRef = async () => {
