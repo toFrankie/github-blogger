@@ -25,14 +25,14 @@ const SELECT_PANEL_PLACEHOLDER = 'Filter by label'
 interface ListProps {
   currentPage: number
   totalCount: number
-  totalLabels: Labels
+  totalLabels: MinimalLabels
   visible: boolean
-  issues: any[]
+  issues: MinimalIssues
   loading: boolean
   onSetCurrentPage: (page: number) => void
   onSetFilterTitle: (title: string) => void
   onSetFilterLabels: (labels: string[]) => void
-  onSetCurrentIssue: (issue: any) => void
+  onSetCurrentIssue: (issue: MinimalIssue) => void
   onSetListVisible: (visible: boolean) => void
 }
 
@@ -128,7 +128,6 @@ export default function List({
                   <Text sx={{fontSize: 1, color: 'fg.muted'}}>totals: {totalCount}</Text>
                 </PageHeader.Description>
               </PageHeader>
-
               <TextInput
                 className="title-filter"
                 placeholder="Filter by title"

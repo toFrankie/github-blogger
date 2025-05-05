@@ -18,7 +18,6 @@ declare global {
 
   type APIUrl = APIMap[keyof APIMap]
 
-  /** 统一提取 Endpoints 的某个属性，比如 'parameters'、'response' */
   type RestApiType<
     T extends APIUrl,
     K extends keyof Endpoints[keyof Endpoints],
@@ -34,13 +33,13 @@ declare global {
 
   type RestApiDataItem<T> = T extends Array<infer U> ? U : never
 
-  type Labels = RestApiData<typeof APIS.GET_LABELS>
+  type RestLabels = RestApiData<typeof APIS.GET_LABELS>
 
-  type Label = RestApiDataItem<Labels>
+  type RestLabel = RestApiDataItem<RestLabels>
 
-  type Issues = RestApiData<typeof APIS.GET_ISSUES>
+  type RestIssues = RestApiData<typeof APIS.GET_ISSUES>
 
-  type Issue = RestApiDataItem<Issues>
+  type RestIssue = RestApiDataItem<RestIssues>
 
   type CreateTreeParams = Omit<RestApiParametersType<typeof APIS.CREATE_TREE>, 'owner' | 'repo'>
 
@@ -68,10 +67,51 @@ declare global {
 
   interface GraphqlSearchIssuesResponse {
     search: {
-      issueCount: number
       edges: Array<{
-        node: Issue
+        node: GraphqlIssue
       }>
     }
   }
+
+  // https://docs.github.com/zh/graphql/reference/objects#issue
+  type GraphqlIssue = {
+    id: string
+    number: number
+    url: string // The HTTP URL for this issue.
+    title: string
+    body: string
+    createdAt: string
+    updatedAt: string
+    state: string
+    labels: {
+      nodes: {
+        id: string
+        name: string
+        description: string
+      }[]
+    }
+  }
+
+  /** -------------------- Normalize -------------------- */
+
+  type MinimalLabel = {
+    id: string // node id
+    name: string
+    description?: string
+  }
+
+  type MinimalLabels = MinimalLabel[]
+
+  type MinimalIssue = {
+    id: string // node id
+    number: number
+    url: string
+    title: string
+    body: string
+    createdAt: string // An ISO-8601 encoded UTC date string.
+    updatedAt: string // An ISO-8601 encoded UTC date string.
+    labels: MinimalLabel[]
+  }
+
+  type MinimalIssues = MinimalIssue[]
 }

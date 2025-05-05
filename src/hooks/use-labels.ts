@@ -11,7 +11,7 @@ export default function useLabels() {
   })
 
   const createLabelMutation = useMutation({
-    mutationFn: (label: any) => createLabel(label),
+    mutationFn: (label: string) => createLabel(label),
     onSuccess: () => {
       queryClient.invalidateQueries({queryKey: ['labels']})
       message.success('Label created successfully')
@@ -22,7 +22,7 @@ export default function useLabels() {
   })
 
   const deleteLabelMutation = useMutation({
-    mutationFn: (label: any) => deleteLabel(label),
+    mutationFn: (label: string) => deleteLabel(label),
     onSuccess: () => {
       queryClient.invalidateQueries({queryKey: ['labels']})
       message.success('Label deleted successfully')
@@ -33,7 +33,7 @@ export default function useLabels() {
   })
 
   const updateLabelMutation = useMutation({
-    mutationFn: ({oldLabel, newLabel}: {oldLabel: any; newLabel: any}) =>
+    mutationFn: ({oldLabel, newLabel}: {oldLabel: string; newLabel: string}) =>
       updateLabel(oldLabel, newLabel),
     onSuccess: () => {
       queryClient.invalidateQueries({queryKey: ['labels']})
@@ -47,8 +47,8 @@ export default function useLabels() {
   return {
     labels,
     labelsLoading,
-    createLabel: createLabelMutation.mutate,
-    deleteLabel: deleteLabelMutation.mutate,
-    updateLabel: updateLabelMutation.mutate,
+    createLabel: createLabelMutation.mutateAsync,
+    deleteLabel: deleteLabelMutation.mutateAsync,
+    updateLabel: updateLabelMutation.mutateAsync,
   }
 }

@@ -62,7 +62,7 @@ export default function App() {
         setCurrent(prev => ({
           ...prev,
           number: data.number,
-          html_url: data.html_url,
+          url: data.url,
           created_at: data.created_at,
           updated_at: data.updated_at,
         }))
@@ -142,7 +142,7 @@ export default function App() {
     }
   }
 
-  const handleCreateLabel = async (label: any) => {
+  const handleCreateLabel = async (label: string) => {
     try {
       await createLabel(label)
     } catch (error) {
@@ -150,7 +150,7 @@ export default function App() {
     }
   }
 
-  const handleDeleteLabel = async (label: any) => {
+  const handleDeleteLabel = async (label: string) => {
     try {
       await deleteLabel(label)
     } catch (error) {
@@ -158,7 +158,7 @@ export default function App() {
     }
   }
 
-  const handleUpdateLabel = async (oldLabel: any, newLabel: any) => {
+  const handleUpdateLabel = async (oldLabel: string, newLabel: string) => {
     try {
       await updateLabel({oldLabel, newLabel})
     } catch (error) {

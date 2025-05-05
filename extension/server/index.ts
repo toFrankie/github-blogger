@@ -6,6 +6,7 @@ import {MESSAGE_TYPE} from '../constants'
 
 import {APIS, DEFAULT_LABEL_COLOR, DEFAULT_PAGINATION_SIZE} from '../constants'
 import {getSettings, to, cdnURL} from '../utils'
+import {normalizeIssueFromGraphql} from '../utils/normalize'
 import * as graphqlQueries from './graphql-queries'
 
 export default class Service {
@@ -110,7 +111,7 @@ export default class Service {
     cursor?: string
     first?: number
   }) {
-    const [err, res] = await to(
+    const [_err, res] = await to(
       this.octokit.graphql<GraphqlSearchIssuesResponse>(
         graphqlQueries.getIssuesWithFilter({
           username: this.config.user,
@@ -119,16 +120,8 @@ export default class Service {
         })
       )
     )
-    if (!err) {
-      return {
-        issueCount: res.search.issueCount,
-        issues: res.search.edges.map(({node}) => ({
-          ...node,
-          labels: node.labels.nodes,
-        })),
-      }
-    }
-    return []
+
+    return res?.search.edges.map(({node}) => normalizeIssueFromGraphql(node)) ?? []
   }
 
   async updateIssue(params: {issue_number: number; title: string; body: string; labels: string[]}) {
@@ -178,7 +171,7 @@ export default class Service {
     return []
   }
 
-  async queryIssueCount() {
+  async getIssueCount() {
     const [err, res] = await to(
       this.octokit.graphql<GraphqlIssueCountResponse>(
         graphqlQueries.getIssueCount({username: this.config.user, repository: this.config.repo})
@@ -188,7 +181,7 @@ export default class Service {
     return 0
   }
 
-  async queryIssuceCountWithFilter(title: string, label: string) {
+  async getIssuceCountWithFilter(title: string, label: string) {
     const [err, res] = await to<GraphqlIssueCountWithFilterResponse>(
       this.octokit.graphql(
         graphqlQueries.getIssueCountWithFilter({
@@ -301,15 +294,15 @@ export default class Service {
       })
     }
 
-    const createLabel = async name => {
+    const createLabel = async (name: string) => {
       return await this.createLabel({name})
     }
 
-    const deleteLabel = async name => {
+    const deleteLabel = async (name: string) => {
       return await this.deleteLabel({name})
     }
 
-    const updateLabel = async (name, newName) => {
+    const updateLabel = async (name: string, newName: string) => {
       return await this.updateLabel({name, new_name: newName})
     }
 
@@ -340,26 +333,26 @@ export default class Service {
     }
 
     const getIssueCount = async () => {
-      return await this.queryIssueCount()
+      return await this.getIssueCount()
     }
 
     const getIssueCountWithFilter = async (title: string, label: string) => {
-      return await this.queryIssuceCountWithFilter(title, label)
+      return await this.getIssuceCountWithFilter(title, label)
     }
 
     const getRef = async () => {
       return await this.getRef()
     }
 
-    const updateRef = async sha => {
+    const updateRef = async (sha: string) => {
       return await this.updateRef({sha})
     }
 
-    const getCommit = async sha => {
+    const getCommit = async (sha: string) => {
       return await this.getCommit({commit_sha: sha})
     }
 
-    const createCommit = async (parentCommitSha, treeSha, message) => {
+    const createCommit = async (parentCommitSha: string, treeSha: string, message: string) => {
       return await this.createCommit({
         message,
         tree: treeSha,
@@ -367,7 +360,7 @@ export default class Service {
       })
     }
 
-    const createBlob = async content => {
+    const createBlob = async (content: string) => {
       return await this.createBlob({content})
     }
 

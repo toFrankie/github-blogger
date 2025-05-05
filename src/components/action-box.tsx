@@ -8,16 +8,28 @@ import {
 import {IconButton, Stack} from '@primer/react'
 import {MESSAGE_TYPE} from '@/constants'
 import {getVscode} from '@/utils'
+import {cloneDeep} from 'licia-es'
 
 const vscode = getVscode()
 
 interface ActionBoxProps {
   number: number
   onUpdateIssue: () => Promise<void>
-  onSetCurrentIssue: (issue: any) => void
+  onSetCurrentIssue: (issue: MinimalIssue) => void
   onSetLabelVisible: (visible: boolean) => void
   onSetListVisible: (visible: boolean) => void
-  currentIssue: any
+  currentIssue: MinimalIssue
+}
+
+const emptyIssue: MinimalIssue = {
+  id: '',
+  number: -1,
+  url: '',
+  title: '',
+  body: '',
+  createdAt: '',
+  updatedAt: '',
+  labels: [],
 }
 
 export default function ActionBox({
@@ -41,7 +53,7 @@ export default function ActionBox({
         />
         <IconButton
           icon={PlusIcon}
-          onClick={() => onSetCurrentIssue({})}
+          onClick={() => onSetCurrentIssue(cloneDeep(emptyIssue))}
           description="Create new issue"
           aria-label="Create new issue"
           tooltipDirection="w"
@@ -52,7 +64,7 @@ export default function ActionBox({
             onClick={() => {
               vscode.postMessage({
                 command: MESSAGE_TYPE.OPEN_EXTERNAL_LINK,
-                externalLink: currentIssue.html_url || currentIssue.url,
+                externalLink: currentIssue.url,
               })
             }}
             description="Open in default browser"

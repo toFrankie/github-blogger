@@ -16,13 +16,13 @@ interface EditorProps {
   title: string
   number: number
   content: string
-  labels: Labels
-  totalLabels: Labels
+  labels: MinimalLabels
+  totalLabels: MinimalLabels
   placeholder: string
   onUpdateTitle: (title: string) => void
   onUpdateBody: (body: string) => void
-  onAddLabel: (label: Label) => void
-  onRemoveLabel: (label: Label) => void
+  onAddLabel: (label: MinimalLabel) => void
+  onRemoveLabel: (label: MinimalLabel) => void
   onUpload: (files: FileList) => Promise<any>
   isUploading: boolean
 }
@@ -72,7 +72,7 @@ export default function Editor({
       <div className="app-labels">
         <Stack direction="horizontal" gap="condensed" wrap="wrap">
           {totalLabels.map(label => {
-            const checked = labels.some(l => l.id === label.id || l.node_id === label.node_id)
+            const checked = labels.some(l => l.id === label.id)
             return (
               <Label
                 key={label.id}

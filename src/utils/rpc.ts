@@ -10,19 +10,19 @@ const vscode = getVscode()
 export const RPC = new WebviewRPC(window, vscode)
 
 export async function getLabels() {
-  const labels = (await RPC.emit(MESSAGE_TYPE.GET_LABELS, [])) as Labels
+  const labels = (await RPC.emit(MESSAGE_TYPE.GET_LABELS, [])) as MinimalLabels
   return labels ?? []
 }
 
-export async function createLabel(label: any) {
+export async function createLabel(label: string) {
   await RPC.emit(MESSAGE_TYPE.CREATE_LABEL, [label])
 }
 
-export async function deleteLabel(label: any) {
+export async function deleteLabel(label: string) {
   await RPC.emit(MESSAGE_TYPE.DELETE_LABEL, [label])
 }
 
-export async function updateLabel(oldLabel: any, newLabel: any) {
+export async function updateLabel(oldLabel: string, newLabel: string) {
   await RPC.emit(MESSAGE_TYPE.UPDATE_LABEL, [oldLabel, newLabel])
 }
 
@@ -42,20 +42,24 @@ export async function getIssueCount(filterTitle: string, filterLabelNames: strin
 
 export async function getIssues(page: number, labels: string[] = [], title: string = '') {
   if (labels.length < 2 && !title) {
-    const issues = (await RPC.emit(MESSAGE_TYPE.GET_ISSUES, [page, labels.join(',')])) as Issues
+    const issues = (await RPC.emit(MESSAGE_TYPE.GET_ISSUES, [
+      page,
+      labels.join(','),
+    ])) as MinimalIssues
+
     return issues || []
   }
 
-  const {issues} = await RPC.emit(MESSAGE_TYPE.GET_ISSUES_WITH_FILTER, [
+  const issues = (await RPC.emit(MESSAGE_TYPE.GET_ISSUES_WITH_FILTER, [
     title,
     labels.join(','),
     page,
-  ])
+  ])) as MinimalIssues
 
   return issues
 }
 
-export async function createIssue(params: CreateIssueParams): Promise<Issue> {
+export async function createIssue(params: CreateIssueParams): Promise<RestIssue> {
   return await RPC.emit(MESSAGE_TYPE.CREATE_ISSUE, [
     params.title,
     params.body,
@@ -63,7 +67,7 @@ export async function createIssue(params: CreateIssueParams): Promise<Issue> {
   ])
 }
 
-export async function updateIssue(params: UpdateIssueParams): Promise<Issue> {
+export async function updateIssue(params: UpdateIssueParams): Promise<RestIssue> {
   return await RPC.emit(MESSAGE_TYPE.UPDATE_ISSUE, [
     params.number,
     params.title,

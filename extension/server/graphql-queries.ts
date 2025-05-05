@@ -92,29 +92,20 @@ export function getIssuesWithFilter({
         ${cursor ? `after: "${cursor}"` : ''}
         query: "${query}"
       ) {
-        issueCount
         edges {
           node {
             ... on Issue {
-              url
               id
-              title
+              number
               url
+              title
               body
               createdAt
               updatedAt
-              number
-              state
-              milestone {
-                id
-                title
-              }
               labels(first: 100) {
                 nodes {
                   id
-                  url
                   name
-                  color
                   description
                 }
               }

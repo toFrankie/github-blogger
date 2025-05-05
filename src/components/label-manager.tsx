@@ -3,12 +3,12 @@ import {Drawer, Input, message, Space, Tag, Tooltip} from 'antd'
 import {useRef, useState} from 'react'
 
 interface LabelManagerProps {
-  labels: Labels
+  labels: MinimalLabels
   visible: boolean
   loading: boolean
-  onCreateLabel: (label: Label) => Promise<void>
-  onDeleteLabel: (label: Label) => Promise<void>
-  onUpdateLabel: (oldLabel: Label, newLabel: Label) => Promise<void>
+  onCreateLabel: (label: string) => Promise<void>
+  onDeleteLabel: (label: string) => Promise<void>
+  onUpdateLabel: (oldLabel: string, newLabel: string) => Promise<void>
   onSetLabelsVisible: (visible: boolean) => void
 }
 
@@ -22,7 +22,7 @@ export default function LabelManager({
 }: LabelManagerProps) {
   const [text, setText] = useState('')
   const [editValue, setEditValue] = useState('')
-  const [editIndex, setEditIndex] = useState()
+  const [editIndex, setEditIndex] = useState('')
   const [inputVisible, setInputVisible] = useState(false)
   const saveEditInputRef: any = useRef(null)
   const saveInputRef: any = useRef(null)
@@ -36,7 +36,7 @@ export default function LabelManager({
     reset()
   }
 
-  const handleClose = label => {
+  const handleDelete = (label: MinimalLabel) => {
     onDeleteLabel(label.name)
   }
 
@@ -52,16 +52,16 @@ export default function LabelManager({
 
   const reset = () => {
     setInputVisible(false)
-    setEditIndex(undefined)
+    setEditIndex('')
     setEditValue('')
     setText('')
   }
 
-  const checkDuplicate = name => {
+  const checkDuplicate = (name: string) => {
     return labels.filter(item => item.name === name).length > 0
   }
 
-  const checkEmpty = name => {
+  const checkEmpty = (name: string) => {
     return name.trim() === ''
   }
 
@@ -104,7 +104,7 @@ export default function LabelManager({
               key={label.name}
               closable
               onClose={() => {
-                handleClose(label)
+                handleDelete(label)
               }}
             >
               <span
@@ -122,7 +122,7 @@ export default function LabelManager({
             </Tag>
           )
           return isLongLabel ? (
-            <Tooltip key={label.id} title={label}>
+            <Tooltip key={label.id} title={label.name}>
               {tagElem}
             </Tooltip>
           ) : (
