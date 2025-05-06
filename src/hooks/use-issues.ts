@@ -1,7 +1,6 @@
 import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query'
 import {message} from 'antd'
 import {SUBMIT_TYPE} from '@/constants'
-import type {CreateIssueParams, UpdateIssueParams} from '@/types/issues'
 import {archiveIssue, createIssue, getIssueCount, getIssues, updateIssue} from '@/utils/rpc'
 
 interface UseIssuesParams {
@@ -24,8 +23,9 @@ export default function useIssues({page, LabelNames = [], title = ''}: UseIssues
   })
 
   const createIssueMutation = useMutation({
-    mutationFn: (params: CreateIssueParams) => createIssue(params),
+    mutationFn: (issue: MinimalIssue) => createIssue(issue),
     onSuccess: async data => {
+      // TODO:
       await archiveIssue(data, SUBMIT_TYPE.CREATE)
       queryClient.invalidateQueries({queryKey: ['issues']})
       message.success('Issue created successfully')
@@ -36,8 +36,9 @@ export default function useIssues({page, LabelNames = [], title = ''}: UseIssues
   })
 
   const updateIssueMutation = useMutation({
-    mutationFn: (params: UpdateIssueParams) => updateIssue(params),
+    mutationFn: (issue: MinimalIssue) => updateIssue(issue),
     onSuccess: async (data, variables) => {
+      // TODO:
       await archiveIssue({...variables, ...data}, SUBMIT_TYPE.UPDATE)
       queryClient.invalidateQueries({queryKey: ['issues']})
       message.success('Issue updated successfully')

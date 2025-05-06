@@ -5,7 +5,7 @@ import {Buffer} from 'buffer'
 import {cloneDeep} from 'licia-es'
 import {useEffect, useState} from 'react'
 import {ActionBox, Editor, LabelManager, List} from '@/components'
-import {MESSAGE_TYPE} from '@/constants'
+import {EMPTY_ISSUE, MESSAGE_TYPE} from '@/constants'
 import {useIssues, useLabels, useUpload} from '@/hooks'
 import {compareIssue} from '@/utils'
 import {RPC} from '@/utils/rpc'
@@ -31,8 +31,8 @@ export default function App() {
   const [currentPage, setCurrentPage] = useState(1)
   const [filterTitle, setFilterTitle] = useState('')
   const [filterLabels, setFilterLabels] = useState<string[]>([])
-  const [current, setCurrent] = useState<any>({})
-  const [originalCurrent, setOriginalCurrent] = useState<any>({})
+  const [current, setCurrent] = useState<MinimalIssue>(cloneDeep(EMPTY_ISSUE))
+  const [originalCurrent, setOriginalCurrent] = useState<MinimalIssue>(cloneDeep(EMPTY_ISSUE))
   const [listVisible, setListVisible] = useState(false)
   const [labelsVisible, setLabelsVisible] = useState(false)
 
@@ -50,14 +50,15 @@ export default function App() {
   }, [])
 
   const handleUpdateIssue = async () => {
-    const {number = undefined, title = '', body = '', labels = []} = current
+    const {number, title, body} = current
     if (!title || !body) {
       message.error('Please enter the content...')
       return
     }
 
-    if (!number) {
-      const data = await createIssue({title, body, labelNames: labels})
+    if (number === -1) {
+      const data = await createIssue(current)
+      // TODO: normalize
       if (data) {
         setCurrent(prev => ({
           ...prev,
@@ -77,8 +78,9 @@ export default function App() {
       return
     }
 
-    const data = await updateIssue({number, title, body, labelNames: labels})
+    const data = await updateIssue(current)
 
+    // TODO: normalize
     if (data) {
       setCurrent(prev => ({
         ...prev,

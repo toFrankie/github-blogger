@@ -6,9 +6,9 @@ import {
   TagIcon,
 } from '@primer/octicons-react'
 import {IconButton, Stack} from '@primer/react'
-import {MESSAGE_TYPE} from '@/constants'
-import {getVscode} from '@/utils'
 import {cloneDeep} from 'licia-es'
+import {EMPTY_ISSUE, MESSAGE_TYPE} from '@/constants'
+import {getVscode} from '@/utils'
 
 const vscode = getVscode()
 
@@ -19,17 +19,6 @@ interface ActionBoxProps {
   onSetLabelVisible: (visible: boolean) => void
   onSetListVisible: (visible: boolean) => void
   currentIssue: MinimalIssue
-}
-
-const emptyIssue: MinimalIssue = {
-  id: '',
-  number: -1,
-  url: '',
-  title: '',
-  body: '',
-  createdAt: '',
-  updatedAt: '',
-  labels: [],
 }
 
 export default function ActionBox({
@@ -53,7 +42,7 @@ export default function ActionBox({
         />
         <IconButton
           icon={PlusIcon}
-          onClick={() => onSetCurrentIssue(cloneDeep(emptyIssue))}
+          onClick={() => onSetCurrentIssue(cloneDeep(EMPTY_ISSUE))}
           description="Create new issue"
           aria-label="Create new issue"
           tooltipDirection="w"

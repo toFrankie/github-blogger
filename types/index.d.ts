@@ -43,6 +43,10 @@ declare global {
 
   type CreateTreeParams = Omit<RestApiParametersType<typeof APIS.CREATE_TREE>, 'owner' | 'repo'>
 
+  type CreateIssueParams = Omit<RestApiParametersType<typeof APIS.CREATE_ISSUE>, 'owner' | 'repo'>
+
+  type UpdateIssueParams = Omit<RestApiParametersType<typeof APIS.UPDATE_ISSUE>, 'owner' | 'repo'>
+
   /** -------------------- GitHub GraphQL -------------------- */
 
   type GraphqlResponse<T> = Promise<T>
@@ -114,4 +118,19 @@ declare global {
   }
 
   type MinimalIssues = MinimalIssue[]
+
+  /** -------------------- RPC -------------------- */
+
+  type CreateIssueRpcArgs = [
+    title: CreateIssueParams['title'],
+    body: CreateIssueParams['body'],
+    labels: string, // label names json string
+  ]
+
+  type UpdateIssueRpcArgs = [
+    issue_number: UpdateIssueParams['issue_number'],
+    title: UpdateIssueParams['title'],
+    body: UpdateIssueParams['body'],
+    labels: string, // label names json string
+  ]
 }

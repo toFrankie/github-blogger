@@ -127,7 +127,7 @@ export default class Service {
     return res.search.edges.map(({node}) => normalizeIssueFromGraphql(node))
   }
 
-  async updateIssue(params: {issue_number: number; title: string; body: string; labels: string[]}) {
+  async updateIssue(params: UpdateIssueParams) {
     const [_err, res] = await to(
       this.octokit.request(APIS.UPDATE_ISSUE, {
         owner: this.config.user,
@@ -138,7 +138,7 @@ export default class Service {
     return res?.data ?? []
   }
 
-  async createIssue(params: {title: string; body: string; labelNames: string[]}) {
+  async createIssue(params: CreateIssueParams) {
     const [_err, res] = await to(
       this.octokit.request(APIS.CREATE_ISSUE, {
         owner: this.config.user,
@@ -309,26 +309,23 @@ export default class Service {
       return await this.updateLabel({name, new_name: newName})
     }
 
-    const createIssue = async (title: string, body: string, labelNamesStr: string) => {
-      return await this.createIssue({
-        title,
-        body,
-        labelNames: JSON.parse(labelNamesStr),
-      })
+    const createIssue = async (...args: CreateIssueRpcArgs) => {
+      const params: CreateIssueParams = {
+        title: args[0],
+        body: args[1],
+        labels: JSON.parse(args[2]),
+      }
+      return await this.createIssue(params)
     }
 
-    const updateIssue = async (
-      issueNumber: number,
-      title: string,
-      body: string,
-      labels: string
-    ) => {
-      return await this.updateIssue({
-        issue_number: issueNumber,
-        title,
-        body,
-        labels: JSON.parse(labels),
-      })
+    const updateIssue = async (...args: UpdateIssueRpcArgs) => {
+      const params: UpdateIssueParams = {
+        issue_number: args[0],
+        title: args[1],
+        body: args[2],
+        labels: JSON.parse(args[3]),
+      }
+      return await this.updateIssue(params)
     }
 
     const uploadImage = async (content, path) => {

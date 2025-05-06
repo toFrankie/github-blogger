@@ -2,7 +2,6 @@ import {message} from 'antd'
 import dayjs from 'dayjs'
 import {WebviewRPC} from 'vscode-webview-rpc'
 import {MESSAGE_TYPE, SUBMIT_TYPE} from '@/constants'
-import type {CreateIssueParams, UpdateIssueParams} from '@/types/issues'
 import {generateMarkdown, getVscode} from '@/utils'
 
 const vscode = getVscode()
@@ -61,21 +60,21 @@ export async function getIssues(page: number = 1, labels: string[] = [], title: 
   return issues
 }
 
-export async function createIssue(params: CreateIssueParams): Promise<RestIssue> {
-  return await RPC.emit(MESSAGE_TYPE.CREATE_ISSUE, [
-    params.title,
-    params.body,
-    JSON.stringify(params.labelNames),
-  ])
+export async function createIssue(params: MinimalIssue): Promise<RestIssue> {
+  const labelNames = params.labels.map(label => label.name)
+  const args: CreateIssueRpcArgs = [params.title, params.body, JSON.stringify(labelNames)]
+  return await RPC.emit(MESSAGE_TYPE.CREATE_ISSUE, args)
 }
 
-export async function updateIssue(params: UpdateIssueParams): Promise<RestIssue> {
-  return await RPC.emit(MESSAGE_TYPE.UPDATE_ISSUE, [
+export async function updateIssue(params: MinimalIssue): Promise<RestIssue> {
+  const labelNames = params.labels.map(label => label.name)
+  const args: UpdateIssueRpcArgs = [
     params.number,
     params.title,
     params.body,
-    JSON.stringify(params.labelNames),
-  ])
+    JSON.stringify(labelNames),
+  ]
+  return await RPC.emit(MESSAGE_TYPE.UPDATE_ISSUE, args)
 }
 
 export async function archiveIssue(

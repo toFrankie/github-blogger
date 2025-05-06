@@ -34,3 +34,14 @@ export const MESSAGE_TYPE = {
   SHOW_SUCCESS: 'show_success',
   SHOW_ERROR: 'show_error',
 } as const
+
+export const EMPTY_ISSUE: MinimalIssue = {
+  id: '',
+  number: -1,
+  url: '',
+  title: '',
+  body: '',
+  createdAt: '',
+  updatedAt: '',
+  labels: [],
+}
