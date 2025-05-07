@@ -10,25 +10,23 @@ import {normalizeIssueFromGraphql, normalizeIssueFromRest} from '../utils/normal
 import * as graphqlQueries from './graphql-queries'
 
 export default class Service {
-  config: Settings
-  octokit: Octokit
-  webview: vscode.Webview
-  rpc: ExtensionRPC
+  public config: Settings
+  public octokit: Octokit
+  public webview: vscode.Webview
+  public rpc: ExtensionRPC
 
   constructor(webview: vscode.Webview) {
-    this.config = null!
     this.webview = webview
-    this.octokit = null!
+    this.config = {} as Settings
+    this.octokit = {} as Octokit
     this.rpc = new ExtensionRPC(this.webview)
     this.init()
   }
 
-  async init() {
-    this.config = await getSettings()
-    this.octokit = new Octokit({
-      auth: this.config.token,
-    })
-    this._registerMethod()
+  private async init() {
+    this.config = getSettings()
+    this.octokit = new Octokit({auth: this.config.token})
+    this.registerRpcListener()
     this.octokit.hook.after('request', async (_response, options) => {
       if (options.url.includes('/graphql')) return
       if (options.url.includes('/git')) return
@@ -48,7 +46,7 @@ export default class Service {
     })
   }
 
-  async getLabels(params: {page: number; per_page: number}) {
+  private async getLabels(params: {page: number; per_page: number}) {
     const [_err, res] = await to(
       this.octokit.request(APIS.GET_LABELS, {
         owner: this.config.user,
@@ -59,7 +57,7 @@ export default class Service {
     return res?.data ?? []
   }
 
-  async createLabel(params: {name: string}) {
+  private async createLabel(params: {name: string}) {
     const [_err, res] = await to(
       this.octokit.request(APIS.CREATE_LABEL, {
         owner: this.config.user,
@@ -71,7 +69,7 @@ export default class Service {
     return res?.data ?? {}
   }
 
-  async deleteLabel(params: {name: string}) {
+  private async deleteLabel(params: {name: string}) {
     const [_err, res] = await to(
       this.octokit.request(APIS.DELETE_LABEL, {
         owner: this.config.user,
@@ -82,7 +80,7 @@ export default class Service {
     return res?.data ?? []
   }
 
-  async updateLabel(params: {name: string; new_name: string}) {
+  private async updateLabel(params: {name: string; new_name: string}) {
     const [_err, res] = await to(
       this.octokit.request(APIS.UPDATE_LABEL, {
         owner: this.config.user,
@@ -93,7 +91,7 @@ export default class Service {
     return res?.data ?? []
   }
 
-  async getIssues(params: {page: number; labels: string}) {
+  private async getIssues(params: {page: number; labels: string}) {
     const [err, res] = await to(
       this.octokit.request(APIS.GET_ISSUES, {
         owner: this.config.user,
@@ -107,7 +105,7 @@ export default class Service {
     return res.data.map(issue => normalizeIssueFromRest(issue))
   }
 
-  async getIssuesWithFilter(params: {
+  private async getIssuesWithFilter(params: {
     title: string
     labels: string
     cursor?: string
@@ -127,7 +125,7 @@ export default class Service {
     return res.search.edges.map(({node}) => normalizeIssueFromGraphql(node))
   }
 
-  async updateIssue(params: UpdateIssueParams) {
+  private async updateIssue(params: UpdateIssueParams) {
     const [_err, res] = await to(
       this.octokit.request(APIS.UPDATE_ISSUE, {
         owner: this.config.user,
@@ -138,7 +136,7 @@ export default class Service {
     return res?.data ?? []
   }
 
-  async createIssue(params: CreateIssueParams) {
+  private async createIssue(params: CreateIssueParams) {
     const [_err, res] = await to(
       this.octokit.request(APIS.CREATE_ISSUE, {
         owner: this.config.user,
@@ -149,7 +147,7 @@ export default class Service {
     return res?.data ?? undefined
   }
 
-  async uploadImage(params: {content: string; path: string}) {
+  private async uploadImage(params: {content: string; path: string}) {
     const [err] = await to(
       this.octokit.request(APIS.UPLOAD_IMAGE, {
         owner: this.config.user,
@@ -174,7 +172,7 @@ export default class Service {
     return []
   }
 
-  async getIssueCount() {
+  private async getIssueCount() {
     const [err, res] = await to(
       this.octokit.graphql<GraphqlIssueCountResponse>(
         graphqlQueries.getIssueCount({username: this.config.user, repository: this.config.repo})
@@ -184,7 +182,7 @@ export default class Service {
     return 0
   }
 
-  async getIssuceCountWithFilter(title: string, labels: string) {
+  private async getIssueCountWithFilter(title: string, labels: string) {
     const [err, res] = await to<GraphqlIssueCountWithFilterResponse>(
       this.octokit.graphql(
         graphqlQueries.getIssueCountWithFilter({
@@ -199,7 +197,7 @@ export default class Service {
     return 0
   }
 
-  async getRef() {
+  private async getRef() {
     const [err, res] = await to(
       this.octokit.request(APIS.GET_REF, {
         owner: this.config.user,
@@ -214,7 +212,7 @@ export default class Service {
     throw err
   }
 
-  async getCommit(params: {commit_sha: string}) {
+  private async getCommit(params: {commit_sha: string}) {
     const [err, res] = await to(
       this.octokit.request(APIS.GET_COMMIT, {
         owner: this.config.user,
@@ -226,7 +224,7 @@ export default class Service {
     throw err
   }
 
-  async createBlob(params: {content: string}) {
+  private async createBlob(params: {content: string}) {
     const [err, res] = await to(
       this.octokit.request(APIS.CREATE_BLOB, {
         owner: this.config.user,
@@ -238,7 +236,7 @@ export default class Service {
     throw err
   }
 
-  async createTree(params: CreateTreeParams) {
+  private async createTree(params: CreateTreeParams) {
     const [err, res] = await to(
       this.octokit.request(APIS.CREATE_TREE, {
         owner: this.config.user,
@@ -250,7 +248,7 @@ export default class Service {
     throw err
   }
 
-  async createCommit(params: {message: string; tree: string; parents: string[]}) {
+  private async createCommit(params: {message: string; tree: string; parents: string[]}) {
     const [err, res] = await to(
       this.octokit.request(APIS.CREATE_COMMIT, {
         owner: this.config.user,
@@ -262,7 +260,7 @@ export default class Service {
     throw err
   }
 
-  async updateRef(params: {sha: string}) {
+  private async updateRef(params: {sha: string}) {
     const [err, res] = await to(
       this.octokit.request(APIS.UPDATE_REF, {
         owner: this.config.user,
@@ -275,10 +273,7 @@ export default class Service {
     throw err
   }
 
-  /**
-   * 注册事件
-   */
-  async _registerMethod() {
+  private registerRpcListener() {
     const getLabels = async () => {
       const data = await this.getLabels({page: 0, per_page: 100})
       return data
@@ -337,7 +332,7 @@ export default class Service {
     }
 
     const getIssueCountWithFilter = async (title: string, labels: string) => {
-      return await this.getIssuceCountWithFilter(title, labels)
+      return await this.getIssueCountWithFilter(title, labels)
     }
 
     const getRef = async () => {
@@ -371,21 +366,41 @@ export default class Service {
       })
     }
 
-    this.rpc.on(MESSAGE_TYPE.GET_LABELS, getLabels)
-    this.rpc.on(MESSAGE_TYPE.DELETE_LABEL, deleteLabel)
-    this.rpc.on(MESSAGE_TYPE.CREATE_LABEL, createLabel)
-    this.rpc.on(MESSAGE_TYPE.UPDATE_LABEL, updateLabel)
-    this.rpc.on(MESSAGE_TYPE.GET_ISSUES, getIssues)
-    this.rpc.on(MESSAGE_TYPE.GET_ISSUES_WITH_FILTER, getIssuesWithFilter)
-    this.rpc.on(MESSAGE_TYPE.UPDATE_ISSUE, updateIssue)
-    this.rpc.on(MESSAGE_TYPE.CREATE_ISSUE, createIssue)
-    this.rpc.on(MESSAGE_TYPE.UPLOAD_IMAGE, uploadImage)
-    this.rpc.on(MESSAGE_TYPE.GET_ISSUE_COUNT, getIssueCount)
-    this.rpc.on(MESSAGE_TYPE.GET_ISSUE_COUNT_WITH_FILTER, getIssueCountWithFilter)
-    this.rpc.on(MESSAGE_TYPE.UPDATE_REF, updateRef)
-    this.rpc.on(MESSAGE_TYPE.GET_COMMIT, getCommit)
-    this.rpc.on(MESSAGE_TYPE.CREATE_COMMIT, createCommit)
-    this.rpc.on(MESSAGE_TYPE.CREATE_BLOB, createBlob)
-    this.rpc.on(MESSAGE_TYPE.CREATE_TREE, createTree)
+    const labelHandlers = {
+      [MESSAGE_TYPE.GET_LABELS]: getLabels,
+      [MESSAGE_TYPE.DELETE_LABEL]: deleteLabel,
+      [MESSAGE_TYPE.CREATE_LABEL]: createLabel,
+      [MESSAGE_TYPE.UPDATE_LABEL]: updateLabel,
+    }
+
+    const issueHandlers = {
+      [MESSAGE_TYPE.GET_ISSUES]: getIssues,
+      [MESSAGE_TYPE.GET_ISSUES_WITH_FILTER]: getIssuesWithFilter,
+      [MESSAGE_TYPE.UPDATE_ISSUE]: updateIssue,
+      [MESSAGE_TYPE.CREATE_ISSUE]: createIssue,
+      [MESSAGE_TYPE.GET_ISSUE_COUNT]: getIssueCount,
+      [MESSAGE_TYPE.GET_ISSUE_COUNT_WITH_FILTER]: getIssueCountWithFilter,
+    }
+
+    const gitHandlers = {
+      [MESSAGE_TYPE.UPDATE_REF]: updateRef,
+      [MESSAGE_TYPE.GET_COMMIT]: getCommit,
+      [MESSAGE_TYPE.CREATE_COMMIT]: createCommit,
+      [MESSAGE_TYPE.CREATE_BLOB]: createBlob,
+      [MESSAGE_TYPE.CREATE_TREE]: createTree,
+    }
+
+    const otherHandlers = {
+      [MESSAGE_TYPE.UPLOAD_IMAGE]: uploadImage,
+    }
+
+    Object.entries({
+      ...labelHandlers,
+      ...issueHandlers,
+      ...gitHandlers,
+      ...otherHandlers,
+    }).forEach(([type, handler]) => {
+      this.rpc.on(type, handler)
+    })
   }
 }
