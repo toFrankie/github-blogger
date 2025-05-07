@@ -25,10 +25,6 @@ export async function updateLabel(oldLabel: string, newLabel: string) {
   await RPC.emit(MESSAGE_TYPE.UPDATE_LABEL, [oldLabel, newLabel])
 }
 
-export async function getMilestones() {
-  return await RPC.emit(MESSAGE_TYPE.GET_MILESTONES, [])
-}
-
 export async function getIssueCount(filterTitle: string, filterLabelNames: string[] = []) {
   if (filterTitle || filterLabelNames.length > 0) {
     return (await RPC.emit(MESSAGE_TYPE.GET_ISSUE_COUNT_WITH_FILTER, [
@@ -60,13 +56,13 @@ export async function getIssues(page: number = 1, labels: string[] = [], title: 
   return issues
 }
 
-export async function createIssue(params: MinimalIssue): Promise<RestIssue> {
+export async function createIssue(params: MinimalIssue): Promise<MinimalIssue> {
   const labelNames = params.labels.map(label => label.name)
   const args: CreateIssueRpcArgs = [params.title, params.body, JSON.stringify(labelNames)]
   return await RPC.emit(MESSAGE_TYPE.CREATE_ISSUE, args)
 }
 
-export async function updateIssue(params: MinimalIssue): Promise<RestIssue> {
+export async function updateIssue(params: MinimalIssue): Promise<MinimalIssue> {
   const labelNames = params.labels.map(label => label.name)
   const args: UpdateIssueRpcArgs = [
     params.number,
@@ -78,41 +74,51 @@ export async function updateIssue(params: MinimalIssue): Promise<RestIssue> {
 }
 
 export async function archiveIssue(
-  issue: any,
+  issue: MinimalIssue,
   type: (typeof SUBMIT_TYPE)[keyof typeof SUBMIT_TYPE]
 ) {
   try {
-    const {number = undefined} = issue
-    const createdAt = issue.created_at || issue.createdAt
+    const {number: issueNumber, createdAt} = issue
 
-    if (!Number.isInteger(number)) return
+    if (!Number.isInteger(issueNumber)) return
 
-    // 获取 Ref
-    const commitSha = await RPC.emit(MESSAGE_TYPE.GET_COMMIT)
+    // 1. 获取 Ref
+    const refResult = (await RPC.emit(MESSAGE_TYPE.GET_REF)) as RestRef
+    const commitSha = refResult.object.sha
 
-    // 获取当前 Commit 的 Tree SHA
-    const treeSha = await RPC.emit(MESSAGE_TYPE.GET_TREE, [commitSha])
+    // 2. 获取当前 Commit 的 Tree SHA
+    const commitResult = (await RPC.emit(MESSAGE_TYPE.GET_COMMIT, [commitSha])) as RestCommit
+    const treeSha = commitResult.tree.sha
 
-    // 生成 Blob
+    // 3. 生成 Blob
     const markdown = generateMarkdown(issue)
-    const blobSha = await RPC.emit(MESSAGE_TYPE.CREATE_BLOB, [markdown])
+    const blobResult = (await RPC.emit(MESSAGE_TYPE.CREATE_BLOB, [markdown])) as RestBlob
+    const blobSha = blobResult.sha
 
-    // 生成 Tree
+    // 4. 生成 Tree
     const year = dayjs(createdAt).year()
-    const filePath = `archives/${year}/${number}.md`
-    const newTreeSha = await RPC.emit(MESSAGE_TYPE.CREATE_TREE, [treeSha, filePath, blobSha])
+    const filePath = `archives/${year}/${issueNumber}.md`
+    const newTreeResult = (await RPC.emit(MESSAGE_TYPE.CREATE_TREE, [
+      treeSha,
+      filePath,
+      blobSha,
+    ])) as RestTree
+    const newTreeSha = newTreeResult.sha
 
-    // 生成 Commit
+    // 5. 生成 Commit
     const commitMessage =
-      type === SUBMIT_TYPE.CREATE ? `docs: create issue ${number}` : `docs: update issue ${number}`
-    const newCommitSha = await RPC.emit(MESSAGE_TYPE.CREATE_COMMIT, [
+      type === SUBMIT_TYPE.CREATE
+        ? `docs: create issue ${issueNumber}`
+        : `docs: update issue ${issueNumber}`
+    const newCommitResult = (await RPC.emit(MESSAGE_TYPE.CREATE_COMMIT, [
       commitSha,
       newTreeSha,
       commitMessage,
-    ])
+    ])) as RestCommit
+    const newCommitSha = newCommitResult.sha
 
-    //  更新 Ref
-    await RPC.emit(MESSAGE_TYPE.UPDATE_REF, [newCommitSha])
+    // 6. 更新 Ref
+    ;(await RPC.emit(MESSAGE_TYPE.UPDATE_REF, [newCommitSha])) as RestRef
   } catch (e) {
     console.log('🚀 ~ archiveIssue failed:', e)
     message.error('Issue Archive Failed')

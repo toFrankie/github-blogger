@@ -2,7 +2,17 @@ import dayjs from 'dayjs'
 import matter from 'gray-matter'
 import {MESSAGE_TYPE} from '@/constants'
 
-export function cdnURL({user, repo, branch, file}) {
+export function cdnURL({
+  user,
+  repo,
+  branch,
+  file,
+}: {
+  user: string
+  repo: string
+  branch: string
+  file: string
+}) {
   const tag = branch ? `@${branch}` : ''
   return `https://cdn.jsdelivr.net/gh/${user}/${repo}${tag}/${file}`
 }
@@ -54,7 +64,7 @@ export function getVscode() {
   return vscode
 }
 
-export function generateMarkdown(issue) {
+export function generateMarkdown(issue: MinimalIssue) {
   return matter.stringify(issue.body, {
     title: issue.title,
     number: `#${issue.number}`,
@@ -65,7 +75,7 @@ export function generateMarkdown(issue) {
   })
 }
 
-export function compareIssue(newIssue, oldIssue) {
+export function compareIssue(newIssue: MinimalIssue, oldIssue: MinimalIssue) {
   if (newIssue.title !== oldIssue.title) return true
   if (newIssue.body !== oldIssue.body) return true
   if (newIssue.labels?.length !== oldIssue.labels?.length) return true

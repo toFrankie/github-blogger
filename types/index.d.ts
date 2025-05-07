@@ -41,11 +41,38 @@ declare global {
 
   type RestIssue = RestApiDataItem<RestIssues>
 
+  type RestRef = RestApiData<typeof APIS.GET_REF>
+
+  type RestCommit = RestApiData<typeof APIS.GET_COMMIT>
+
+  type RestBlob = RestApiData<typeof APIS.CREATE_BLOB>
+
+  type RestTree = RestApiData<typeof APIS.CREATE_TREE>
+
+  type GetRefParams = Omit<RestApiParametersType<typeof APIS.GET_REF>, 'owner' | 'repo' | 'ref'>
+
+  type GetCommitParams = Omit<RestApiParametersType<typeof APIS.GET_COMMIT>, 'owner' | 'repo'>
+
+  type CreateCommitParams = Omit<RestApiParametersType<typeof APIS.CREATE_COMMIT>, 'owner' | 'repo'>
+
+  type CreateBlobParams = Omit<RestApiParametersType<typeof APIS.CREATE_BLOB>, 'owner' | 'repo'>
+
   type CreateTreeParams = Omit<RestApiParametersType<typeof APIS.CREATE_TREE>, 'owner' | 'repo'>
+
+  type UpdateRefParams = Omit<
+    RestApiParametersType<typeof APIS.UPDATE_REF>,
+    'owner' | 'repo' | 'ref'
+  >
+
+  type CreateTreeParams = Omit<RestApiParametersType<typeof APIS.CREATE_TREE>, 'owner' | 'repo'>
+
+  type GetIssuesParams = Omit<RestApiParametersType<typeof APIS.GET_ISSUES>, 'owner' | 'repo'>
 
   type CreateIssueParams = Omit<RestApiParametersType<typeof APIS.CREATE_ISSUE>, 'owner' | 'repo'>
 
   type UpdateIssueParams = Omit<RestApiParametersType<typeof APIS.UPDATE_ISSUE>, 'owner' | 'repo'>
+
+  type CreateCommitParams = Omit<RestApiParametersType<typeof APIS.CREATE_COMMIT>, 'owner' | 'repo'>
 
   /** -------------------- GitHub GraphQL -------------------- */
 
@@ -121,6 +148,8 @@ declare global {
 
   /** -------------------- RPC -------------------- */
 
+  type GetIssuesRpcArgs = [page: number, labels: string]
+
   type CreateIssueRpcArgs = [
     title: CreateIssueParams['title'],
     body: CreateIssueParams['body'],
@@ -133,4 +162,18 @@ declare global {
     body: UpdateIssueParams['body'],
     labels: string, // label names json string
   ]
+
+  type GetCommitRpcArgs = [commit_sha: string]
+
+  type GetRefRpcArgs = []
+
+  type UpdateRefRpcArgs = [sha: string]
+
+  type CreateBlobRpcArgs = [content: string]
+
+  type CreateBlobRpcArgs = [content: string]
+
+  type CreateTreeRpcArgs = [base_tree: string, tree_path: string, tree_sha: string]
+
+  type CreateCommitRpcArgs = [parents_commit_sha: string, tree_sha: string, message: string]
 }

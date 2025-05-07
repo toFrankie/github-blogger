@@ -40,3 +40,11 @@ export function normalizeIssueFromGraphql(issue: GraphqlIssue): MinimalIssue {
     })),
   }
 }
+
+export function normalizeLabelFromRest(label: RestLabel): MinimalLabel {
+  return {
+    id: label.node_id,
+    name: label.name,
+    description: label.description ?? '',
+  }
+}

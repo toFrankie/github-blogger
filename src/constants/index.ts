@@ -14,18 +14,13 @@ export const MESSAGE_TYPE = {
   GET_ISSUE_COUNT_WITH_FILTER: 'get_issue_count_with_filter',
   CREATE_ISSUE: 'create_issue',
   UPDATE_ISSUE: 'update_issue',
-  OPEN_EXTERNAL_LINK: 'open_external_link',
   GET_LABELS: 'get_labels',
   CREATE_LABEL: 'create_label',
   DELETE_LABEL: 'delete_label',
   UPDATE_LABEL: 'update_label',
-  GET_MILESTONES: 'get_milestones',
-  GET_SETTINGS: 'get_settings',
 
-  UPLOAD_IMAGE: 'upload_image',
+  GET_REF: 'get_ref',
   GET_COMMIT: 'get_commit',
-  GET_TREE: 'get_tree',
-  GET_BLOB: 'get_blob',
   CREATE_BLOB: 'create_blob',
   CREATE_TREE: 'create_tree',
   CREATE_COMMIT: 'create_commit',
@@ -33,6 +28,10 @@ export const MESSAGE_TYPE = {
 
   SHOW_SUCCESS: 'show_success',
   SHOW_ERROR: 'show_error',
+
+  GET_SETTINGS: 'get_settings',
+  UPLOAD_IMAGE: 'upload_image',
+  OPEN_EXTERNAL_LINK: 'open_external_link',
 } as const
 
 export const EMPTY_ISSUE: MinimalIssue = {

@@ -56,51 +56,48 @@ export default function App() {
       return
     }
 
+    // create
     if (number === -1) {
       const data = await createIssue(current)
-      // TODO: normalize
       if (data) {
         setCurrent(prev => ({
           ...prev,
           number: data.number,
           url: data.url,
-          created_at: data.created_at,
-          updated_at: data.updated_at,
+          createdAt: data.createdAt,
+          updatedAt: data.updatedAt,
         }))
         setOriginalCurrent(cloneDeep(current))
       }
       return
     }
 
+    // check diff
     const isDiff = compareIssue(current, originalCurrent)
     if (!isDiff) {
       message.warning('No changes made.')
       return
     }
 
+    // update
     const data = await updateIssue(current)
-
-    // TODO: normalize
     if (data) {
-      setCurrent(prev => ({
-        ...prev,
-        updated_at: data.updated_at,
-      }))
+      setCurrent(prev => ({...prev, updatedAt: data.updatedAt}))
       setOriginalCurrent(cloneDeep(current))
     }
   }
 
-  const handleAddLabel = (label: any) => {
+  const handleAddLabel = (label: MinimalLabel) => {
     setCurrent(prev => ({
       ...prev,
-      labels: [...(prev.labels || []), label],
+      labels: prev.labels.concat(label),
     }))
   }
 
-  const handleRemoveLabel = (label: any) => {
+  const handleRemoveLabel = (label: MinimalLabel) => {
     setCurrent(prev => ({
       ...prev,
-      labels: (prev.labels || []).filter(item => item.id !== label.id && item.id !== label.node_id),
+      labels: prev.labels.filter(item => item.id !== label.id),
     }))
   }
 

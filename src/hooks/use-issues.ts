@@ -25,9 +25,10 @@ export default function useIssues({page, LabelNames = [], title = ''}: UseIssues
   const createIssueMutation = useMutation({
     mutationFn: (issue: MinimalIssue) => createIssue(issue),
     onSuccess: async data => {
-      // TODO:
+      if (!data) return // 创建失败
+
       await archiveIssue(data, SUBMIT_TYPE.CREATE)
-      queryClient.invalidateQueries({queryKey: ['issues']})
+      queryClient.invalidateQueries({queryKey: ['issues']}) // TODO:
       message.success('Issue created successfully')
     },
     onError: () => {
@@ -37,10 +38,11 @@ export default function useIssues({page, LabelNames = [], title = ''}: UseIssues
 
   const updateIssueMutation = useMutation({
     mutationFn: (issue: MinimalIssue) => updateIssue(issue),
-    onSuccess: async (data, variables) => {
-      // TODO:
-      await archiveIssue({...variables, ...data}, SUBMIT_TYPE.UPDATE)
-      queryClient.invalidateQueries({queryKey: ['issues']})
+    onSuccess: async data => {
+      if (!data) return // 更新失败
+
+      await archiveIssue(data, SUBMIT_TYPE.UPDATE)
+      queryClient.invalidateQueries({queryKey: ['issues']}) // TODO:
       message.success('Issue updated successfully')
     },
     onError: () => {

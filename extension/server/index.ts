@@ -6,7 +6,11 @@ import {MESSAGE_TYPE} from '../constants'
 
 import {APIS, DEFAULT_LABEL_COLOR, DEFAULT_PAGINATION_SIZE} from '../constants'
 import {getSettings, to, cdnURL} from '../utils'
-import {normalizeIssueFromGraphql, normalizeIssueFromRest} from '../utils/normalize'
+import {
+  normalizeIssueFromGraphql,
+  normalizeIssueFromRest,
+  normalizeLabelFromRest,
+} from '../utils/normalize'
 import * as graphqlQueries from './graphql-queries'
 
 export default class Service {
@@ -47,14 +51,15 @@ export default class Service {
   }
 
   private async getLabels(params: {page: number; per_page: number}) {
-    const [_err, res] = await to(
+    const [err, res] = await to(
       this.octokit.request(APIS.GET_LABELS, {
         owner: this.config.user,
         repo: this.config.repo,
         ...params,
       })
     )
-    return res?.data ?? []
+    if (err) return []
+    return res.data.map(label => normalizeLabelFromRest(label))
   }
 
   private async createLabel(params: {name: string}) {
@@ -91,7 +96,7 @@ export default class Service {
     return res?.data ?? []
   }
 
-  private async getIssues(params: {page: number; labels: string}) {
+  private async getIssues(params: GetIssuesParams) {
     const [err, res] = await to(
       this.octokit.request(APIS.GET_ISSUES, {
         owner: this.config.user,
@@ -126,25 +131,27 @@ export default class Service {
   }
 
   private async updateIssue(params: UpdateIssueParams) {
-    const [_err, res] = await to(
+    const [err, res] = await to(
       this.octokit.request(APIS.UPDATE_ISSUE, {
         owner: this.config.user,
         repo: this.config.repo,
         ...params,
       })
     )
-    return res?.data ?? []
+    if (err) return null
+    return normalizeIssueFromRest(res.data)
   }
 
   private async createIssue(params: CreateIssueParams) {
-    const [_err, res] = await to(
+    const [err, res] = await to(
       this.octokit.request(APIS.CREATE_ISSUE, {
         owner: this.config.user,
         repo: this.config.repo,
         ...params,
       })
     )
-    return res?.data ?? undefined
+    if (err) return null
+    return normalizeIssueFromRest(res.data)
   }
 
   private async uploadImage(params: {content: string; path: string}) {
@@ -193,8 +200,8 @@ export default class Service {
         })
       )
     )
-    if (!err) return res.search.issueCount
-    return 0
+    if (err) return 0
+    return res.search.issueCount
   }
 
   private async getRef() {
@@ -205,14 +212,11 @@ export default class Service {
         ref: `heads/${this.config.branch}`,
       })
     )
-    if (res === undefined) {
-      throw new Error(`Please check if the ${this.config.branch} branch exists`)
-    }
-    if (!err) return res.data.object.sha
-    throw err
+    if (err) return null
+    return res.data
   }
 
-  private async getCommit(params: {commit_sha: string}) {
+  private async getCommit(params: GetCommitParams) {
     const [err, res] = await to(
       this.octokit.request(APIS.GET_COMMIT, {
         owner: this.config.user,
@@ -220,11 +224,11 @@ export default class Service {
         ...params,
       })
     )
-    if (!err) return res.data.tree.sha
-    throw err
+    if (err) return null
+    return res.data
   }
 
-  private async createBlob(params: {content: string}) {
+  private async createBlob(params: CreateBlobParams) {
     const [err, res] = await to(
       this.octokit.request(APIS.CREATE_BLOB, {
         owner: this.config.user,
@@ -232,8 +236,8 @@ export default class Service {
         ...params,
       })
     )
-    if (!err) return res.data.sha
-    throw err
+    if (err) return null
+    return res.data
   }
 
   private async createTree(params: CreateTreeParams) {
@@ -244,11 +248,11 @@ export default class Service {
         ...params,
       })
     )
-    if (!err) return res.data.sha
-    throw err
+    if (err) return null
+    return res.data
   }
 
-  private async createCommit(params: {message: string; tree: string; parents: string[]}) {
+  private async createCommit(params: CreateCommitParams) {
     const [err, res] = await to(
       this.octokit.request(APIS.CREATE_COMMIT, {
         owner: this.config.user,
@@ -256,11 +260,11 @@ export default class Service {
         ...params,
       })
     )
-    if (!err) return res.data.sha
-    throw err
+    if (err) return null
+    return res.data
   }
 
-  private async updateRef(params: {sha: string}) {
+  private async updateRef(params: UpdateRefParams) {
     const [err, res] = await to(
       this.octokit.request(APIS.UPDATE_REF, {
         owner: this.config.user,
@@ -269,8 +273,8 @@ export default class Service {
         ...params,
       })
     )
-    if (!err) return res.data
-    throw err
+    if (err) return null
+    return res.data
   }
 
   private registerRpcListener() {
@@ -279,8 +283,12 @@ export default class Service {
       return data
     }
 
-    const getIssues = async (page: number, labels: string) => {
-      return await this.getIssues({page, labels})
+    const getIssues = async (...args: GetIssuesRpcArgs) => {
+      const params: GetIssuesParams = {
+        page: args[0],
+        labels: args[1],
+      }
+      return await this.getIssues(params)
     }
 
     const getIssuesWithFilter = async (page: number, labels: string, title: string) => {
@@ -339,31 +347,36 @@ export default class Service {
       return await this.getRef()
     }
 
-    const updateRef = async (sha: string) => {
-      return await this.updateRef({sha})
+    const updateRef = async (...args: UpdateRefRpcArgs) => {
+      const params: UpdateRefParams = {sha: args[0]}
+      return await this.updateRef(params)
     }
 
-    const getCommit = async (sha: string) => {
-      return await this.getCommit({commit_sha: sha})
+    const getCommit = async (...args: GetCommitRpcArgs) => {
+      const params: GetCommitParams = {commit_sha: args[0]}
+      return await this.getCommit(params)
     }
 
-    const createCommit = async (parentCommitSha: string, treeSha: string, message: string) => {
-      return await this.createCommit({
-        message,
-        tree: treeSha,
-        parents: [parentCommitSha],
-      })
+    const createCommit = async (...args: CreateCommitRpcArgs) => {
+      const params: CreateCommitParams = {
+        parents: [args[0]],
+        tree: args[1],
+        message: args[2],
+      }
+      return await this.createCommit(params)
     }
 
-    const createBlob = async (content: string) => {
-      return await this.createBlob({content})
+    const createBlob = async (...args: CreateBlobRpcArgs) => {
+      const params: CreateBlobParams = {content: args[0]}
+      return await this.createBlob(params)
     }
 
-    const createTree = async (baseTree: string, path: string, sha: string) => {
-      return await this.createTree({
-        base_tree: baseTree,
-        tree: [{path, mode: '100644', type: 'blob', sha}],
-      })
+    const createTree = async (...args: CreateTreeRpcArgs) => {
+      const params: CreateTreeParams = {
+        base_tree: args[0],
+        tree: [{path: args[1], mode: '100644', type: 'blob', sha: args[2]}],
+      }
+      return await this.createTree(params)
     }
 
     const labelHandlers = {
@@ -383,6 +396,7 @@ export default class Service {
     }
 
     const gitHandlers = {
+      [MESSAGE_TYPE.GET_REF]: getRef,
       [MESSAGE_TYPE.UPDATE_REF]: updateRef,
       [MESSAGE_TYPE.GET_COMMIT]: getCommit,
       [MESSAGE_TYPE.CREATE_COMMIT]: createCommit,
