@@ -25,7 +25,7 @@ const SELECT_PANEL_PLACEHOLDER = 'Filter by label'
 interface ListProps {
   currentPage: number
   totalCount: number
-  totalLabels: MinimalLabels
+  allLabel: MinimalLabels
   visible: boolean
   issues: MinimalIssues
   loading: boolean
@@ -39,7 +39,7 @@ interface ListProps {
 export default function List({
   currentPage,
   totalCount,
-  totalLabels,
+  allLabel,
   visible,
   issues,
   onSetCurrentPage,
@@ -57,8 +57,8 @@ export default function List({
   const hasFilter = titleValue.trim() || selected.length > 0
 
   const items = useMemo(() => {
-    return totalLabels.map(item => ({text: item.name}))
-  }, [totalLabels])
+    return allLabel.map(item => ({text: item.name}))
+  }, [allLabel])
 
   const filteredItems = items.filter(
     item =>
@@ -90,12 +90,12 @@ export default function List({
 
   const searchByLabel = useCallback(
     debounce((labels: string[]) => {
-      const allName = totalLabels.map(l => l.name)
+      const allName = allLabel.map(l => l.name)
       const filteredNames: string[] = intersect(allName, labels)
       onSetCurrentPage(1)
       onSetFilterLabels(filteredNames)
     }, 500),
-    [totalLabels]
+    [allLabel]
   )
 
   return (

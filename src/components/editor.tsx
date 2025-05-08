@@ -12,92 +12,6 @@ import {message} from 'antd'
 
 import 'bytemd/dist/index.min.css'
 
-interface EditorProps {
-  title: string
-  number: number
-  content: string
-  labels: MinimalLabels
-  totalLabels: MinimalLabels
-  placeholder: string
-  onUpdateTitle: (title: string) => void
-  onUpdateBody: (body: string) => void
-  onAddLabel: (label: MinimalLabel) => void
-  onRemoveLabel: (label: MinimalLabel) => void
-  onUpload: (files: FileList) => Promise<any>
-  isUploading: boolean
-}
-
-export default function Editor({
-  title,
-  number,
-  content,
-  labels,
-  totalLabels,
-  placeholder,
-  onUpdateTitle,
-  onUpdateBody,
-  onAddLabel,
-  onRemoveLabel,
-  onUpload,
-}: EditorProps) {
-  const handleChange = (item, checked) => {
-    if (checked) {
-      onAddLabel(item)
-    } else {
-      onRemoveLabel(item)
-    }
-  }
-
-  const copyLink = () => {
-    const link = content || ''
-    navigator.clipboard.writeText(link)
-    message.success('Link copied.')
-  }
-
-  return (
-    <>
-      <div className="app-title">
-        <TextInput
-          className="title-input"
-          placeholder="Title"
-          value={title}
-          onChange={e => onUpdateTitle(e.target.value)}
-        />
-        {!!number && (
-          <div className="number" onClick={copyLink}>
-            #{number}
-          </div>
-        )}
-      </div>
-      <div className="app-labels">
-        <Stack direction="horizontal" gap="condensed" wrap="wrap">
-          {totalLabels.map(label => {
-            const checked = labels.some(l => l.id === label.id)
-            return (
-              <Label
-                key={label.id}
-                size="small"
-                variant={checked ? 'accent' : 'secondary'}
-                onClick={() => {
-                  handleChange(label, !checked)
-                }}
-              >
-                {label.name}
-              </Label>
-            )
-          })}
-        </Stack>
-      </div>
-      <MDEditor
-        value={content}
-        onChange={onUpdateBody}
-        uploadImages={onUpload}
-        placeholder={placeholder}
-      />
-    </>
-  )
-}
-
 const plugins = [
   frontmatter(),
   breaks(),
@@ -109,15 +23,71 @@ const plugins = [
   mermaid(),
 ]
 
-function MDEditor({value, onChange, uploadImages, placeholder}) {
+interface EditorProps {
+  issue: MinimalIssue
+  allLabel: MinimalLabels
+  onTitleChange: (title: string) => void
+  onBodyChange: (body: string) => void
+  onAddLabel: (label: MinimalLabel) => void
+  onRemoveLabel: (label: MinimalLabel) => void
+  onUploadImages: ClientUploadImages
+}
+
+export default function Editor({
+  issue,
+  allLabel,
+  onTitleChange,
+  onBodyChange,
+  onAddLabel,
+  onRemoveLabel,
+  onUploadImages,
+}: EditorProps) {
+  const copyLink = () => {
+    navigator.clipboard.writeText(issue.url)
+    message.success('Link copied.')
+  }
+
   return (
-    <BytemdEditor
-      placeholder={placeholder}
-      plugins={plugins}
-      previewDebounce={50}
-      uploadImages={uploadImages}
-      value={value}
-      onChange={onChange}
-    />
+    <>
+      <div className="app-title">
+        <TextInput
+          className="title-input"
+          placeholder="Title"
+          value={issue.title}
+          onChange={e => onTitleChange(e.target.value)}
+        />
+        {issue.number > -1 && (
+          <div className="number" onClick={copyLink}>
+            #{issue.number}
+          </div>
+        )}
+      </div>
+      <div className="app-labels">
+        <Stack direction="horizontal" gap="condensed" wrap="wrap">
+          {allLabel.map(label => {
+            const checked = issue.labels.some(l => l.id === label.id)
+            return (
+              <Label
+                key={label.id}
+                size="small"
+                variant={checked ? 'accent' : 'secondary'}
+                onClick={() => (!checked ? onAddLabel(label) : onRemoveLabel(label))}
+              >
+                {label.name}
+              </Label>
+            )
+          })}
+        </Stack>
+      </div>
+
+      <BytemdEditor
+        placeholder="Leave your thought..."
+        plugins={plugins}
+        previewDebounce={50}
+        uploadImages={onUploadImages}
+        value={issue.body}
+        onChange={onBodyChange}
+      />
+    </>
   )
 }

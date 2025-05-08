@@ -6,7 +6,7 @@ import {cloneDeep} from 'licia-es'
 import {useEffect, useState} from 'react'
 import {ActionBox, Editor, LabelManager, List} from '@/components'
 import {EMPTY_ISSUE, MESSAGE_TYPE} from '@/constants'
-import {useIssues, useLabels, useUpload} from '@/hooks'
+import {useIssues, useLabels, useUploadImages} from '@/hooks'
 import {compareIssue} from '@/utils'
 import {RPC} from '@/utils/rpc'
 
@@ -42,7 +42,7 @@ export default function App() {
     title: filterTitle,
   })
   const {labels, labelsLoading, createLabel, deleteLabel, updateLabel} = useLabels()
-  const {upload, isUploading} = useUpload()
+  const {upload: handleUploadImages} = useUploadImages()
 
   useEffect(() => {
     RPC.on(MESSAGE_TYPE.SHOW_SUCCESS, showSuccess)
@@ -87,30 +87,9 @@ export default function App() {
     }
   }
 
-  const handleAddLabel = (label: MinimalLabel) => {
-    setCurrent(prev => ({
-      ...prev,
-      labels: prev.labels.concat(label),
-    }))
-  }
-
-  const handleRemoveLabel = (label: MinimalLabel) => {
-    setCurrent(prev => ({
-      ...prev,
-      labels: prev.labels.filter(item => item.id !== label.id),
-    }))
-  }
-
   const handleSetCurrentIssue = (issue: any) => {
     setCurrent(issue)
     setOriginalCurrent(cloneDeep(issue))
-  }
-
-  const handleSetCurrentIssueBody = (body: string) => {
-    setCurrent(prev => ({
-      ...prev,
-      body,
-    }))
   }
 
   const handleSetListVisible = (visible: boolean) => {
@@ -131,14 +110,6 @@ export default function App() {
 
   const handleSetFilterLabels = (labels: string[]) => {
     setFilterLabels(labels)
-  }
-
-  const handleUpload = async (files: FileList) => {
-    try {
-      await upload(files)
-    } catch (error) {
-      console.error('Upload failed:', error)
-    }
   }
 
   const handleCreateLabel = async (label: string) => {
@@ -168,23 +139,20 @@ export default function App() {
   return (
     <div className="app">
       <Editor
-        content={current.body || ''}
-        labels={current.labels || []}
-        number={current.number}
-        placeholder="Leave your thought..."
-        title={current.title || ''}
-        totalLabels={labels}
-        onUpdateTitle={title => setCurrent(prev => ({...prev, title}))}
-        onUpdateBody={handleSetCurrentIssueBody}
-        onAddLabel={handleAddLabel}
-        onRemoveLabel={handleRemoveLabel}
-        onUpload={handleUpload}
-        isUploading={isUploading}
+        issue={current}
+        allLabel={labels}
+        onTitleChange={title => setCurrent(prev => ({...prev, title}))}
+        onBodyChange={body => setCurrent(prev => ({...prev, body}))}
+        onAddLabel={label => setCurrent(prev => ({...prev, labels: prev.labels.concat(label)}))}
+        onRemoveLabel={label =>
+          setCurrent(prev => ({...prev, labels: prev.labels.filter(item => item.id !== label.id)}))
+        }
+        onUploadImages={handleUploadImages}
       />
       <List
         currentPage={currentPage}
         totalCount={totalCount}
-        totalLabels={labels}
+        allLabel={labels}
         visible={listVisible}
         issues={issues}
         loading={issuesLoading}

@@ -12,9 +12,15 @@ function checkFile(file: File) {
   return isLt2M
 }
 
-export default function useUpload() {
-  const uploadMutation = useMutation({
-    mutationFn: async (files: FileList) => {
+type UploadImagesResult = {
+  url: string
+  title?: string
+  alt?: string
+}[]
+
+export default function useUploadImages() {
+  const uploadMutation = useMutation<UploadImagesResult, Error, File[]>({
+    mutationFn: async (files: File[]) => {
       if (files.length === 0) {
         throw new Error('Please select a image')
       }
@@ -51,7 +57,7 @@ export default function useUpload() {
   })
 
   return {
-    upload: uploadMutation.mutate,
+    upload: uploadMutation.mutateAsync,
     isUploading: uploadMutation.isPending,
   }
 }

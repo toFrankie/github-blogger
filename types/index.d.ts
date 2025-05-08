@@ -1,4 +1,5 @@
 import type {Endpoints, OctokitResponse} from '@octokit/types'
+import type {EditorProps} from '@bytemd/react'
 import {APIS} from '@/constants'
 
 export {}
@@ -176,4 +177,8 @@ declare global {
   type CreateTreeRpcArgs = [base_tree: string, tree_path: string, tree_sha: string]
 
   type CreateCommitRpcArgs = [parents_commit_sha: string, tree_sha: string, message: string]
+
+  /** -------------------- Client -------------------- */
+
+  type ClientUploadImages = EditorProps['uploadImages']
 }
