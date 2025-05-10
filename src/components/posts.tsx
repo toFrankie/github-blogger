@@ -23,17 +23,23 @@ import {type ActionListItemInput} from '@primer/react/deprecated'
 import {Blankslate} from '@primer/react/experimental'
 import {debounce, intersect, unique} from 'licia-es'
 import {useCallback, useMemo, useState} from 'react'
+import {DEFAULT_PAGINATION_SIZE} from '@/constants'
 
 const SELECT_PANEL_PLACEHOLDER = 'Filter by label'
 
 interface ListProps {
   repo: RestRepo | undefined
   currentPage: number
-  totalCount: number
+  issueCount: number
   allLabel: MinimalLabels
   visible: boolean
-  issues: MinimalIssues
-  isIssuePending: boolean
+  issues: MinimalIssues | undefined
+  issueStatus: {
+    withoutIssue: boolean
+    isPending: boolean
+    isLoading: boolean
+    withFilter: boolean
+  }
   onSetCurrentPage: (page: number) => void
   onSetFilterTitle: (title: string) => void
   onSetFilterLabels: (labels: string[]) => void
@@ -44,11 +50,11 @@ interface ListProps {
 export default function Posts({
   repo,
   currentPage,
-  totalCount,
+  issueCount,
   allLabel,
   visible,
   issues,
-  isIssuePending,
+  issueStatus,
   onSetCurrentPage,
   onSetFilterTitle,
   onSetFilterLabels,
@@ -60,8 +66,6 @@ export default function Posts({
   const [filter, setFilter] = useState('')
   const [open, setOpen] = useState(false)
   const [current, setCurrent] = useState(currentPage)
-
-  const hasFilter = titleValue.trim() || selected.length > 0
 
   const items = useMemo(() => {
     return allLabel.map(item => ({text: item.name}))
@@ -107,8 +111,6 @@ export default function Posts({
 
   if (!visible) return null
 
-  const IssueSpinner = isIssuePending ? <Spinner size="small" /> : null
-
   return (
     <Dialog
       title={
@@ -122,137 +124,164 @@ export default function Posts({
                   <MarkGithubIcon size={32} />
                 )}
                 <div>{repo?.full_name}</div>
-                <div>{IssueSpinner}</div>
               </Stack>
             </PageHeader.Title>
           </PageHeader.TitleArea>
           <PageHeader.Description>
-            <Text sx={{fontSize: 1, color: 'fg.muted'}}>totals: {totalCount}</Text>
+            <Text sx={{fontSize: 1, color: 'fg.muted'}}>totals: {issueCount}</Text>
           </PageHeader.Description>
         </PageHeader>
       }
       position="left"
       width="large"
       onClose={() => onSetListVisible(false)}
-    >
-      <div className="app-issue-list">
-        <div className="issue-filter">
-          <Stack>
-            <TextInput
-              className="title-filter"
-              placeholder="Filter by title"
-              onChange={handleTitleChange}
-              value={titleValue}
-              trailingAction={
-                titleValue ? (
-                  <TextInput.Action
-                    icon={XCircleFillIcon}
-                    aria-label="Clear input"
-                    onClick={() => {
-                      setTitleValue('')
-                      searchByTitle('')
-                    }}
-                  />
-                ) : (
-                  <></>
-                )
-              }
-            />
-            <SelectPanel
-              renderAnchor={({children, ...anchorProps}) => (
-                <Button
-                  {...anchorProps}
-                  alignContent="start"
-                  trailingAction={TriangleDownIcon}
-                  aria-haspopup="dialog"
-                  labelWrap
-                >
-                  {sortSelectedItems(children as string, selectedItemsSortedFirst)}
-                </Button>
+      renderBody={() => {
+        return (
+          <div className="app-issue-list">
+            <div className="issue-filter">
+              <Stack>
+                <TextInput
+                  className="title-filter"
+                  placeholder="Filter by title"
+                  onChange={handleTitleChange}
+                  value={titleValue}
+                  trailingAction={
+                    titleValue ? (
+                      <TextInput.Action
+                        icon={XCircleFillIcon}
+                        aria-label="Clear input"
+                        onClick={() => {
+                          setTitleValue('')
+                          searchByTitle('')
+                        }}
+                      />
+                    ) : (
+                      <></>
+                    )
+                  }
+                />
+                <SelectPanel
+                  renderAnchor={({children, ...anchorProps}) => (
+                    <Button
+                      {...anchorProps}
+                      alignContent="start"
+                      trailingAction={TriangleDownIcon}
+                      aria-haspopup="dialog"
+                      labelWrap
+                    >
+                      {sortSelectedItems(children as string, selectedItemsSortedFirst)}
+                    </Button>
+                  )}
+                  footer={
+                    <Button
+                      style={{width: '100%'}}
+                      onClick={() => {
+                        setFilter('')
+                        setSelected([])
+                        searchByLabel([])
+                      }}
+                    >
+                      Clear filters
+                    </Button>
+                  }
+                  title="Select labels"
+                  placeholder={SELECT_PANEL_PLACEHOLDER}
+                  placeholderText="Filter label"
+                  open={open}
+                  onOpenChange={setOpen}
+                  items={selectedItemsSortedFirst}
+                  selected={selected}
+                  onSelectedChange={handleSelectedChange}
+                  onFilterChange={setFilter}
+                />
+              </Stack>
+            </div>
+            <div className="list">
+              {!issues || issueStatus.isLoading ? (
+                <Loading />
+              ) : issueStatus.withoutIssue ? (
+                <WithoutIssue onActionClick={() => onSetListVisible(false)} />
+              ) : issueStatus.withFilter && !issueStatus.isPending && !issues.length ? (
+                <NoFilterResult />
+              ) : (
+                <ActionList className="list" variant="full">
+                  {issues.map(item => (
+                    <ActionList.Item
+                      key={item.id}
+                      className="list-item"
+                      onClick={() => {
+                        onSetListVisible(false)
+                        onSetCurrentIssue(item)
+                      }}
+                    >
+                      <span className="list-title">{item.title}</span>
+                      <ActionList.Description className="list-number">
+                        #{item.number}
+                      </ActionList.Description>
+                      <ActionList.TrailingVisual>
+                        <ChevronRightIcon size={16} />
+                      </ActionList.TrailingVisual>
+                    </ActionList.Item>
+                  ))}
+                </ActionList>
               )}
-              footer={
-                <Button
-                  style={{width: '100%'}}
-                  onClick={() => {
-                    setFilter('')
-                    setSelected([])
-                    searchByLabel([])
-                  }}
-                >
-                  Clear filters
-                </Button>
-              }
-              title="Select labels"
-              placeholder={SELECT_PANEL_PLACEHOLDER}
-              placeholderText="Filter label"
-              open={open}
-              onOpenChange={setOpen}
-              items={selectedItemsSortedFirst}
-              selected={selected}
-              onSelectedChange={handleSelectedChange}
-              onFilterChange={setFilter}
-            />
-          </Stack>
-        </div>
-        <div className="list">
-          {issues.length > 0 ? (
-            <ActionList className="list" variant="full">
-              {issues.map(item => (
-                <ActionList.Item
-                  key={item.id}
-                  className="list-item"
-                  onClick={() => {
-                    onSetListVisible(false)
-                    onSetCurrentIssue(item)
-                  }}
-                >
-                  <span className="list-title">{item.title}</span>
-                  <ActionList.Description className="list-number">
-                    #{item.number}
-                  </ActionList.Description>
-                  <ActionList.TrailingVisual>
-                    <ChevronRightIcon size={16} />
-                  </ActionList.TrailingVisual>
-                </ActionList.Item>
-              ))}
-            </ActionList>
-          ) : hasFilter ? (
-            <Blankslate spacious>
-              <Blankslate.Visual>
-                <SearchIcon size="medium" />
-              </Blankslate.Visual>
-              <Blankslate.Heading>No results</Blankslate.Heading>
-              <Blankslate.Description>Try adjusting your search filters.</Blankslate.Description>
-            </Blankslate>
-          ) : (
-            <Blankslate spacious>
-              <Blankslate.Visual>
-                <SparkleFillIcon size="medium" />
-              </Blankslate.Visual>
-              <Blankslate.Heading>Welcome to GitHub Blogger</Blankslate.Heading>
-              <Blankslate.Description>
-                Create and manage blog posts with GitHub Issues.
-              </Blankslate.Description>
-              <Blankslate.PrimaryAction onClick={() => onSetListVisible(false)}>
-                Create Your First Post
-              </Blankslate.PrimaryAction>
-            </Blankslate>
-          )}
-        </div>
-        <div className="issue-pagination">
-          <Pagination
-            currentPage={current}
-            pageCount={Math.ceil(totalCount / 20)}
-            surroundingPageCount={1}
-            showPages={{narrow: false}}
-            onPageChange={(_event, number) => {
-              setCurrent(number)
-              onSetCurrentPage(number)
-            }}
-          />
-        </div>
-      </div>
-    </Dialog>
+            </div>
+            <div className="issue-pagination">
+              <Pagination
+                currentPage={current}
+                pageCount={Math.ceil(issueCount / DEFAULT_PAGINATION_SIZE)}
+                surroundingPageCount={1}
+                showPages={{narrow: false}}
+                onPageChange={(_event, number) => {
+                  setCurrent(number)
+                  onSetCurrentPage(number)
+                }}
+              />
+            </div>
+          </div>
+        )
+      }}
+    />
+  )
+}
+
+function Loading() {
+  return (
+    <Blankslate spacious>
+      <Blankslate.Visual>
+        <Spinner size="medium" />
+      </Blankslate.Visual>
+      <Blankslate.Heading>Searching...</Blankslate.Heading>
+    </Blankslate>
+  )
+}
+
+function WithoutIssue({onActionClick}: {onActionClick: () => void}) {
+  return (
+    <Blankslate spacious>
+      <Blankslate.Visual>
+        <SparkleFillIcon size="medium" />
+      </Blankslate.Visual>
+      <Blankslate.Heading>Welcome to GitHub Blogger</Blankslate.Heading>
+      <Blankslate.Description>
+        Create and manage blog posts with GitHub Issues.
+      </Blankslate.Description>
+      <Blankslate.PrimaryAction onClick={onActionClick}>
+        Create Your First Post
+      </Blankslate.PrimaryAction>
+    </Blankslate>
+  )
+}
+
+function NoFilterResult() {
+  return (
+    <Blankslate spacious>
+      <Blankslate.Visual>
+        <SearchIcon size="medium" />
+      </Blankslate.Visual>
+      <Blankslate.Heading>No results</Blankslate.Heading>
+      <Blankslate.Description>Try adjusting your search filters.</Blankslate.Description>
+    </Blankslate>
   )
 }
 

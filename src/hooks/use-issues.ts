@@ -1,7 +1,15 @@
 import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query'
 import {message} from 'antd'
+import {useMemo} from 'react'
 import {SUBMIT_TYPE} from '@/constants'
-import {archiveIssue, createIssue, getIssueCount, getIssues, updateIssue} from '@/utils/rpc'
+import {
+  archiveIssue,
+  createIssue,
+  getIssueCount,
+  getIssueCountWithFilter,
+  getIssues,
+  updateIssue,
+} from '@/utils/rpc'
 
 interface UseIssuesParams {
   page: number
@@ -12,17 +20,33 @@ interface UseIssuesParams {
 export default function useIssues({page, LabelNames = [], title = ''}: UseIssuesParams) {
   const queryClient = useQueryClient()
 
-  // TODO: error
-  const {data: issues = [], isPending: isIssuePending} = useQuery({
+  // TODO: 错误处理、默认值、创建后 refetch
+  const {
+    data: issues,
+    isLoading: isLoadingIssues,
+    isPending: isPendingIssues,
+    isFetched: isFetchedIssues,
+  } = useQuery({
     queryKey: ['issues', page, LabelNames, title],
     queryFn: () => getIssues(page, LabelNames, title),
   })
 
-  const {data: totalCount = 1} = useQuery({
-    queryKey: ['issue', 'count', LabelNames, title],
-    queryFn: () => getIssueCount(title, LabelNames),
+  const {data: issueCount, isFetched: isFetchedIssueCount} = useQuery({
+    queryKey: ['issue-count', 'total'],
+    queryFn: () => getIssueCount(),
   })
 
+  const withFilter = useMemo(() => {
+    return !!title || LabelNames.length > 0
+  }, [title, LabelNames])
+
+  const {data: issueCountWithFilter, isPending: isPendingIssueCountWithFilter} = useQuery({
+    queryKey: ['issue-count', 'filtered', LabelNames, title],
+    queryFn: () => getIssueCountWithFilter(title, LabelNames),
+    enabled: withFilter,
+  })
+
+  // TODO: 将所有 issues 或 issueCount 查询失效
   const createIssueMutation = useMutation({
     mutationFn: (issue: MinimalIssue) => createIssue(issue),
     onSuccess: async data => {
@@ -51,10 +75,26 @@ export default function useIssues({page, LabelNames = [], title = ''}: UseIssues
     },
   })
 
+  const withoutIssue = useMemo(() => {
+    return isFetchedIssueCount && issueCount === 0
+  }, [isFetchedIssueCount, issueCount])
+
+  const isLoading = useMemo(() => isLoadingIssues, [isLoadingIssues])
+
+  const isPending = useMemo(() => {
+    return isPendingIssues || (withFilter && isPendingIssueCountWithFilter)
+  }, [isPendingIssues, withFilter, isPendingIssueCountWithFilter])
+
+  const issueStatus = useMemo(
+    () => ({withoutIssue, isLoading, isPending, withFilter}),
+    [withoutIssue, isLoading, isPending, withFilter]
+  )
+
   return {
     issues,
-    totalCount,
-    isIssuePending,
+    issueCount, // 总数量
+    issueCountWithFilter, // 过滤后的数量
+    issueStatus,
     createIssue: createIssueMutation.mutateAsync,
     updateIssue: updateIssueMutation.mutateAsync,
   }

@@ -26,7 +26,7 @@ const plugins = [
 interface EditorProps {
   issue: MinimalIssue
   allLabel: MinimalLabels
-  isLabelPending: boolean
+  isPendingLabels: boolean
   onTitleChange: (title: string) => void
   onBodyChange: (body: string) => void
   onAddLabel: (label: MinimalLabel) => void
@@ -37,7 +37,7 @@ interface EditorProps {
 export default function Editor({
   issue,
   allLabel,
-  isLabelPending,
+  isPendingLabels,
   onTitleChange,
   onBodyChange,
   onAddLabel,
@@ -65,7 +65,7 @@ export default function Editor({
         )}
       </div>
       <div className="app-labels">
-        {isLabelPending ? (
+        {isPendingLabels ? (
           <Spinner size="small" />
         ) : (
           <Stack direction="horizontal" gap="condensed" wrap="wrap">

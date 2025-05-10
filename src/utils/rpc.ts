@@ -29,14 +29,18 @@ export async function updateLabel(oldLabel: string, newLabel: string) {
   await RPC.emit(MESSAGE_TYPE.UPDATE_LABEL, [oldLabel, newLabel])
 }
 
-export async function getIssueCount(filterTitle: string, filterLabelNames: string[] = []) {
-  if (filterTitle || filterLabelNames.length > 0) {
-    return (await RPC.emit(MESSAGE_TYPE.GET_ISSUE_COUNT_WITH_FILTER, [
-      filterTitle,
-      filterLabelNames.join(','),
-    ])) as number
-  }
+export async function getIssueCount() {
   return (await RPC.emit(MESSAGE_TYPE.GET_ISSUE_COUNT)) as number
+}
+
+export async function getIssueCountWithFilter(
+  filterTitle: string,
+  filterLabelNames: string[] = []
+) {
+  return (await RPC.emit(MESSAGE_TYPE.GET_ISSUE_COUNT_WITH_FILTER, [
+    filterTitle,
+    filterLabelNames.join(','),
+  ])) as number
 }
 
 export async function getIssues(page: number = 1, labels: string[] = [], title: string = '') {

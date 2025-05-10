@@ -42,12 +42,12 @@ export default function App() {
     queryFn: () => getRepo(),
   })
 
-  const {issues, totalCount, isIssuePending, createIssue, updateIssue} = useIssues({
+  const {issues, issueCount, createIssue, updateIssue, issueStatus} = useIssues({
     page: currentPage,
     LabelNames: filterLabels,
     title: filterTitle,
   })
-  const {labels: allLabel, isLabelPending, createLabel, deleteLabel, updateLabel} = useLabels()
+  const {labels: allLabel, isPendingLabels, createLabel, deleteLabel, updateLabel} = useLabels()
   const {upload: handleUploadImages} = useUploadImages()
 
   useEffect(() => {
@@ -147,7 +147,7 @@ export default function App() {
       <Editor
         issue={current}
         allLabel={allLabel}
-        isLabelPending={isLabelPending}
+        isPendingLabels={isPendingLabels}
         onTitleChange={title => setCurrent(prev => ({...prev, title}))}
         onBodyChange={body => setCurrent(prev => ({...prev, body}))}
         onAddLabel={label => setCurrent(prev => ({...prev, labels: prev.labels.concat(label)}))}
@@ -159,11 +159,11 @@ export default function App() {
       <Posts
         repo={repo}
         currentPage={currentPage}
-        totalCount={totalCount}
+        issueStatus={issueStatus}
+        issueCount={issueCount}
         allLabel={allLabel}
         visible={listVisible}
         issues={issues}
-        isIssuePending={isIssuePending}
         onSetCurrentPage={handleSetCurrentPage}
         onSetFilterTitle={handleSetFilterTitle}
         onSetFilterLabels={handleSetFilterLabels}
@@ -173,7 +173,7 @@ export default function App() {
       <Labels
         allLabel={allLabel}
         visible={labelsVisible}
-        isLabelPending={isLabelPending}
+        isPendingLabels={isPendingLabels}
         onCreateLabel={handleCreateLabel}
         onDeleteLabel={handleDeleteLabel}
         onUpdateLabel={handleUpdateLabel}

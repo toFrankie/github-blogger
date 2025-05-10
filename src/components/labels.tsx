@@ -6,7 +6,7 @@ import {useRef, useState} from 'react'
 interface LabelManagerProps {
   allLabel: MinimalLabels
   visible: boolean
-  isLabelPending: boolean
+  isPendingLabels: boolean
   onCreateLabel: (label: string) => Promise<void>
   onDeleteLabel: (label: string) => Promise<void>
   onUpdateLabel: (oldLabel: string, newLabel: string) => Promise<void>
