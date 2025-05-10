@@ -4,7 +4,7 @@ import {message} from 'antd'
 import {Buffer} from 'buffer'
 import {cloneDeep} from 'licia-es'
 import {useEffect, useState} from 'react'
-import {ActionBox, Editor, LabelManager, List} from '@/components'
+import {ActionBox, Editor, Labels, Posts} from '@/components'
 import {EMPTY_ISSUE, MESSAGE_TYPE} from '@/constants'
 import {useIssues, useLabels, useUploadImages} from '@/hooks'
 import {compareIssue} from '@/utils'
@@ -150,7 +150,7 @@ export default function App() {
         }
         onUploadImages={handleUploadImages}
       />
-      <List
+      <Posts
         currentPage={currentPage}
         totalCount={totalCount}
         allLabel={allLabel}
@@ -163,7 +163,7 @@ export default function App() {
         onSetCurrentIssue={handleSetCurrentIssue}
         onSetListVisible={handleSetListVisible}
       />
-      <LabelManager
+      <Labels
         allLabel={allLabel}
         visible={labelsVisible}
         loading={labelLoading}

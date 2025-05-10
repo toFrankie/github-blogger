@@ -1,4 +1,4 @@
 export {default as ActionBox} from './action-box'
 export {default as Editor} from './editor'
-export {default as LabelManager} from './label-manager'
-export {default as List} from './list'
+export {default as Labels} from './labels'
+export {default as Posts} from './posts'

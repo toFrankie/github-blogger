@@ -1,5 +1,6 @@
 import {PlusOutlined} from '@ant-design/icons'
 import {Drawer, Input, message, Space, Tag, Tooltip} from 'antd'
+import {Dialog} from '@primer/react'
 import {useRef, useState} from 'react'
 
 interface LabelManagerProps {
@@ -12,7 +13,7 @@ interface LabelManagerProps {
   onSetLabelsVisible: (visible: boolean) => void
 }
 
-export default function LabelManager({
+export default function Labels({
   allLabel,
   visible,
   onCreateLabel,
@@ -68,11 +69,10 @@ export default function LabelManager({
   if (!visible) return null
 
   return (
-    <Drawer
-      closable={false}
-      open={visible}
-      placement="right"
-      title="Labels Management"
+    <Dialog
+      title="Labels"
+      position="right"
+      width="medium"
       onClose={() => onSetLabelsVisible(false)}
     >
       <Space wrap size={[0, 'small']}>
@@ -159,6 +159,6 @@ export default function LabelManager({
           </Tag>
         )}
       </Space>
-    </Drawer>
+    </Dialog>
   )
 }
