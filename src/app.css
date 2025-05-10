@@ -10,6 +10,10 @@
 @import url('@primer/primitives/dist/css/functional/typography/typography.css');
 @import url('@primer/primitives/dist/css/base/motion/motion.css');
 
+html {
+  scrollbar-color: rgba(121, 121, 121, 0.4) transparent !important;
+}
+
 body {
   padding: 0 !important;
   margin: 0 !important;
@@ -128,6 +132,7 @@ code {
   display: flex;
   flex-direction: column;
   height: 100%;
+  padding: 16px;
 }
 
 .issue-filter {
