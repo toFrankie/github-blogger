@@ -3,7 +3,7 @@ import {Drawer, Input, message, Space, Tag, Tooltip} from 'antd'
 import {useRef, useState} from 'react'
 
 interface LabelManagerProps {
-  labels: MinimalLabels
+  allLabel: MinimalLabels
   visible: boolean
   loading: boolean
   onCreateLabel: (label: string) => Promise<void>
@@ -13,7 +13,7 @@ interface LabelManagerProps {
 }
 
 export default function LabelManager({
-  labels,
+  allLabel,
   visible,
   onCreateLabel,
   onDeleteLabel,
@@ -58,7 +58,7 @@ export default function LabelManager({
   }
 
   const checkDuplicate = (name: string) => {
-    return labels.filter(item => item.name === name).length > 0
+    return allLabel.filter(item => item.name === name).length > 0
   }
 
   const checkEmpty = (name: string) => {
@@ -76,7 +76,7 @@ export default function LabelManager({
       onClose={() => onSetLabelsVisible(false)}
     >
       <Space wrap size={[0, 'small']}>
-        {labels.map(label => {
+        {allLabel.map(label => {
           if (label.id === editIndex) {
             return (
               <Input

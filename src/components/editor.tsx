@@ -7,7 +7,7 @@ import math from '@bytemd/plugin-math'
 import mediumZoom from '@bytemd/plugin-medium-zoom'
 import mermaid from '@bytemd/plugin-mermaid'
 import {Editor as BytemdEditor} from '@bytemd/react'
-import {Label, Stack, TextInput} from '@primer/react'
+import {Label, Stack, Spinner, TextInput} from '@primer/react'
 import {message} from 'antd'
 
 import 'bytemd/dist/index.min.css'
@@ -26,6 +26,7 @@ const plugins = [
 interface EditorProps {
   issue: MinimalIssue
   allLabel: MinimalLabels
+  labelLoading: boolean
   onTitleChange: (title: string) => void
   onBodyChange: (body: string) => void
   onAddLabel: (label: MinimalLabel) => void
@@ -36,6 +37,7 @@ interface EditorProps {
 export default function Editor({
   issue,
   allLabel,
+  labelLoading,
   onTitleChange,
   onBodyChange,
   onAddLabel,
@@ -63,21 +65,25 @@ export default function Editor({
         )}
       </div>
       <div className="app-labels">
-        <Stack direction="horizontal" gap="condensed" wrap="wrap">
-          {allLabel.map(label => {
-            const checked = issue.labels.some(l => l.id === label.id)
-            return (
-              <Label
-                key={label.id}
-                size="small"
-                variant={checked ? 'accent' : 'secondary'}
-                onClick={() => (!checked ? onAddLabel(label) : onRemoveLabel(label))}
-              >
-                {label.name}
-              </Label>
-            )
-          })}
-        </Stack>
+        {labelLoading ? (
+          <Spinner size="small" />
+        ) : (
+          <Stack direction="horizontal" gap="condensed" wrap="wrap">
+            {allLabel.map(label => {
+              const checked = issue.labels.some(l => l.id === label.id)
+              return (
+                <Label
+                  key={label.id}
+                  size="small"
+                  variant={checked ? 'accent' : 'secondary'}
+                  onClick={() => (!checked ? onAddLabel(label) : onRemoveLabel(label))}
+                >
+                  {label.name}
+                </Label>
+              )
+            })}
+          </Stack>
+        )}
       </div>
 
       <BytemdEditor

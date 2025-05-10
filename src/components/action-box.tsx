@@ -13,21 +13,19 @@ import {getVscode} from '@/utils'
 const vscode = getVscode()
 
 interface ActionBoxProps {
-  number: number
+  issue: MinimalIssue
   onUpdateIssue: () => Promise<void>
   onSetCurrentIssue: (issue: MinimalIssue) => void
   onSetLabelVisible: (visible: boolean) => void
   onSetListVisible: (visible: boolean) => void
-  currentIssue: MinimalIssue
 }
 
 export default function ActionBox({
-  number,
+  issue,
   onUpdateIssue,
   onSetCurrentIssue,
   onSetLabelVisible,
   onSetListVisible,
-  currentIssue,
 }: ActionBoxProps) {
   return (
     <div className="app-action-box">
@@ -35,8 +33,8 @@ export default function ActionBox({
         <IconButton
           icon={CloudIcon}
           onClick={onUpdateIssue}
-          description="Update current issue"
-          aria-label="Update current issue"
+          description="Update issue"
+          aria-label="Update issue"
           tooltipDirection="w"
           variant="primary"
         />
@@ -47,13 +45,13 @@ export default function ActionBox({
           aria-label="Create new issue"
           tooltipDirection="w"
         />
-        {!!number && (
+        {issue.number > -1 && (
           <IconButton
             icon={LinkExternalIcon}
             onClick={() => {
               vscode.postMessage({
                 command: MESSAGE_TYPE.OPEN_EXTERNAL_LINK,
-                externalLink: currentIssue.url,
+                externalLink: issue.url,
               })
             }}
             description="Open in default browser"
@@ -71,8 +69,8 @@ export default function ActionBox({
         <IconButton
           icon={ListUnorderedIcon}
           onClick={() => onSetListVisible(true)}
-          description="Issue List"
-          aria-label="Issue List"
+          description="Posts"
+          aria-label="Posts"
           tooltipDirection="w"
         />
       </Stack>

@@ -8,6 +8,7 @@
 @import url('@primer/primitives/dist/css/functional/size/size.css');
 @import url('@primer/primitives/dist/css/functional/size/viewport.css');
 @import url('@primer/primitives/dist/css/functional/typography/typography.css');
+@import url('@primer/primitives/dist/css/base/motion/motion.css');
 
 body {
   padding: 0 !important;

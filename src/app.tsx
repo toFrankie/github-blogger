@@ -41,7 +41,7 @@ export default function App() {
     LabelNames: filterLabels,
     title: filterTitle,
   })
-  const {labels, labelsLoading, createLabel, deleteLabel, updateLabel} = useLabels()
+  const {labels: allLabel, labelLoading, createLabel, deleteLabel, updateLabel} = useLabels()
   const {upload: handleUploadImages} = useUploadImages()
 
   useEffect(() => {
@@ -140,7 +140,8 @@ export default function App() {
     <div className="app">
       <Editor
         issue={current}
-        allLabel={labels}
+        allLabel={allLabel}
+        labelLoading={labelLoading}
         onTitleChange={title => setCurrent(prev => ({...prev, title}))}
         onBodyChange={body => setCurrent(prev => ({...prev, body}))}
         onAddLabel={label => setCurrent(prev => ({...prev, labels: prev.labels.concat(label)}))}
@@ -152,7 +153,7 @@ export default function App() {
       <List
         currentPage={currentPage}
         totalCount={totalCount}
-        allLabel={labels}
+        allLabel={allLabel}
         visible={listVisible}
         issues={issues}
         loading={issuesLoading}
@@ -163,21 +164,20 @@ export default function App() {
         onSetListVisible={handleSetListVisible}
       />
       <LabelManager
-        labels={labels}
+        allLabel={allLabel}
         visible={labelsVisible}
-        loading={labelsLoading}
+        loading={labelLoading}
         onCreateLabel={handleCreateLabel}
         onDeleteLabel={handleDeleteLabel}
         onUpdateLabel={handleUpdateLabel}
         onSetLabelsVisible={handleSetLabelsVisible}
       />
       <ActionBox
-        number={current.number}
+        issue={current}
         onUpdateIssue={handleUpdateIssue}
         onSetCurrentIssue={handleSetCurrentIssue}
         onSetLabelVisible={handleSetLabelsVisible}
         onSetListVisible={handleSetListVisible}
-        currentIssue={current}
       />
     </div>
   )
