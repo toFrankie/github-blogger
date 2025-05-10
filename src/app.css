@@ -66,7 +66,7 @@ code {
   margin: 0 8px 8px;
 }
 
-.app-action-box {
+.app-action-bar {
   position: fixed;
   right: 16px;
   bottom: 40px;
@@ -75,12 +75,12 @@ code {
   flex-direction: column;
 }
 
-.app-action-box > .ant-btn {
+.app-action-bar > .ant-btn {
   margin-bottom: 8px;
 }
 
 /* stylelint-disable-next-line selector-max-compound-selectors */
-.app-action-box > .ant-btn > .ant-btn-icon {
+.app-action-bar > .ant-btn > .ant-btn-icon {
   position: relative;
   top: 1px;
 }

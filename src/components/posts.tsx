@@ -1,5 +1,6 @@
 import {
   ChevronRightIcon,
+  MarkGithubIcon,
   SearchIcon,
   SparkleFillIcon,
   TriangleDownIcon,
@@ -7,11 +8,13 @@ import {
 } from '@primer/octicons-react'
 import {
   ActionList,
+  Avatar,
   Button,
   Dialog,
   PageHeader,
   Pagination,
   SelectPanel,
+  Spinner,
   Stack,
   Text,
   TextInput,
@@ -24,12 +27,13 @@ import {useCallback, useMemo, useState} from 'react'
 const SELECT_PANEL_PLACEHOLDER = 'Filter by label'
 
 interface ListProps {
+  repo: RestRepo | undefined
   currentPage: number
   totalCount: number
   allLabel: MinimalLabels
   visible: boolean
   issues: MinimalIssues
-  loading: boolean
+  isIssuePending: boolean
   onSetCurrentPage: (page: number) => void
   onSetFilterTitle: (title: string) => void
   onSetFilterLabels: (labels: string[]) => void
@@ -38,11 +42,13 @@ interface ListProps {
 }
 
 export default function Posts({
+  repo,
   currentPage,
   totalCount,
   allLabel,
   visible,
   issues,
+  isIssuePending,
   onSetCurrentPage,
   onSetFilterTitle,
   onSetFilterLabels,
@@ -101,12 +107,24 @@ export default function Posts({
 
   if (!visible) return null
 
+  const IssueSpinner = isIssuePending ? <Spinner size="small" /> : null
+
   return (
     <Dialog
       title={
         <PageHeader role="banner" aria-label="Add-pageheader-docs">
           <PageHeader.TitleArea>
-            <PageHeader.Title>Posts</PageHeader.Title>
+            <PageHeader.Title>
+              <Stack gap="condensed" direction="horizontal">
+                {repo?.owner.avatar_url ? (
+                  <Avatar size={32} src={repo?.owner.avatar_url} />
+                ) : (
+                  <MarkGithubIcon size={32} />
+                )}
+                <div>{repo?.full_name}</div>
+                <div>{IssueSpinner}</div>
+              </Stack>
+            </PageHeader.Title>
           </PageHeader.TitleArea>
           <PageHeader.Description>
             <Text sx={{fontSize: 1, color: 'fg.muted'}}>totals: {totalCount}</Text>

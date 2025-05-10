@@ -8,6 +8,7 @@ export const DEFAULT_PAGINATION_SIZE = 20
 export const DEFAULT_LABEL_COLOR = 'f5fee6' // without leading #
 
 export const MESSAGE_TYPE = {
+  GET_REPO: 'get_repo',
   GET_ISSUES: 'get_issues',
   GET_ISSUES_WITH_FILTER: 'get_issues_with_filter',
   GET_ISSUE_COUNT: 'get_issue_count',

@@ -20,7 +20,7 @@ interface ActionBoxProps {
   onSetListVisible: (visible: boolean) => void
 }
 
-export default function ActionBox({
+export default function ActionBar({
   issue,
   onUpdateIssue,
   onSetCurrentIssue,
@@ -28,7 +28,7 @@ export default function ActionBox({
   onSetListVisible,
 }: ActionBoxProps) {
   return (
-    <div className="app-action-box">
+    <div className="app-action-bar">
       <Stack gap="condensed">
         <IconButton
           icon={CloudIcon}

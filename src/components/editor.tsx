@@ -7,7 +7,7 @@ import math from '@bytemd/plugin-math'
 import mediumZoom from '@bytemd/plugin-medium-zoom'
 import mermaid from '@bytemd/plugin-mermaid'
 import {Editor as BytemdEditor} from '@bytemd/react'
-import {Label, Stack, Spinner, TextInput} from '@primer/react'
+import {Label, Spinner, Stack, TextInput} from '@primer/react'
 import {message} from 'antd'
 
 import 'bytemd/dist/index.min.css'
@@ -26,7 +26,7 @@ const plugins = [
 interface EditorProps {
   issue: MinimalIssue
   allLabel: MinimalLabels
-  labelLoading: boolean
+  isLabelPending: boolean
   onTitleChange: (title: string) => void
   onBodyChange: (body: string) => void
   onAddLabel: (label: MinimalLabel) => void
@@ -37,7 +37,7 @@ interface EditorProps {
 export default function Editor({
   issue,
   allLabel,
-  labelLoading,
+  isLabelPending,
   onTitleChange,
   onBodyChange,
   onAddLabel,
@@ -65,7 +65,7 @@ export default function Editor({
         )}
       </div>
       <div className="app-labels">
-        {labelLoading ? (
+        {isLabelPending ? (
           <Spinner size="small" />
         ) : (
           <Stack direction="horizontal" gap="condensed" wrap="wrap">

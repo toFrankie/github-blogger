@@ -12,6 +12,8 @@ export const DEFAULT_LABEL_COLOR = 'f5fee6' // without leading #
 export const DEFAULT_PAGINATION_SIZE = 20
 
 export const APIS = {
+  /** Get a repository. {@link https://docs.github.com/zh/rest/repos/repos?apiVersion=2022-11-28#get-a-repository|More} */
+  GET_REPO: 'GET /repos/{owner}/{repo}',
   /** Creates a new repository for the authenticated user. {@link https://docs.github.com/zh/rest/repos/repos?apiVersion=2022-11-28#create-a-repository-for-the-authenticated-user|More} */
   CREATE_REPO: 'POST /user/repos',
   /** Lists all labels for a repository. {@link https://docs.github.com/zh/rest/issues/labels?apiVersion=2022-11-28#list-labels-for-a-repository|More} */
@@ -45,6 +47,7 @@ export const APIS = {
 } as const satisfies Record<string, keyof Endpoints>
 
 export const MESSAGE_TYPE = {
+  GET_REPO: 'get_repo',
   GET_ISSUES: 'get_issues',
   GET_ISSUES_WITH_FILTER: 'get_issues_with_filter',
   GET_ISSUE_COUNT: 'get_issue_count',

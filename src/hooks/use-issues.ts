@@ -12,7 +12,8 @@ interface UseIssuesParams {
 export default function useIssues({page, LabelNames = [], title = ''}: UseIssuesParams) {
   const queryClient = useQueryClient()
 
-  const {data: issues = [], isLoading: issuesLoading} = useQuery({
+  // TODO: error
+  const {data: issues = [], isPending: isIssuePending} = useQuery({
     queryKey: ['issues', page, LabelNames, title],
     queryFn: () => getIssues(page, LabelNames, title),
   })
@@ -53,7 +54,7 @@ export default function useIssues({page, LabelNames = [], title = ''}: UseIssues
   return {
     issues,
     totalCount,
-    issuesLoading,
+    isIssuePending,
     createIssue: createIssueMutation.mutateAsync,
     updateIssue: updateIssueMutation.mutateAsync,
   }

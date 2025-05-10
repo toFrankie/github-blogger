@@ -277,6 +277,17 @@ export default class Service {
     return res.data
   }
 
+  private async getRepo() {
+    const [err, res] = await to(
+      this.octokit.request(APIS.GET_REPO, {
+        owner: this.config.user,
+        repo: this.config.repo,
+      })
+    )
+    if (err) return null
+    return res.data
+  }
+
   private registerRpcListener() {
     const getLabels = async () => {
       const data = await this.getLabels({page: 0, per_page: 100})
@@ -379,6 +390,10 @@ export default class Service {
       return await this.createTree(params)
     }
 
+    const getRepo = async () => {
+      return await this.getRepo()
+    }
+
     const labelHandlers = {
       [MESSAGE_TYPE.GET_LABELS]: getLabels,
       [MESSAGE_TYPE.DELETE_LABEL]: deleteLabel,
@@ -405,6 +420,7 @@ export default class Service {
     }
 
     const otherHandlers = {
+      [MESSAGE_TYPE.GET_REPO]: getRepo,
       [MESSAGE_TYPE.UPLOAD_IMAGE]: uploadImage,
     }
 

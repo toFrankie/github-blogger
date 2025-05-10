@@ -1,14 +1,15 @@
 import 'github-markdown-css'
 
+import {useQuery} from '@tanstack/react-query'
 import {message} from 'antd'
 import {Buffer} from 'buffer'
 import {cloneDeep} from 'licia-es'
 import {useEffect, useState} from 'react'
-import {ActionBox, Editor, Labels, Posts} from '@/components'
+import {ActionBar, Editor, Labels, Posts} from '@/components'
 import {EMPTY_ISSUE, MESSAGE_TYPE} from '@/constants'
 import {useIssues, useLabels, useUploadImages} from '@/hooks'
 import {compareIssue} from '@/utils'
-import {RPC} from '@/utils/rpc'
+import {getRepo, RPC} from '@/utils/rpc'
 
 import 'bytemd/dist/index.min.css'
 import '@/app.css'
@@ -36,12 +37,17 @@ export default function App() {
   const [listVisible, setListVisible] = useState(false)
   const [labelsVisible, setLabelsVisible] = useState(false)
 
-  const {issues, totalCount, issuesLoading, createIssue, updateIssue} = useIssues({
+  const {data: repo} = useQuery({
+    queryKey: ['repo'],
+    queryFn: () => getRepo(),
+  })
+
+  const {issues, totalCount, isIssuePending, createIssue, updateIssue} = useIssues({
     page: currentPage,
     LabelNames: filterLabels,
     title: filterTitle,
   })
-  const {labels: allLabel, labelLoading, createLabel, deleteLabel, updateLabel} = useLabels()
+  const {labels: allLabel, isLabelPending, createLabel, deleteLabel, updateLabel} = useLabels()
   const {upload: handleUploadImages} = useUploadImages()
 
   useEffect(() => {
@@ -141,7 +147,7 @@ export default function App() {
       <Editor
         issue={current}
         allLabel={allLabel}
-        labelLoading={labelLoading}
+        isLabelPending={isLabelPending}
         onTitleChange={title => setCurrent(prev => ({...prev, title}))}
         onBodyChange={body => setCurrent(prev => ({...prev, body}))}
         onAddLabel={label => setCurrent(prev => ({...prev, labels: prev.labels.concat(label)}))}
@@ -151,12 +157,13 @@ export default function App() {
         onUploadImages={handleUploadImages}
       />
       <Posts
+        repo={repo}
         currentPage={currentPage}
         totalCount={totalCount}
         allLabel={allLabel}
         visible={listVisible}
         issues={issues}
-        loading={issuesLoading}
+        isIssuePending={isIssuePending}
         onSetCurrentPage={handleSetCurrentPage}
         onSetFilterTitle={handleSetFilterTitle}
         onSetFilterLabels={handleSetFilterLabels}
@@ -166,13 +173,13 @@ export default function App() {
       <Labels
         allLabel={allLabel}
         visible={labelsVisible}
-        loading={labelLoading}
+        isLabelPending={isLabelPending}
         onCreateLabel={handleCreateLabel}
         onDeleteLabel={handleDeleteLabel}
         onUpdateLabel={handleUpdateLabel}
         onSetLabelsVisible={handleSetLabelsVisible}
       />
-      <ActionBox
+      <ActionBar
         issue={current}
         onUpdateIssue={handleUpdateIssue}
         onSetCurrentIssue={handleSetCurrentIssue}

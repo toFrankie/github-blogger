@@ -5,7 +5,7 @@ import {createLabel, deleteLabel, getLabels, updateLabel} from '@/utils/rpc'
 export default function useLabels() {
   const queryClient = useQueryClient()
 
-  const {data: labels = [], isLoading: labelLoading} = useQuery({
+  const {data: labels = [], isPending: isLabelPending} = useQuery({
     queryKey: ['labels'],
     queryFn: getLabels,
   })
@@ -46,7 +46,7 @@ export default function useLabels() {
 
   return {
     labels,
-    labelLoading,
+    isLabelPending,
     createLabel: createLabelMutation.mutateAsync,
     deleteLabel: deleteLabelMutation.mutateAsync,
     updateLabel: updateLabelMutation.mutateAsync,

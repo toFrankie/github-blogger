@@ -1,12 +1,12 @@
 import {PlusOutlined} from '@ant-design/icons'
-import {Drawer, Input, message, Space, Tag, Tooltip} from 'antd'
 import {Dialog} from '@primer/react'
+import {Input, message, Space, Tag, Tooltip} from 'antd'
 import {useRef, useState} from 'react'
 
 interface LabelManagerProps {
   allLabel: MinimalLabels
   visible: boolean
-  loading: boolean
+  isLabelPending: boolean
   onCreateLabel: (label: string) => Promise<void>
   onDeleteLabel: (label: string) => Promise<void>
   onUpdateLabel: (oldLabel: string, newLabel: string) => Promise<void>

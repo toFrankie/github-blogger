@@ -8,6 +8,10 @@ const vscode = getVscode()
 
 export const RPC = new WebviewRPC(window, vscode)
 
+export async function getRepo() {
+  return (await RPC.emit(MESSAGE_TYPE.GET_REPO)) as RestRepo
+}
+
 export async function getLabels() {
   const labels = (await RPC.emit(MESSAGE_TYPE.GET_LABELS, [])) as MinimalLabels
   return labels ?? []

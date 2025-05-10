@@ -34,6 +34,8 @@ declare global {
 
   type RestApiDataItem<T> = T extends Array<infer U> ? U : never
 
+  type RestRepo = RestApiData<typeof APIS.GET_REPO>
+
   type RestLabels = RestApiData<typeof APIS.GET_LABELS>
 
   type RestLabel = RestApiDataItem<RestLabels>
