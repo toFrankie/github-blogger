@@ -3,24 +3,24 @@ import {Dialog} from '@primer/react'
 import {Input, message, Space, Tag, Tooltip} from 'antd'
 import {useRef, useState} from 'react'
 
-interface LabelManagerProps {
+interface LabelsProps {
   allLabel: MinimalLabels
   visible: boolean
   isPendingLabels: boolean
-  onCreateLabel: (label: string) => Promise<void>
-  onDeleteLabel: (label: string) => Promise<void>
-  onUpdateLabel: (oldLabel: string, newLabel: string) => Promise<void>
+  onLabelCreate: (label: string) => Promise<void>
+  onLabelDelete: (label: string) => Promise<void>
+  onLabelUpdate: (oldLabel: string, newLabel: string) => Promise<void>
   onSetLabelsVisible: (visible: boolean) => void
 }
 
 export default function Labels({
   allLabel,
   visible,
-  onCreateLabel,
-  onDeleteLabel,
-  onUpdateLabel,
+  onLabelCreate,
+  onLabelDelete,
+  onLabelUpdate,
   onSetLabelsVisible,
-}: LabelManagerProps) {
+}: LabelsProps) {
   const [text, setText] = useState('')
   const [editValue, setEditValue] = useState('')
   const [editIndex, setEditIndex] = useState('')
@@ -33,12 +33,12 @@ export default function Labels({
       reset()
       return
     }
-    await onUpdateLabel(label.name, editValue)
+    await onLabelUpdate(label.name, editValue)
     reset()
   }
 
   const handleDelete = (label: MinimalLabel) => {
-    onDeleteLabel(label.name)
+    onLabelDelete(label.name)
   }
 
   const handleInputConfirm = async () => {
@@ -47,7 +47,7 @@ export default function Labels({
       reset()
       return
     }
-    await onCreateLabel(text)
+    await onLabelCreate(text)
     reset()
   }
 

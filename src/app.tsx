@@ -32,9 +32,11 @@ export default function App() {
   const [currentPage, setCurrentPage] = useState(1)
   const [filterTitle, setFilterTitle] = useState('')
   const [filterLabels, setFilterLabels] = useState<string[]>([])
-  const [current, setCurrent] = useState<MinimalIssue>(cloneDeep(EMPTY_ISSUE))
-  const [originalCurrent, setOriginalCurrent] = useState<MinimalIssue>(cloneDeep(EMPTY_ISSUE))
-  const [listVisible, setListVisible] = useState(false)
+  const [currentIssue, setCurrentIssue] = useState<MinimalIssue>(cloneDeep(EMPTY_ISSUE))
+  const [currentIssueOriginal, setCurrentIssueOriginal] = useState<MinimalIssue>(
+    cloneDeep(EMPTY_ISSUE)
+  )
+  const [postsVisible, setPostsVisible] = useState(false)
   const [labelsVisible, setLabelsVisible] = useState(false)
 
   const {data: repo} = useQuery({
@@ -42,11 +44,12 @@ export default function App() {
     queryFn: () => getRepo(),
   })
 
-  const {issues, issueCount, createIssue, updateIssue, issueStatus} = useIssues({
-    page: currentPage,
-    LabelNames: filterLabels,
-    title: filterTitle,
-  })
+  const {issues, issueCount, issueCountWithFilter, createIssue, updateIssue, issueStatus} =
+    useIssues({
+      page: currentPage,
+      LabelNames: filterLabels,
+      title: filterTitle,
+    })
   const {labels: allLabel, isPendingLabels, createLabel, deleteLabel, updateLabel} = useLabels()
   const {upload: handleUploadImages} = useUploadImages()
 
@@ -55,8 +58,8 @@ export default function App() {
     RPC.on(MESSAGE_TYPE.SHOW_ERROR, showError)
   }, [])
 
-  const handleUpdateIssue = async () => {
-    const {number, title, body} = current
+  const onIssueUpdate = async () => {
+    const {number, title, body} = currentIssue
     if (!title || !body) {
       message.error('Please enter the content...')
       return
@@ -64,61 +67,61 @@ export default function App() {
 
     // create
     if (number === -1) {
-      const data = await createIssue(current)
+      const data = await createIssue(currentIssue)
       if (data) {
-        setCurrent(prev => ({
+        setCurrentIssue(prev => ({
           ...prev,
           number: data.number,
           url: data.url,
           createdAt: data.createdAt,
           updatedAt: data.updatedAt,
         }))
-        setOriginalCurrent(cloneDeep(current))
+        setCurrentIssueOriginal(cloneDeep(currentIssue))
       }
       return
     }
 
     // check diff
-    const isDiff = compareIssue(current, originalCurrent)
+    const isDiff = compareIssue(currentIssue, currentIssueOriginal)
     if (!isDiff) {
       message.warning('No changes made.')
       return
     }
 
     // update
-    const data = await updateIssue(current)
+    const data = await updateIssue(currentIssue)
     if (data) {
-      setCurrent(prev => ({...prev, updatedAt: data.updatedAt}))
-      setOriginalCurrent(cloneDeep(current))
+      setCurrentIssue(prev => ({...prev, updatedAt: data.updatedAt}))
+      setCurrentIssueOriginal(cloneDeep(currentIssue))
     }
   }
 
-  const handleSetCurrentIssue = (issue: any) => {
-    setCurrent(issue)
-    setOriginalCurrent(cloneDeep(issue))
+  const onCurrentIssueChange = (issue: any) => {
+    setCurrentIssue(issue)
+    setCurrentIssueOriginal(cloneDeep(issue))
   }
 
-  const handleSetListVisible = (visible: boolean) => {
-    setListVisible(visible)
+  const onPostsVisibleChange = (visible: boolean) => {
+    setPostsVisible(visible)
   }
 
-  const handleSetLabelsVisible = (visible: boolean) => {
+  const onLabelsVisibleChange = (visible: boolean) => {
     setLabelsVisible(visible)
   }
 
-  const handleSetCurrentPage = (page: number) => {
+  const onCurrentPageChange = (page: number) => {
     setCurrentPage(page)
   }
 
-  const handleSetFilterTitle = (title: string) => {
+  const onFilterTitleChange = (title: string) => {
     setFilterTitle(title)
   }
 
-  const handleSetFilterLabels = (labels: string[]) => {
+  const onFilterLabelChange = (labels: string[]) => {
     setFilterLabels(labels)
   }
 
-  const handleCreateLabel = async (label: string) => {
+  const onLabelCreate = async (label: string) => {
     try {
       await createLabel(label)
     } catch (error) {
@@ -126,7 +129,7 @@ export default function App() {
     }
   }
 
-  const handleDeleteLabel = async (label: string) => {
+  const onLabelDelete = async (label: string) => {
     try {
       await deleteLabel(label)
     } catch (error) {
@@ -134,7 +137,7 @@ export default function App() {
     }
   }
 
-  const handleUpdateLabel = async (oldLabel: string, newLabel: string) => {
+  const onLabelUpdate = async (oldLabel: string, newLabel: string) => {
     try {
       await updateLabel({oldLabel, newLabel})
     } catch (error) {
@@ -145,14 +148,19 @@ export default function App() {
   return (
     <div className="app">
       <Editor
-        issue={current}
+        issue={currentIssue}
         allLabel={allLabel}
         isPendingLabels={isPendingLabels}
-        onTitleChange={title => setCurrent(prev => ({...prev, title}))}
-        onBodyChange={body => setCurrent(prev => ({...prev, body}))}
-        onAddLabel={label => setCurrent(prev => ({...prev, labels: prev.labels.concat(label)}))}
+        onTitleChange={title => setCurrentIssue(prev => ({...prev, title}))}
+        onBodyChange={body => setCurrentIssue(prev => ({...prev, body}))}
+        onAddLabel={label =>
+          setCurrentIssue(prev => ({...prev, labels: prev.labels.concat(label)}))
+        }
         onRemoveLabel={label =>
-          setCurrent(prev => ({...prev, labels: prev.labels.filter(item => item.id !== label.id)}))
+          setCurrentIssue(prev => ({
+            ...prev,
+            labels: prev.labels.filter(item => item.id !== label.id),
+          }))
         }
         onUploadImages={handleUploadImages}
       />
@@ -161,30 +169,31 @@ export default function App() {
         currentPage={currentPage}
         issueStatus={issueStatus}
         issueCount={issueCount}
+        issueCountWithFilter={issueCountWithFilter}
         allLabel={allLabel}
-        visible={listVisible}
+        visible={postsVisible}
         issues={issues}
-        onSetCurrentPage={handleSetCurrentPage}
-        onSetFilterTitle={handleSetFilterTitle}
-        onSetFilterLabels={handleSetFilterLabels}
-        onSetCurrentIssue={handleSetCurrentIssue}
-        onSetListVisible={handleSetListVisible}
+        onSetCurrentPage={onCurrentPageChange}
+        onSetFilterTitle={onFilterTitleChange}
+        onSetFilterLabels={onFilterLabelChange}
+        onSetCurrentIssue={onCurrentIssueChange}
+        onSetPostsVisible={onPostsVisibleChange}
       />
       <Labels
         allLabel={allLabel}
         visible={labelsVisible}
         isPendingLabels={isPendingLabels}
-        onCreateLabel={handleCreateLabel}
-        onDeleteLabel={handleDeleteLabel}
-        onUpdateLabel={handleUpdateLabel}
-        onSetLabelsVisible={handleSetLabelsVisible}
+        onLabelCreate={onLabelCreate}
+        onLabelDelete={onLabelDelete}
+        onLabelUpdate={onLabelUpdate}
+        onSetLabelsVisible={onLabelsVisibleChange}
       />
       <ActionBar
-        issue={current}
-        onUpdateIssue={handleUpdateIssue}
-        onSetCurrentIssue={handleSetCurrentIssue}
-        onSetLabelVisible={handleSetLabelsVisible}
-        onSetListVisible={handleSetListVisible}
+        issue={currentIssue}
+        onUpdateIssue={onIssueUpdate}
+        onSetCurrentIssue={onCurrentIssueChange}
+        onSetLabelsVisible={onLabelsVisibleChange}
+        onSetPostsVisible={onPostsVisibleChange}
       />
     </div>
   )

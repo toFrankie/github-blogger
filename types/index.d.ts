@@ -183,4 +183,8 @@ declare global {
   /** -------------------- Client -------------------- */
 
   type ClientUploadImages = EditorProps['uploadImages']
+
+  /** -------------------- Utils -------------------- */
+
+  type ValueOf<T> = T[keyof T]
 }

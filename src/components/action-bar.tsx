@@ -16,16 +16,16 @@ interface ActionBoxProps {
   issue: MinimalIssue
   onUpdateIssue: () => Promise<void>
   onSetCurrentIssue: (issue: MinimalIssue) => void
-  onSetLabelVisible: (visible: boolean) => void
-  onSetListVisible: (visible: boolean) => void
+  onSetLabelsVisible: (visible: boolean) => void
+  onSetPostsVisible: (visible: boolean) => void
 }
 
 export default function ActionBar({
   issue,
   onUpdateIssue,
   onSetCurrentIssue,
-  onSetLabelVisible,
-  onSetListVisible,
+  onSetLabelsVisible,
+  onSetPostsVisible,
 }: ActionBoxProps) {
   return (
     <div className="app-action-bar">
@@ -61,14 +61,14 @@ export default function ActionBar({
         )}
         <IconButton
           icon={TagIcon}
-          onClick={() => onSetLabelVisible(true)}
+          onClick={() => onSetLabelsVisible(true)}
           description="Labels"
           aria-label="Labels"
           tooltipDirection="w"
         />
         <IconButton
           icon={ListUnorderedIcon}
-          onClick={() => onSetListVisible(true)}
+          onClick={() => onSetPostsVisible(true)}
           description="Posts"
           aria-label="Posts"
           tooltipDirection="w"

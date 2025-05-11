@@ -37,6 +37,10 @@ export async function getIssueCountWithFilter(
   filterTitle: string,
   filterLabelNames: string[] = []
 ) {
+  if (!filterTitle && filterLabelNames.length === 0) {
+    return getIssueCount()
+  }
+
   return (await RPC.emit(MESSAGE_TYPE.GET_ISSUE_COUNT_WITH_FILTER, [
     filterTitle,
     filterLabelNames.join(','),
@@ -44,24 +48,17 @@ export async function getIssueCountWithFilter(
 }
 
 export async function getIssues(page: number = 1, labels: string[] = [], title: string = '') {
-  // 注意 REST API 的 labels 字段 "2017,2018" 是且关系，而 GraphQL API 的 label:2017,2018 是或关系。
-  // 按 Label 筛选的功能，预期是或关系。
-  if (!title && labels.length < 2) {
-    const issues = (await RPC.emit(MESSAGE_TYPE.GET_ISSUES, [
-      page,
-      labels.join(','),
-    ])) as MinimalIssues
+  // 注意：
+  // 1. REST API 不支持按 title 筛选。
+  // 2. REST API 的 labels 字段 "2017,2018" 是且关系，而 GraphQL API 的 label:2017,2018 是或关系。
+  // 3. 按 Label 筛选的功能，预期是或关系。
 
-    return issues || []
-  }
+  const useGraphQL = title || labels.length >= 2
+  const messageType = useGraphQL ? MESSAGE_TYPE.GET_ISSUES_WITH_FILTER : MESSAGE_TYPE.GET_ISSUES
+  const args = useGraphQL ? [page, labels.join(','), title] : [page, labels.join(',')]
 
-  const issues = (await RPC.emit(MESSAGE_TYPE.GET_ISSUES_WITH_FILTER, [
-    page,
-    labels.join(','),
-    title,
-  ])) as MinimalIssues
-
-  return issues
+  const issues = (await RPC.emit(messageType, args)) as MinimalIssues
+  return issues || []
 }
 
 export async function createIssue(params: MinimalIssue): Promise<MinimalIssue> {
@@ -81,10 +78,9 @@ export async function updateIssue(params: MinimalIssue): Promise<MinimalIssue> {
   return await RPC.emit(MESSAGE_TYPE.UPDATE_ISSUE, args)
 }
 
-export async function archiveIssue(
-  issue: MinimalIssue,
-  type: (typeof SUBMIT_TYPE)[keyof typeof SUBMIT_TYPE]
-) {
+type SubmitType = ValueOf<typeof SUBMIT_TYPE>
+
+export async function archiveIssue(issue: MinimalIssue, type: SubmitType) {
   try {
     const {number: issueNumber, createdAt} = issue
 

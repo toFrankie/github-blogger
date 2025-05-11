@@ -25,7 +25,6 @@ export default function useIssues({page, LabelNames = [], title = ''}: UseIssues
     data: issues,
     isLoading: isLoadingIssues,
     isPending: isPendingIssues,
-    isFetched: isFetchedIssues,
   } = useQuery({
     queryKey: ['issues', page, LabelNames, title],
     queryFn: () => getIssues(page, LabelNames, title),

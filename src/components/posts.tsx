@@ -1,6 +1,10 @@
 import {
   ChevronRightIcon,
+  GearIcon,
+  GraphIcon,
+  IssueOpenedIcon,
   MarkGithubIcon,
+  PlayIcon,
   SearchIcon,
   SparkleFillIcon,
   TriangleDownIcon,
@@ -9,8 +13,11 @@ import {
 import {
   ActionList,
   Avatar,
+  Box,
   Button,
   Dialog,
+  IconButton,
+  Link,
   PageHeader,
   Pagination,
   SelectPanel,
@@ -23,14 +30,29 @@ import {type ActionListItemInput} from '@primer/react/deprecated'
 import {Blankslate} from '@primer/react/experimental'
 import {debounce, intersect, unique} from 'licia-es'
 import {useCallback, useMemo, useState} from 'react'
-import {DEFAULT_PAGINATION_SIZE} from '@/constants'
+import {DEFAULT_PAGINATION_SIZE, MESSAGE_TYPE} from '@/constants'
+import {getVscode} from '@/utils'
 
-const SELECT_PANEL_PLACEHOLDER = 'Filter by label'
+const SELECT_PANEL_PLACEHOLDER = 'Filter labels'
 
-interface ListProps {
+const vscode = getVscode()
+
+const LINK_TYPE = {
+  REPO: 'repo',
+  PROFILE: 'profile',
+  INSIGHTS: 'insights',
+  ACTIONS: 'actions',
+  ISSUES: 'issues',
+  SETTINGS: 'settings',
+} as const
+
+type LinkType = ValueOf<typeof LINK_TYPE>
+
+interface PostsProps {
   repo: RestRepo | undefined
   currentPage: number
-  issueCount: number
+  issueCount: number | undefined
+  issueCountWithFilter: number | undefined
   allLabel: MinimalLabels
   visible: boolean
   issues: MinimalIssues | undefined
@@ -44,13 +66,14 @@ interface ListProps {
   onSetFilterTitle: (title: string) => void
   onSetFilterLabels: (labels: string[]) => void
   onSetCurrentIssue: (issue: MinimalIssue) => void
-  onSetListVisible: (visible: boolean) => void
+  onSetPostsVisible: (visible: boolean) => void
 }
 
 export default function Posts({
   repo,
   currentPage,
   issueCount,
+  issueCountWithFilter,
   allLabel,
   visible,
   issues,
@@ -59,13 +82,12 @@ export default function Posts({
   onSetFilterTitle,
   onSetFilterLabels,
   onSetCurrentIssue,
-  onSetListVisible,
-}: ListProps) {
+  onSetPostsVisible,
+}: PostsProps) {
   const [titleValue, setTitleValue] = useState('')
   const [selected, setSelected] = useState<ActionListItemInput[]>([])
   const [filter, setFilter] = useState('')
   const [open, setOpen] = useState(false)
-  const [current, setCurrent] = useState(currentPage)
 
   const items = useMemo(() => {
     return allLabel.map(item => ({text: item.name}))
@@ -109,40 +131,101 @@ export default function Posts({
     [allLabel]
   )
 
+  const openExternalLink = (type: LinkType) => {
+    if (!repo || !type) return
+
+    const repoUrl = repo.html_url
+    const links = {
+      [LINK_TYPE.REPO]: repoUrl,
+      [LINK_TYPE.PROFILE]: repo.owner.html_url,
+      [LINK_TYPE.INSIGHTS]: `${repoUrl}/graphs/traffic`,
+      [LINK_TYPE.ACTIONS]: `${repoUrl}/actions`,
+      [LINK_TYPE.ISSUES]: `${repoUrl}/issues`,
+      [LINK_TYPE.SETTINGS]: `${repoUrl}/settings`,
+    }
+
+    vscode.postMessage({
+      command: MESSAGE_TYPE.OPEN_EXTERNAL_LINK,
+      externalLink: links[type],
+    })
+  }
+
   if (!visible) return null
 
   return (
     <Dialog
-      title={
-        <PageHeader role="banner" aria-label="Add-pageheader-docs">
-          <PageHeader.TitleArea>
-            <PageHeader.Title>
-              <Stack gap="condensed" direction="horizontal">
-                {repo?.owner.avatar_url ? (
-                  <Avatar size={32} src={repo?.owner.avatar_url} />
-                ) : (
-                  <MarkGithubIcon size={32} />
-                )}
-                <div>{repo?.full_name}</div>
-              </Stack>
-            </PageHeader.Title>
-          </PageHeader.TitleArea>
-          <PageHeader.Description>
-            <Text sx={{fontSize: 1, color: 'fg.muted'}}>totals: {issueCount}</Text>
-          </PageHeader.Description>
-        </PageHeader>
-      }
+      title="Posts"
       position="left"
       width="large"
-      onClose={() => onSetListVisible(false)}
+      onClose={() => onSetPostsVisible(false)}
       renderBody={() => {
         return (
           <div className="app-issue-list">
-            <div className="issue-filter">
+            <Box sx={{pb: 3}}>
               <Stack>
+                <PageHeader role="banner" aria-label="Add-pageheader-docs">
+                  <PageHeader.TitleArea>
+                    <PageHeader.Title>
+                      <Stack gap="condensed" direction="horizontal">
+                        {repo?.owner.avatar_url ? (
+                          <Avatar
+                            size={32}
+                            src={repo?.owner.avatar_url}
+                            onClick={() => openExternalLink(LINK_TYPE.PROFILE)}
+                            sx={{cursor: 'pointer'}}
+                          />
+                        ) : (
+                          <MarkGithubIcon size={32} />
+                        )}
+                        <Link
+                          sx={{
+                            color: 'fg.default',
+                            cursor: 'pointer',
+                            textDecoration: 'none',
+                            '&:hover': {
+                              color: 'fg.default',
+                              textDecoration: 'underline',
+                            },
+                          }}
+                          onClick={() => openExternalLink(LINK_TYPE.REPO)}
+                        >
+                          {repo?.name}
+                        </Link>
+                      </Stack>
+                    </PageHeader.Title>
+                  </PageHeader.TitleArea>
+                  <PageHeader.Description>
+                    <Text sx={{fontSize: 1, color: 'fg.muted'}}>
+                      {issueCount ?? '-'} total
+                      {issueStatus.withFilter ? ` · ${issueCountWithFilter ?? '-'} filtered` : ''}
+                    </Text>
+                  </PageHeader.Description>
+                  <PageHeader.Actions>
+                    <IconButton
+                      aria-label="Issues"
+                      icon={IssueOpenedIcon}
+                      onClick={() => openExternalLink(LINK_TYPE.ISSUES)}
+                    />
+                    <IconButton
+                      aria-label="Actions"
+                      icon={PlayIcon}
+                      onClick={() => openExternalLink(LINK_TYPE.ACTIONS)}
+                    />
+                    <IconButton
+                      aria-label="Insights"
+                      icon={GraphIcon}
+                      onClick={() => openExternalLink(LINK_TYPE.INSIGHTS)}
+                    />
+                    <IconButton
+                      aria-label="Settings"
+                      icon={GearIcon}
+                      onClick={() => openExternalLink(LINK_TYPE.SETTINGS)}
+                    />
+                  </PageHeader.Actions>
+                </PageHeader>
                 <TextInput
                   className="title-filter"
-                  placeholder="Filter by title"
+                  placeholder="Title"
                   onChange={handleTitleChange}
                   value={titleValue}
                   trailingAction={
@@ -195,12 +278,13 @@ export default function Posts({
                   onFilterChange={setFilter}
                 />
               </Stack>
-            </div>
+            </Box>
+
             <div className="list">
               {!issues || issueStatus.isLoading ? (
                 <Loading />
               ) : issueStatus.withoutIssue ? (
-                <WithoutIssue onActionClick={() => onSetListVisible(false)} />
+                <WithoutIssue onActionClick={() => onSetPostsVisible(false)} />
               ) : issueStatus.withFilter && !issueStatus.isPending && !issues.length ? (
                 <NoFilterResult />
               ) : (
@@ -210,7 +294,7 @@ export default function Posts({
                       key={item.id}
                       className="list-item"
                       onClick={() => {
-                        onSetListVisible(false)
+                        onSetPostsVisible(false)
                         onSetCurrentIssue(item)
                       }}
                     >
@@ -226,18 +310,15 @@ export default function Posts({
                 </ActionList>
               )}
             </div>
-            <div className="issue-pagination">
+            <Box sx={{borderTop: '1px solid', borderColor: 'border.default'}}>
               <Pagination
-                currentPage={current}
-                pageCount={Math.ceil(issueCount / DEFAULT_PAGINATION_SIZE)}
+                currentPage={currentPage}
+                pageCount={Math.ceil((issueCount ?? 0) / DEFAULT_PAGINATION_SIZE)}
                 surroundingPageCount={1}
                 showPages={{narrow: false}}
-                onPageChange={(_event, number) => {
-                  setCurrent(number)
-                  onSetCurrentPage(number)
-                }}
+                onPageChange={(_event, number) => onSetCurrentPage(number)}
               />
-            </div>
+            </Box>
           </div>
         )
       }}
