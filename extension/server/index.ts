@@ -2,7 +2,7 @@ import {Octokit} from '@octokit/core'
 import {ExtensionRPC} from 'vscode-webview-rpc'
 import {isEmpty} from 'licia'
 import * as vscode from 'vscode'
-import {MESSAGE_TYPE} from '../constants'
+import {GRAPHQL_PAGINATION_SIZE_LIMIT, MESSAGE_TYPE} from '../constants'
 
 import {APIS, DEFAULT_LABEL_COLOR, DEFAULT_PAGINATION_SIZE} from '../constants'
 import {getSettings, to, cdnURL} from '../utils'
@@ -294,33 +294,36 @@ export default class Service {
   private async getPageCursor(page: number) {
     if (page <= 1) return null
 
+    const chunkLimit = GRAPHQL_PAGINATION_SIZE_LIMIT
+
     const targetIndex = (page - 1) * DEFAULT_PAGINATION_SIZE
-    const chunkSize = 100 // GraphQL API 每次最多可查 100 条数据
-    const first = Math.ceil(targetIndex / chunkSize) * chunkSize
 
-    let currentCursor: string | null = null
-    let remainingItems = first
+    const loopCount = Math.ceil(targetIndex / chunkLimit)
 
-    while (remainingItems > 0) {
-      const currentChunk = Math.min(remainingItems, chunkSize)
+    let startCursor: string | null = null
+
+    for (let i = 0; i < loopCount; i++) {
+      const isLast = i === loopCount - 1
+      const first = isLast ? targetIndex % chunkLimit : chunkLimit
+
       const [err, res] = await to(
         this.octokit.graphql<GraphqlPageCursorResponse>(query.getIssuePageCursor(), {
           owner: this.config.user,
           name: this.config.repo,
-          first: currentChunk,
-          after: currentCursor,
+          first,
+          after: startCursor,
         })
       )
 
-      if (err || !res) return null
+      if (err) return null
 
-      currentCursor = res.repository.issues.pageInfo.endCursor
-      remainingItems -= currentChunk
+      startCursor = res.repository.issues.pageInfo.endCursor
+      const hasNextPage = res.repository.issues.pageInfo.hasNextPage
 
-      if (!res.repository.issues.pageInfo.hasNextPage) break
+      if (!hasNextPage) break
     }
 
-    return currentCursor
+    return startCursor
   }
 
   private registerRpcListener() {

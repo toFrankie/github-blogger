@@ -84,41 +84,6 @@ export function getIssuesWithFilterLegacy({
 
   const query = Object.values(queryParts).filter(Boolean).join(' ')
 
-  console.log(
-    'query',
-    `
-    {
-      search(
-        type: ISSUE
-        first: ${first}
-        ${cursor ? `after: "${cursor}"` : ''}
-        query: "${query}"
-      ) {
-        edges {
-          node {
-            ... on Issue {
-              id
-              number
-              url
-              title
-              body
-              createdAt
-              updatedAt
-              labels(first: 100) {
-                nodes {
-                  id
-                  name
-                  description
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  `
-  )
-
   return `
     {
       search(
@@ -217,9 +182,6 @@ export function getIssuePageCursor() {
           pageInfo {
             hasNextPage
             endCursor
-          }
-          nodes {
-            id
           }
         }
       }

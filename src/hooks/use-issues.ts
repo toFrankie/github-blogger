@@ -21,24 +21,35 @@ interface UseIssuesParams {
 export default function useIssues({page, LabelNames = [], title = ''}: UseIssuesParams) {
   const queryClient = useQueryClient()
 
-  const {data: targetCursor, isLoading: isCursorLoading} = useQuery({
-    queryKey: ['issues', 'cursor', page, LabelNames, title],
+  const withCursor = page > 1
+
+  const {
+    data: targetCursor,
+    isLoading: isCursorLoading,
+    isPending: isPendingCursor,
+  } = useQuery({
+    queryKey: ['issues', 'cursor', page, title, LabelNames.join(',')],
     queryFn: () => getPageCursor(page),
-    enabled: page > 1,
+    enabled: withCursor,
+    gcTime: Infinity,
+    staleTime: Infinity,
   })
+
+  // TODO: error
+  const issuesEnabled = !withCursor || (withCursor && !isPendingCursor && !!targetCursor)
 
   const {
     data: issues,
     isLoading: isLoadingIssues,
     isPending: isPendingIssues,
   } = useQuery({
-    queryKey: ['issues', 'list', targetCursor, LabelNames, title],
+    queryKey: ['issues', 'list', page, title, LabelNames.join(',')],
     queryFn: () => getIssues(page, LabelNames, title),
-    enabled: !isCursorLoading && (!!targetCursor || page === 1),
+    enabled: issuesEnabled,
   })
 
   const {data: issueCount, isFetched: isFetchedIssueCount} = useQuery({
-    queryKey: ['issue-count', 'total'],
+    queryKey: ['issue', 'count', 'total'],
     queryFn: () => getIssueCount(),
   })
 
@@ -47,7 +58,7 @@ export default function useIssues({page, LabelNames = [], title = ''}: UseIssues
   }, [title, LabelNames])
 
   const {data: issueCountWithFilter, isPending: isPendingIssueCountWithFilter} = useQuery({
-    queryKey: ['issue-count', 'filtered', LabelNames, title],
+    queryKey: ['issue', 'count', 'filtered', title, LabelNames.join(',')],
     queryFn: () => getIssueCountWithFilter(title, LabelNames),
     enabled: withFilter,
   })

@@ -11,6 +11,8 @@ export const DEFAULT_LABEL_COLOR = 'f5fee6' // without leading #
 
 export const DEFAULT_PAGINATION_SIZE = 20
 
+export const GRAPHQL_PAGINATION_SIZE_LIMIT = 100
+
 export const APIS = {
   /** Get a repository. {@link https://docs.github.com/zh/rest/repos/repos?apiVersion=2022-11-28#get-a-repository|More} */
   GET_REPO: 'GET /repos/{owner}/{repo}',

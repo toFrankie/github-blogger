@@ -37,11 +37,13 @@ export default function App() {
     cloneDeep(EMPTY_ISSUE)
   )
   const [postsVisible, setPostsVisible] = useState(false)
-  const [labelsVisible, setLabelsVisible] = useState(false) // FIXME:
+  const [labelsVisible, setLabelsVisible] = useState(false)
 
   const {data: repo} = useQuery({
     queryKey: ['repo'],
     queryFn: () => getRepo(),
+    gcTime: Infinity,
+    staleTime: Infinity,
   })
 
   const {issues, issueCount, issueCountWithFilter, createIssue, updateIssue, issueStatus} =
