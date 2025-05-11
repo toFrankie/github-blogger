@@ -7,6 +7,7 @@ import {
   PlayIcon,
   SearchIcon,
   SparkleFillIcon,
+  TagIcon,
   TriangleDownIcon,
   XCircleFillIcon,
 } from '@primer/octicons-react'
@@ -15,6 +16,7 @@ import {
   Avatar,
   Box,
   Button,
+  CounterLabel,
   Dialog,
   IconButton,
   Link,
@@ -23,7 +25,6 @@ import {
   SelectPanel,
   Spinner,
   Stack,
-  Text,
   TextInput,
 } from '@primer/react'
 import {type ActionListItemInput} from '@primer/react/deprecated'
@@ -40,9 +41,10 @@ const vscode = getVscode()
 const LINK_TYPE = {
   REPO: 'repo',
   PROFILE: 'profile',
-  INSIGHTS: 'insights',
-  ACTIONS: 'actions',
   ISSUES: 'issues',
+  LABELS: 'labels',
+  ACTIONS: 'actions',
+  INSIGHTS: 'insights',
   SETTINGS: 'settings',
 } as const
 
@@ -138,9 +140,10 @@ export default function Posts({
     const links = {
       [LINK_TYPE.REPO]: repoUrl,
       [LINK_TYPE.PROFILE]: repo.owner.html_url,
-      [LINK_TYPE.INSIGHTS]: `${repoUrl}/graphs/traffic`,
-      [LINK_TYPE.ACTIONS]: `${repoUrl}/actions`,
       [LINK_TYPE.ISSUES]: `${repoUrl}/issues`,
+      [LINK_TYPE.LABELS]: `${repoUrl}/labels`,
+      [LINK_TYPE.ACTIONS]: `${repoUrl}/actions`,
+      [LINK_TYPE.INSIGHTS]: `${repoUrl}/graphs/traffic`,
       [LINK_TYPE.SETTINGS]: `${repoUrl}/settings`,
     }
 
@@ -166,7 +169,7 @@ export default function Posts({
                 <PageHeader role="banner" aria-label="Add-pageheader-docs">
                   <PageHeader.TitleArea>
                     <PageHeader.Title>
-                      <Stack gap="condensed" direction="horizontal">
+                      <Stack gap="condensed" direction="horizontal" align="center">
                         {repo?.owner.avatar_url ? (
                           <Avatar
                             size={32}
@@ -191,34 +194,45 @@ export default function Posts({
                         >
                           {repo?.name}
                         </Link>
+                        {issueCount && issueStatus.withFilter && issueCountWithFilter ? (
+                          <CounterLabel sx={{color: 'fg.muted'}}>
+                            {issueCountWithFilter}/{issueCount}
+                          </CounterLabel>
+                        ) : issueCount ? (
+                          <CounterLabel sx={{color: 'fg.muted'}}>{issueCount}</CounterLabel>
+                        ) : null}
                       </Stack>
                     </PageHeader.Title>
                   </PageHeader.TitleArea>
-                  <PageHeader.Description>
-                    <Text sx={{fontSize: 1, color: 'fg.muted'}}>
-                      {issueCount ?? '-'} total
-                      {issueStatus.withFilter ? ` · ${issueCountWithFilter ?? '-'} filtered` : ''}
-                    </Text>
-                  </PageHeader.Description>
                   <PageHeader.Actions>
                     <IconButton
                       aria-label="Issues"
                       icon={IssueOpenedIcon}
+                      tooltipDirection="n"
                       onClick={() => openExternalLink(LINK_TYPE.ISSUES)}
+                    />
+                    <IconButton
+                      aria-label="Labels"
+                      icon={TagIcon}
+                      tooltipDirection="n"
+                      onClick={() => openExternalLink(LINK_TYPE.LABELS)}
                     />
                     <IconButton
                       aria-label="Actions"
                       icon={PlayIcon}
+                      tooltipDirection="n"
                       onClick={() => openExternalLink(LINK_TYPE.ACTIONS)}
                     />
                     <IconButton
                       aria-label="Insights"
                       icon={GraphIcon}
+                      tooltipDirection="n"
                       onClick={() => openExternalLink(LINK_TYPE.INSIGHTS)}
                     />
                     <IconButton
                       aria-label="Settings"
                       icon={GearIcon}
+                      tooltipDirection="n"
                       onClick={() => openExternalLink(LINK_TYPE.SETTINGS)}
                     />
                   </PageHeader.Actions>
