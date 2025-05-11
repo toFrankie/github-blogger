@@ -37,7 +37,7 @@ export default function App() {
     cloneDeep(EMPTY_ISSUE)
   )
   const [postsVisible, setPostsVisible] = useState(false)
-  const [labelsVisible, setLabelsVisible] = useState(false)
+  const [labelsVisible, setLabelsVisible] = useState(false) // FIXME:
 
   const {data: repo} = useQuery({
     queryKey: ['repo'],

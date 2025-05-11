@@ -1,6 +1,6 @@
 import {PlusOutlined} from '@ant-design/icons'
-import {Dialog} from '@primer/react'
-import {Input, message, Space, Tag, Tooltip} from 'antd'
+import {Box, CounterLabel, Dialog, IssueLabelToken, Stack} from '@primer/react'
+import {Input, message, Tag, Tooltip} from 'antd'
 import {useRef, useState} from 'react'
 
 interface LabelsProps {
@@ -37,6 +37,7 @@ export default function Labels({
     reset()
   }
 
+  // @ts-ignore TODO:
   const handleDelete = (label: MinimalLabel) => {
     onLabelDelete(label.name)
   }
@@ -70,12 +71,19 @@ export default function Labels({
 
   return (
     <Dialog
-      title="Labels"
+      title={
+        <Stack justify="space-between" align="center" direction="horizontal">
+          <Box>
+            Labels
+            <CounterLabel sx={{ml: 1, color: 'fg.muted'}}>{allLabel.length}</CounterLabel>
+          </Box>
+        </Stack>
+      }
       position="right"
       width="medium"
       onClose={() => onSetLabelsVisible(false)}
     >
-      <Space wrap size={[0, 'small']}>
+      <Stack gap="condensed" direction="horizontal" wrap="wrap">
         {allLabel.map(label => {
           if (label.id === editIndex) {
             return (
@@ -99,27 +107,37 @@ export default function Labels({
           }
 
           const isLongLabel = label.name.length > 20
+          // const tagElem = (
+          //   <Tag
+          //     key={label.name}
+          //     closable
+          //     onClose={() => {
+          //       handleDelete(label)
+          //     }}
+          //   >
+          //     <span
+          //       onDoubleClick={e => {
+          //         setEditIndex(label.id)
+          //         setEditValue(label.name)
+          //         setTimeout(() => {
+          //           saveEditInputRef.current?.focus()
+          //         }, 0)
+          //         e.preventDefault()
+          //       }}
+          //     >
+          //       {isLongLabel ? `${label.name.slice(0, 20)}...` : label.name}
+          //     </span>
+          //   </Tag>
+          // )
           const tagElem = (
-            <Tag
-              key={label.name}
-              closable
-              onClose={() => {
-                handleDelete(label)
-              }}
-            >
-              <span
-                onDoubleClick={e => {
-                  setEditIndex(label.id)
-                  setEditValue(label.name)
-                  setTimeout(() => {
-                    saveEditInputRef.current?.focus()
-                  }, 0)
-                  e.preventDefault()
-                }}
-              >
-                {isLongLabel ? `${label.name.slice(0, 20)}...` : label.name}
-              </span>
-            </Tag>
+            <IssueLabelToken
+              key={label.id}
+              id={label.id}
+              text={label.name}
+              fillColor={`#${label.color}`}
+              size="large"
+              as="button"
+            />
           )
           return isLongLabel ? (
             <Tooltip key={label.id} title={label.name}>
@@ -145,6 +163,10 @@ export default function Labels({
           />
         )}
 
+        {/* <CounterLabel sx={{ml: 1, color: 'white', bg: 'success.emphasis'}}>
+          <PlusIcon size={16} />
+        </CounterLabel> */}
+
         {!inputVisible && (
           <Tag
             className="add-label"
@@ -158,7 +180,7 @@ export default function Labels({
             <PlusOutlined /> New Label
           </Tag>
         )}
-      </Space>
+      </Stack>
     </Dialog>
   )
 }

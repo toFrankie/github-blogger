@@ -48,6 +48,7 @@ export const APIS = {
 
 export const MESSAGE_TYPE = {
   GET_REPO: 'get_repo',
+  GET_PAGE_CURSOR: 'get_page_cursor',
   GET_ISSUES: 'get_issues',
   GET_ISSUES_WITH_FILTER: 'get_issues_with_filter',
   GET_ISSUE_COUNT: 'get_issue_count',

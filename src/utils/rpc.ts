@@ -48,16 +48,14 @@ export async function getIssueCountWithFilter(
 }
 
 export async function getIssues(page: number = 1, labels: string[] = [], title: string = '') {
-  // 注意：
-  // 1. REST API 不支持按 title 筛选。
-  // 2. REST API 的 labels 字段 "2017,2018" 是且关系，而 GraphQL API 的 label:2017,2018 是或关系。
-  // 3. 按 Label 筛选的功能，预期是或关系。
+  let pageCursor: string | null = null
 
-  const useGraphQL = title || labels.length >= 2
-  const messageType = useGraphQL ? MESSAGE_TYPE.GET_ISSUES_WITH_FILTER : MESSAGE_TYPE.GET_ISSUES
-  const args = useGraphQL ? [page, labels.join(','), title] : [page, labels.join(',')]
+  if (page > 1) {
+    pageCursor = (await RPC.emit(MESSAGE_TYPE.GET_PAGE_CURSOR, [page])) as string | null
+  }
 
-  const issues = (await RPC.emit(messageType, args)) as MinimalIssues
+  const args = [pageCursor, labels, title]
+  const issues = (await RPC.emit(MESSAGE_TYPE.GET_ISSUES_WITH_FILTER, args)) as MinimalIssues
   return issues || []
 }
 
@@ -127,4 +125,8 @@ export async function archiveIssue(issue: MinimalIssue, type: SubmitType) {
     console.log('🚀 ~ archiveIssue failed:', e)
     message.error('Issue Archive Failed')
   }
+}
+
+export async function getPageCursor(page: number) {
+  return (await RPC.emit(MESSAGE_TYPE.GET_PAGE_CURSOR, [page])) as string | null
 }

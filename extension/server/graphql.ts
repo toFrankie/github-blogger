@@ -66,7 +66,7 @@ export function getIssueCountWithFilter({
   `
 }
 
-export function getIssuesWithFilter({
+export function getIssuesWithFilterLegacy({
   username,
   repository,
   first,
@@ -84,7 +84,9 @@ export function getIssuesWithFilter({
 
   const query = Object.values(queryParts).filter(Boolean).join(' ')
 
-  return `
+  console.log(
+    'query',
+    `
     {
       search(
         type: ISSUE
@@ -110,6 +112,114 @@ export function getIssuesWithFilter({
                 }
               }
             }
+          }
+        }
+      }
+    }
+  `
+  )
+
+  return `
+    {
+      search(
+        type: ISSUE
+        states: OPEN
+        first: ${first}
+        ${cursor ? `after: "${cursor}"` : ''}
+        query: "${query}"
+      ) {
+        edges {
+          node {
+            ... on Issue {
+              id
+              number
+              url
+              title
+              body
+              createdAt
+              updatedAt
+              labels(first: 100) {
+                nodes {
+                  id
+                  name
+                  description
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  `
+}
+
+export function getIssuesWithFilter() {
+  return `
+    query IssuesWithFilter(
+      $owner: String!
+      $name: String!
+      $labels: [String!]
+      $first: Int
+      $after: String
+    ) {
+      repository(owner: $owner, name: $name) {
+        issues(
+          first: $first
+          labels: $labels
+          after: $after
+          states: OPEN
+          orderBy: { field: CREATED_AT, direction: DESC }
+        ) {
+          pageInfo {
+            startCursor
+            endCursor
+            hasNextPage
+            hasPreviousPage
+          }
+          nodes {
+            id
+            number
+            url
+            title
+            body
+            createdAt
+            updatedAt
+            labels(first: 100) {
+              nodes {
+                id
+                name
+                description
+                color
+              }
+            }
+          }
+        }
+      }
+    }
+  `
+}
+
+export function getIssuePageCursor() {
+  return `
+    query GetIssuePageCursor(
+      $owner: String!
+      $name: String!
+      $first: Int
+      $after: String
+    ) {
+      repository(owner: $owner, name: $name) {
+        issues(
+          first: $first
+          after: $after
+          states: OPEN
+          orderBy: { field: CREATED_AT, direction: DESC }
+        ) {
+          pageInfo {
+            hasNextPage
+            endCursor
+          }
+          nodes {
+            id
           }
         }
       }

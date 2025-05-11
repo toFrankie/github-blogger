@@ -1,6 +1,6 @@
 import {Octokit} from '@octokit/core'
 import {ExtensionRPC} from 'vscode-webview-rpc'
-import {encode} from 'js-base64'
+import {isEmpty} from 'licia'
 import * as vscode from 'vscode'
 import {MESSAGE_TYPE} from '../constants'
 
@@ -11,7 +11,7 @@ import {
   normalizeIssueFromRest,
   normalizeLabelFromRest,
 } from '../utils/normalize'
-import * as graphqlQueries from './graphql-queries'
+import * as query from './graphql'
 
 export default class Service {
   public config: Settings
@@ -112,22 +112,25 @@ export default class Service {
 
   private async getIssuesWithFilter(params: {
     title: string
-    labels: string
-    cursor?: string
+    labels?: string[]
+    after?: string
     first?: number
   }) {
+    const variables = {
+      owner: this.config.user,
+      name: this.config.repo,
+      first: DEFAULT_PAGINATION_SIZE,
+      after: params.after,
+      labels: params.labels,
+    }
+
     const [err, res] = await to(
-      this.octokit.graphql<GraphqlSearchIssuesResponse>(
-        graphqlQueries.getIssuesWithFilter({
-          username: this.config.user,
-          repository: this.config.repo,
-          ...params,
-        })
-      )
+      this.octokit.graphql<GraphqlIssuesResponse>(query.getIssuesWithFilter(), variables)
     )
 
     if (err) return []
-    return res.search.edges.map(({node}) => normalizeIssueFromGraphql(node))
+
+    return res.repository.issues.nodes.map(node => normalizeIssueFromGraphql(node))
   }
 
   private async updateIssue(params: UpdateIssueParams) {
@@ -182,7 +185,7 @@ export default class Service {
   private async getIssueCount() {
     const [err, res] = await to(
       this.octokit.graphql<GraphqlIssueCountResponse>(
-        graphqlQueries.getIssueCount({username: this.config.user, repository: this.config.repo})
+        query.getIssueCount({username: this.config.user, repository: this.config.repo})
       )
     )
     if (!err) return res.repository.issues.totalCount
@@ -192,7 +195,7 @@ export default class Service {
   private async getIssueCountWithFilter(title: string, labels: string) {
     const [err, res] = await to<GraphqlIssueCountWithFilterResponse>(
       this.octokit.graphql(
-        graphqlQueries.getIssueCountWithFilter({
+        query.getIssueCountWithFilter({
           username: this.config.user,
           repository: this.config.repo,
           title,
@@ -288,6 +291,38 @@ export default class Service {
     return res.data
   }
 
+  private async getPageCursor(page: number) {
+    if (page <= 1) return null
+
+    const targetIndex = (page - 1) * DEFAULT_PAGINATION_SIZE
+    const chunkSize = 100 // GraphQL API 每次最多可查 100 条数据
+    const first = Math.ceil(targetIndex / chunkSize) * chunkSize
+
+    let currentCursor: string | null = null
+    let remainingItems = first
+
+    while (remainingItems > 0) {
+      const currentChunk = Math.min(remainingItems, chunkSize)
+      const [err, res] = await to(
+        this.octokit.graphql<GraphqlPageCursorResponse>(query.getIssuePageCursor(), {
+          owner: this.config.user,
+          name: this.config.repo,
+          first: currentChunk,
+          after: currentCursor,
+        })
+      )
+
+      if (err || !res) return null
+
+      currentCursor = res.repository.issues.pageInfo.endCursor
+      remainingItems -= currentChunk
+
+      if (!res.repository.issues.pageInfo.hasNextPage) break
+    }
+
+    return currentCursor
+  }
+
   private registerRpcListener() {
     const getLabels = async () => {
       const data = await this.getLabels({page: 0, per_page: 100})
@@ -302,11 +337,11 @@ export default class Service {
       return await this.getIssues(params)
     }
 
-    const getIssuesWithFilter = async (page: number, labels: string, title: string) => {
+    const getIssuesWithFilter = async (after: string, labels: string[], title: string) => {
       return await this.getIssuesWithFilter({
         title,
-        labels,
-        cursor: page > 1 ? encode(`cursor:${(page - 1) * 20}`) : undefined,
+        labels: isEmpty(labels) ? undefined : labels,
+        after: after || undefined,
         first: DEFAULT_PAGINATION_SIZE,
       })
     }
@@ -394,6 +429,10 @@ export default class Service {
       return await this.getRepo()
     }
 
+    const getPageCursor = async (page: number) => {
+      return await this.getPageCursor(page)
+    }
+
     const labelHandlers = {
       [MESSAGE_TYPE.GET_LABELS]: getLabels,
       [MESSAGE_TYPE.DELETE_LABEL]: deleteLabel,
@@ -421,6 +460,7 @@ export default class Service {
 
     const otherHandlers = {
       [MESSAGE_TYPE.GET_REPO]: getRepo,
+      [MESSAGE_TYPE.GET_PAGE_CURSOR]: getPageCursor,
       [MESSAGE_TYPE.UPLOAD_IMAGE]: uploadImage,
     }
 

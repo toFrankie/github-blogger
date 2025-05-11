@@ -8,6 +8,7 @@ import {
   getIssueCount,
   getIssueCountWithFilter,
   getIssues,
+  getPageCursor,
   updateIssue,
 } from '@/utils/rpc'
 
@@ -20,14 +21,20 @@ interface UseIssuesParams {
 export default function useIssues({page, LabelNames = [], title = ''}: UseIssuesParams) {
   const queryClient = useQueryClient()
 
-  // TODO: 错误处理、默认值、创建后 refetch
+  const {data: targetCursor, isLoading: isCursorLoading} = useQuery({
+    queryKey: ['issues', 'cursor', page, LabelNames, title],
+    queryFn: () => getPageCursor(page),
+    enabled: page > 1,
+  })
+
   const {
     data: issues,
     isLoading: isLoadingIssues,
     isPending: isPendingIssues,
   } = useQuery({
-    queryKey: ['issues', page, LabelNames, title],
+    queryKey: ['issues', 'list', targetCursor, LabelNames, title],
     queryFn: () => getIssues(page, LabelNames, title),
+    enabled: !isCursorLoading && (!!targetCursor || page === 1),
   })
 
   const {data: issueCount, isFetched: isFetchedIssueCount} = useQuery({
@@ -78,7 +85,10 @@ export default function useIssues({page, LabelNames = [], title = ''}: UseIssues
     return isFetchedIssueCount && issueCount === 0
   }, [isFetchedIssueCount, issueCount])
 
-  const isLoading = useMemo(() => isLoadingIssues, [isLoadingIssues])
+  const isLoading = useMemo(
+    () => isCursorLoading || isLoadingIssues,
+    [isCursorLoading, isLoadingIssues]
+  )
 
   const isPending = useMemo(() => {
     return isPendingIssues || (withFilter && isPendingIssueCountWithFilter)

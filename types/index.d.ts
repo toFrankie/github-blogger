@@ -99,29 +99,45 @@ declare global {
     }
   }
 
-  interface GraphqlSearchIssuesResponse {
-    search: {
-      edges: Array<{
-        node: GraphqlIssue
-      }>
+  interface GraphqlPageCursorResponse {
+    repository: {
+      issues: {
+        pageInfo: {
+          hasNextPage: boolean
+          endCursor: string | null
+        }
+      }
     }
   }
 
-  // https://docs.github.com/zh/graphql/reference/objects#issue
+  interface GraphqlIssuesResponse {
+    repository: {
+      issues: {
+        nodes: Array<GraphqlIssue>
+        pageInfo: {
+          startCursor: string
+          endCursor: string
+          hasNextPage: boolean
+          hasPreviousPage: boolean
+        }
+      }
+    }
+  }
+
   type GraphqlIssue = {
     id: string
     number: number
-    url: string // The HTTP URL for this issue.
+    url: string
     title: string
     body: string
     createdAt: string
     updatedAt: string
-    state: string
     labels: {
       nodes: {
         id: string
         name: string
-        description: string
+        description: string | undefined // TODO: 需要确认
+        color: string | undefined // TODO: 需要确认
       }[]
     }
   }
@@ -132,6 +148,7 @@ declare global {
     id: string // node id
     name: string
     description?: string
+    color?: string
   }
 
   type MinimalLabels = MinimalLabel[]

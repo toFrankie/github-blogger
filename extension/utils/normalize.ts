@@ -46,5 +46,6 @@ export function normalizeLabelFromRest(label: RestLabel): MinimalLabel {
     id: label.node_id,
     name: label.name,
     description: label.description ?? '',
+    color: label.color ?? '',
   }
 }

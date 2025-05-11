@@ -1,6 +1,6 @@
 ---
-description: 
-globs: 
+description:
+globs:
 alwaysApply: true
 ---
  # 项目概述
@@ -23,7 +23,7 @@ alwaysApply: true
 - GitHub REST API 和 GraphQL API 创建、保存、查询 Issue 和 Label 等信息
   - @octokit/core v5
 - TanStack React Query v5 管理网络请求
-- licia-es 工具库（类似于 lodash 的工具库）
+- licia-es 工具库（没有用到 lodash 库）
 - @tomjs/vite-plugin-vscode 基于该插件来开发 VSCode 扩展。
 
 ## 项目结构
