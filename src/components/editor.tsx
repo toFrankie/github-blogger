@@ -77,6 +77,7 @@ export default function Editor({
                   size="small"
                   variant={checked ? 'accent' : 'secondary'}
                   onClick={() => (!checked ? onAddLabel(label) : onRemoveLabel(label))}
+                  sx={{fontSize: '11px'}}
                 >
                   {label.name}
                 </Label>
