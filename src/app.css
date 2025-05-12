@@ -128,39 +128,6 @@ code {
   z-index: 100;
 }
 
-.app-issue-list {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  padding: 16px;
-}
-
-.issue-filter {
-  margin-bottom: 16px;
-}
-
-.title-filter {
-  width: 100%;
-}
-
-.app-issue-list .list-item {
-  width: 100%;
-  margin: 4px 0;
-}
-
-.app-issue-list .list-item > div > div,
-.app-issue-list .list-item > div > div > div {
-  align-items: center;
-}
-
-.app-issue-list .list-title {
-  font-weight: 400;
-}
-
-.app-issue-list .list-number {
-  flex-shrink: 0;
-}
-
 .label-input {
   width: auto;
   margin-right: 8px;
@@ -169,17 +136,6 @@ code {
 
 .add-label {
   cursor: pointer;
-}
-
-.app-issue-list .list {
-  flex: 1;
-  overflow: hidden;
-  overflow-y: auto;
-}
-
-.app-issue-list .list::-webkit-scrollbar {
-  width: 0;
-  height: initial;
 }
 
 .ant-drawer-body {

@@ -25,7 +25,9 @@ import {
   SelectPanel,
   Spinner,
   Stack,
+  Text,
   TextInput,
+  Truncate,
 } from '@primer/react'
 import {type ActionListItemInput} from '@primer/react/deprecated'
 import {Blankslate} from '@primer/react/experimental'
@@ -163,177 +165,201 @@ export default function Posts({
       onClose={() => onSetPostsVisible(false)}
       renderBody={() => {
         return (
-          <div className="app-issue-list">
-            <Box sx={{pb: 3}}>
+          <Stack padding="normal" sx={{height: '100%', overflow: 'hidden'}}>
+            <Stack.Item sx={{flexShrink: 0}}>
               <Stack>
-                <PageHeader role="banner" aria-label="Add-pageheader-docs">
-                  <PageHeader.TitleArea>
-                    <PageHeader.Title>
-                      <Stack gap="condensed" direction="horizontal" align="center">
-                        {repo?.owner.avatar_url ? (
-                          <Avatar
-                            size={32}
-                            src={repo?.owner.avatar_url}
-                            onClick={() => openExternalLink(LINK_TYPE.PROFILE)}
-                            sx={{cursor: 'pointer'}}
-                          />
-                        ) : (
-                          <MarkGithubIcon size={32} />
-                        )}
-                        <Link
-                          sx={{
-                            color: 'fg.default',
-                            cursor: 'pointer',
-                            textDecoration: 'none',
-                            '&:hover': {
+                <Stack.Item>
+                  <PageHeader role="banner" aria-label="Add-pageheader-docs">
+                    <PageHeader.TitleArea>
+                      <PageHeader.Title>
+                        <Stack gap="condensed" direction="horizontal" align="center">
+                          {repo?.owner.avatar_url ? (
+                            <Avatar
+                              size={32}
+                              src={repo?.owner.avatar_url}
+                              onClick={() => openExternalLink(LINK_TYPE.PROFILE)}
+                              sx={{cursor: 'pointer'}}
+                            />
+                          ) : (
+                            <MarkGithubIcon size={32} />
+                          )}
+                          <Link
+                            sx={{
                               color: 'fg.default',
-                              textDecoration: 'underline',
-                            },
-                          }}
-                          onClick={() => openExternalLink(LINK_TYPE.REPO)}
-                        >
-                          {repo?.name}
-                        </Link>
-                        {issueCount && issueStatus.withFilter && issueCountWithFilter ? (
-                          <CounterLabel sx={{color: 'fg.muted'}}>
-                            {issueCountWithFilter}/{issueCount}
-                          </CounterLabel>
-                        ) : issueCount ? (
-                          <CounterLabel sx={{color: 'fg.muted'}}>{issueCount}</CounterLabel>
-                        ) : null}
-                      </Stack>
-                    </PageHeader.Title>
-                  </PageHeader.TitleArea>
-                  <PageHeader.Actions>
-                    <IconButton
-                      aria-label="Issues"
-                      icon={IssueOpenedIcon}
-                      tooltipDirection="n"
-                      onClick={() => openExternalLink(LINK_TYPE.ISSUES)}
-                    />
-                    <IconButton
-                      aria-label="Labels"
-                      icon={TagIcon}
-                      tooltipDirection="n"
-                      onClick={() => openExternalLink(LINK_TYPE.LABELS)}
-                    />
-                    <IconButton
-                      aria-label="Actions"
-                      icon={PlayIcon}
-                      tooltipDirection="n"
-                      onClick={() => openExternalLink(LINK_TYPE.ACTIONS)}
-                    />
-                    <IconButton
-                      aria-label="Insights"
-                      icon={GraphIcon}
-                      tooltipDirection="n"
-                      onClick={() => openExternalLink(LINK_TYPE.INSIGHTS)}
-                    />
-                    <IconButton
-                      aria-label="Settings"
-                      icon={GearIcon}
-                      tooltipDirection="n"
-                      onClick={() => openExternalLink(LINK_TYPE.SETTINGS)}
-                    />
-                  </PageHeader.Actions>
-                </PageHeader>
-                <TextInput
-                  className="title-filter"
-                  placeholder="Title"
-                  onChange={handleTitleChange}
-                  value={titleValue}
-                  trailingAction={
-                    titleValue ? (
-                      <TextInput.Action
-                        icon={XCircleFillIcon}
-                        aria-label="Clear input"
-                        onClick={() => {
-                          setTitleValue('')
-                          searchByTitle('')
-                        }}
+                              cursor: 'pointer',
+                              textDecoration: 'none',
+                              '&:hover': {
+                                color: 'fg.default',
+                                textDecoration: 'underline',
+                              },
+                            }}
+                            onClick={() => openExternalLink(LINK_TYPE.REPO)}
+                          >
+                            {repo?.name}
+                          </Link>
+                          {issueCount && issueStatus.withFilter && issueCountWithFilter ? (
+                            <CounterLabel sx={{color: 'fg.muted'}}>
+                              {issueCountWithFilter}/{issueCount}
+                            </CounterLabel>
+                          ) : issueCount ? (
+                            <CounterLabel sx={{color: 'fg.muted'}}>{issueCount}</CounterLabel>
+                          ) : null}
+                        </Stack>
+                      </PageHeader.Title>
+                    </PageHeader.TitleArea>
+                    <PageHeader.Actions>
+                      <IconButton
+                        aria-label="Issues"
+                        icon={IssueOpenedIcon}
+                        tooltipDirection="n"
+                        onClick={() => openExternalLink(LINK_TYPE.ISSUES)}
                       />
-                    ) : (
-                      <></>
-                    )
-                  }
-                />
-                <SelectPanel
-                  renderAnchor={({children, ...anchorProps}) => (
-                    <Button
-                      {...anchorProps}
-                      alignContent="start"
-                      trailingAction={TriangleDownIcon}
-                      aria-haspopup="dialog"
-                      labelWrap
-                    >
-                      {sortSelectedItems(children as string, selectedItemsSortedFirst)}
-                    </Button>
-                  )}
-                  footer={
-                    <Button
-                      style={{width: '100%'}}
-                      onClick={() => {
-                        setFilter('')
-                        setSelected([])
-                        searchByLabel([])
-                      }}
-                    >
-                      Clear filters
-                    </Button>
-                  }
-                  title="Select labels"
-                  placeholder={SELECT_PANEL_PLACEHOLDER}
-                  placeholderText="Filter label"
-                  open={open}
-                  onOpenChange={setOpen}
-                  items={selectedItemsSortedFirst}
-                  selected={selected}
-                  onSelectedChange={handleSelectedChange}
-                  onFilterChange={setFilter}
-                />
+                      <IconButton
+                        aria-label="Labels"
+                        icon={TagIcon}
+                        tooltipDirection="n"
+                        onClick={() => openExternalLink(LINK_TYPE.LABELS)}
+                      />
+                      <IconButton
+                        aria-label="Actions"
+                        icon={PlayIcon}
+                        tooltipDirection="n"
+                        onClick={() => openExternalLink(LINK_TYPE.ACTIONS)}
+                      />
+                      <IconButton
+                        aria-label="Insights"
+                        icon={GraphIcon}
+                        tooltipDirection="n"
+                        onClick={() => openExternalLink(LINK_TYPE.INSIGHTS)}
+                      />
+                      <IconButton
+                        aria-label="Settings"
+                        icon={GearIcon}
+                        tooltipDirection="n"
+                        onClick={() => openExternalLink(LINK_TYPE.SETTINGS)}
+                      />
+                    </PageHeader.Actions>
+                  </PageHeader>
+                </Stack.Item>
+                <Stack.Item>
+                  <TextInput
+                    sx={{width: '100%'}}
+                    placeholder="Title"
+                    onChange={handleTitleChange}
+                    value={titleValue}
+                    trailingAction={
+                      titleValue ? (
+                        <TextInput.Action
+                          icon={XCircleFillIcon}
+                          aria-label="Clear input"
+                          onClick={() => {
+                            setTitleValue('')
+                            searchByTitle('')
+                          }}
+                        />
+                      ) : (
+                        <></>
+                      )
+                    }
+                  />
+                </Stack.Item>
+                <Stack.Item>
+                  <SelectPanel
+                    renderAnchor={({children, ...anchorProps}) => (
+                      <Button
+                        {...anchorProps}
+                        sx={{width: '100%'}}
+                        alignContent="start"
+                        trailingAction={TriangleDownIcon}
+                        aria-haspopup="dialog"
+                        labelWrap
+                      >
+                        {sortSelectedItems(children as string, selectedItemsSortedFirst)}
+                      </Button>
+                    )}
+                    footer={
+                      <Button
+                        style={{width: '100%'}}
+                        onClick={() => {
+                          setFilter('')
+                          setSelected([])
+                          searchByLabel([])
+                        }}
+                      >
+                        Clear filters
+                      </Button>
+                    }
+                    title="Select labels"
+                    placeholder={SELECT_PANEL_PLACEHOLDER}
+                    placeholderText="Filter label"
+                    open={open}
+                    onOpenChange={setOpen}
+                    items={selectedItemsSortedFirst}
+                    selected={selected}
+                    onSelectedChange={handleSelectedChange}
+                    onFilterChange={setFilter}
+                  />
+                </Stack.Item>
               </Stack>
-            </Box>
-
-            <div className="list">
-              {!issues || issueStatus.isLoading ? (
-                <Loading />
-              ) : issueStatus.withoutIssue ? (
-                <WithoutIssue onActionClick={() => onSetPostsVisible(false)} />
-              ) : issueStatus.withFilter && !issueStatus.isPending && !issues.length ? (
-                <NoFilterResult />
-              ) : (
-                <ActionList className="list" variant="full">
-                  {issues.map(item => (
-                    <ActionList.Item
-                      key={item.id}
-                      className="list-item"
-                      onClick={() => {
-                        onSetPostsVisible(false)
-                        onSetCurrentIssue(item)
-                      }}
-                    >
-                      <span className="list-title">{item.title}</span>
-                      <ActionList.Description className="list-number">
-                        #{item.number}
-                      </ActionList.Description>
-                      <ActionList.TrailingVisual>
-                        <ChevronRightIcon size={16} />
-                      </ActionList.TrailingVisual>
-                    </ActionList.Item>
-                  ))}
-                </ActionList>
-              )}
-            </div>
-            <Box sx={{borderTop: '1px solid', borderColor: 'border.default'}}>
-              <Pagination
-                currentPage={currentPage}
-                pageCount={Math.ceil((issueCount ?? 0) / DEFAULT_PAGINATION_SIZE)}
-                surroundingPageCount={1}
-                showPages={{narrow: false}}
-                onPageChange={(_event, number) => onSetCurrentPage(number)}
-              />
-            </Box>
-          </div>
+            </Stack.Item>
+            <Stack.Item grow sx={{overflow: 'auto'}}>
+              <>
+                {!issues || issueStatus.isLoading ? (
+                  <Loading />
+                ) : issueStatus.withoutIssue ? (
+                  <WithoutIssue onActionClick={() => onSetPostsVisible(false)} />
+                ) : issueStatus.withFilter && !issueStatus.isPending && !issues.length ? (
+                  <NoFilterResult />
+                ) : (
+                  <ActionList className="list" variant="full">
+                    {issues.map(item => {
+                      return (
+                        <ActionList.Item
+                          key={item.id}
+                          sx={{my: 1, '&:first-of-type': {mt: 0}, '&:last-of-type': {mb: 0}}}
+                          onClick={() => {
+                            onSetPostsVisible(false)
+                            onSetCurrentIssue(item)
+                          }}
+                        >
+                          <Stack direction="horizontal" gap="condensed" align="center">
+                            <Stack.Item sx={{minWidth: 0, flexGrow: 1}}>
+                              <Stack direction="horizontal" align="baseline" gap="condensed">
+                                <Stack.Item sx={{fontWeight: 'semibold'}}>
+                                  <Truncate title={item.title} maxWidth="100%">
+                                    {item.title}
+                                  </Truncate>
+                                </Stack.Item>
+                                <Stack.Item sx={{flexShrink: 0}}>
+                                  <Text sx={{color: 'fg.muted', fontSize: 0}}>#{item.number}</Text>
+                                </Stack.Item>
+                              </Stack>
+                            </Stack.Item>
+                            <Stack.Item sx={{flexShrink: 0, flexGrow: 0, color: 'fg.muted'}}>
+                              <ChevronRightIcon size={16} />
+                            </Stack.Item>
+                          </Stack>
+                        </ActionList.Item>
+                      )
+                    })}
+                  </ActionList>
+                )}
+              </>
+            </Stack.Item>
+          </Stack>
+        )
+      }}
+      renderFooter={() => {
+        return (
+          <Box sx={{borderTop: '1px solid', borderColor: 'border.default'}}>
+            <Pagination
+              currentPage={currentPage}
+              pageCount={Math.ceil((issueCount ?? 0) / DEFAULT_PAGINATION_SIZE)}
+              surroundingPageCount={1}
+              showPages={{narrow: false}}
+              onPageChange={(_event, number) => onSetCurrentPage(number)}
+            />
+          </Box>
         )
       }}
     />
