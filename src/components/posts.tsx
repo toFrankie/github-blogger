@@ -311,7 +311,28 @@ export default function Posts({
                 ) : issueStatus.withFilter && !issueStatus.isPending && !issues.length ? (
                   <NoFilterResult />
                 ) : (
-                  <ActionList variant="full">
+                  <ActionList variant="full" sx={{position: 'relative'}}>
+                    {/* <Box
+                      sx={{
+                        position: 'absolute',
+                        top: '-2px',
+                        height: 16,
+                        width: '100%',
+                        background: 'rgba(255, 255, 255, 1)',
+                        zIndex: 2,
+                      }}
+                    />
+                    <Box
+                      sx={{
+                        position: 'sticky',
+                        top: 0,
+                        height: 8,
+                        marginTop: '0',
+                        background: '#ff0',
+                        boxShadow: 'rgba(5, 5, 5, 0.9) 0 0 10px 0px',
+                        zIndex: 1,
+                      }}
+                    /> */}
                     {issues.map(item => {
                       return (
                         <ActionList.Item
@@ -342,6 +363,15 @@ export default function Posts({
                         </ActionList.Item>
                       )
                     })}
+                    {/* <Box
+                      sx={{
+                        position: 'sticky',
+                        bottom: 0,
+                        height: 16,
+                        background: 'rgba(0, 0, 0, 0.1)',
+                        zIndex: 2,
+                      }}
+                    /> */}
                   </ActionList>
                 )}
               </>
