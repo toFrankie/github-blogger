@@ -311,7 +311,7 @@ export default function Posts({
                 ) : issueStatus.withFilter && !issueStatus.isPending && !issues.length ? (
                   <NoFilterResult />
                 ) : (
-                  <ActionList className="list" variant="full">
+                  <ActionList variant="full">
                     {issues.map(item => {
                       return (
                         <ActionList.Item
