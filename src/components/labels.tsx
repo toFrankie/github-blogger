@@ -1,6 +1,6 @@
 import {useState} from 'react'
 import {PlusIcon} from '@primer/octicons-react'
-import {CounterLabel, Dialog, IssueLabelToken, Stack} from '@primer/react'
+import {CounterLabel, Dialog, IssueLabelToken, Stack, Box} from '@primer/react'
 
 interface LabelsProps {
   allLabel: MinimalLabels
@@ -37,13 +37,23 @@ export default function Labels({allLabel, visible, onSetLabelsVisible}: LabelsPr
     >
       <Stack gap="condensed" direction="horizontal" wrap="wrap">
         {allLabel.map(label => (
-          <Stack.Item key={label.id}>
+          <Stack.Item key={label.id} sx={{position: 'relative'}}>
             <IssueLabelToken
               id={label.id}
               text={label.name}
               fillColor={`#${label.color}`}
               size="large"
               isSelected={hoveredId === label.id}
+            />
+            <Box
+              sx={{
+                cursor: 'pointer',
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+              }}
               onMouseEnter={() => setHoveredId(label.id)}
               onMouseLeave={() => setHoveredId('')}
             />
@@ -51,7 +61,7 @@ export default function Labels({allLabel, visible, onSetLabelsVisible}: LabelsPr
         ))}
 
         <Stack.Item>
-          <CounterLabel sx={{color: 'white', bg: 'success.emphasis'}}>
+          <CounterLabel sx={{color: 'white', bg: 'success.emphasis', cursor: 'pointer'}}>
             <PlusIcon size={16} />
           </CounterLabel>
         </Stack.Item>
