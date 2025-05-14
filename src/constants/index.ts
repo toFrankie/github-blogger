@@ -5,7 +5,26 @@ export const SUBMIT_TYPE = {
 
 export const DEFAULT_PAGINATION_SIZE = 20
 
-export const DEFAULT_LABEL_COLOR = 'f5fee6' // without leading #
+export const DEFAULT_LABEL_COLOR = 'F5FEE6' // without leading #
+
+export const PREDEFINED_COLORS = [
+  'B60205',
+  'D93F0B',
+  'FBCA04',
+  '0E8A16',
+  '006B75',
+  '1D76DB',
+  '0052CC',
+  '5319E7',
+  'E99695',
+  'F9D0C4',
+  'FEF2C0',
+  'C2E0C6',
+  'BFDADC',
+  'C5DEF5',
+  'BFD4F2',
+  'D4C5F9',
+]
 
 export const MESSAGE_TYPE = {
   GET_REPO: 'get_repo',
