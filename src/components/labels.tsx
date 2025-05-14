@@ -1,3 +1,4 @@
+import {useState} from 'react'
 import {PlusIcon} from '@primer/octicons-react'
 import {CounterLabel, Dialog, IssueLabelToken, Stack} from '@primer/react'
 
@@ -12,6 +13,8 @@ interface LabelsProps {
 }
 
 export default function Labels({allLabel, visible, onSetLabelsVisible}: LabelsProps) {
+  const [hoveredId, setHoveredId] = useState<string>('')
+
   // 检查是否存在重复的标签
 
   if (!visible) return null
@@ -34,14 +37,15 @@ export default function Labels({allLabel, visible, onSetLabelsVisible}: LabelsPr
     >
       <Stack gap="condensed" direction="horizontal" wrap="wrap">
         {allLabel.map(label => (
-          <Stack.Item>
+          <Stack.Item key={label.id}>
             <IssueLabelToken
-              key={label.id}
               id={label.id}
               text={label.name}
               fillColor={`#${label.color}`}
               size="large"
-              as="button"
+              isSelected={hoveredId === label.id}
+              onMouseEnter={() => setHoveredId(label.id)}
+              onMouseLeave={() => setHoveredId('')}
             />
           </Stack.Item>
         ))}
