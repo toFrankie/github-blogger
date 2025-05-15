@@ -7,7 +7,7 @@ export const EXTENSION_COMMAND = {
   CONFIG: `${EXTENSION_NAME}.config-dev`,
 } as const
 
-export const DEFAULT_LABEL_COLOR = 'F5FEE6' // without leading #
+export const LABEL_DEFAULT_COLOR = 'F5FEE6' // without leading #
 
 export const DEFAULT_PAGINATION_SIZE = 20
 

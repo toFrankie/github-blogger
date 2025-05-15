@@ -1,4 +1,4 @@
-import {SyncIcon} from '@primer/octicons-react'
+import {SparkleFillIcon, SyncIcon} from '@primer/octicons-react'
 import {
   ActionMenu,
   Box,
@@ -10,127 +10,138 @@ import {
   TextInput,
 } from '@primer/react'
 import {type FormEvent, useEffect, useState} from 'react'
-import {DEFAULT_LABEL_COLOR, PREDEFINED_COLORS} from '../constants'
+import {LABEL_DEFAULT_COLOR, LABEL_PREDEFINED_COLORS} from '../constants'
+
+const CYCLE_COLORS = [...LABEL_PREDEFINED_COLORS, LABEL_DEFAULT_COLOR]
+
+const HEX_COLOR_REGEX = /^[0-9A-Fa-f]{6}$/
 
 interface LabelEditDialogProps {
-  isOpen: boolean
-  onClose: () => void
-  labelToEdit?: MinimalLabel | null
-  onSave: (label: {name: string; color: string; description?: string}) => Promise<void>
-  onDelete?: (labelName: string) => Promise<void>
   isSaving?: boolean
   isDeleting?: boolean
+  label?: MinimalLabel | null
+  allLabelName: string[]
+  onSave: (label: {name: string; color: string; description: string | null}) => Promise<void>
+  onDelete?: (labelName: string) => Promise<void>
+  onClose: () => void
 }
 
 export default function LabelEditDialog({
-  isOpen,
-  onClose,
-  labelToEdit,
-  onSave,
-  onDelete,
   isSaving,
   isDeleting,
+  label: originalLabel,
+  allLabelName,
+  onSave,
+  onDelete,
+  onClose,
 }: LabelEditDialogProps) {
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [color, setColor] = useState('')
-  const [displayColorForToken, setDisplayColorForToken] = useState(DEFAULT_LABEL_COLOR)
+  const [displayColorForToken, setDisplayColorForToken] = useState(LABEL_DEFAULT_COLOR)
   const [nameError, setNameError] = useState<string | null>(null)
   const [colorError, setColorError] = useState<string | null>(null)
   const [isColorInputInvalid, setIsColorInputInvalid] = useState(false)
   const [currentColorIndex, setCurrentColorIndex] = useState<number>(
-    PREDEFINED_COLORS.findIndex(
-      color => color.toLowerCase() === DEFAULT_LABEL_COLOR.toLowerCase()
-    ) || 0
+    CYCLE_COLORS.findIndex(color => color.toUpperCase() === LABEL_DEFAULT_COLOR.toUpperCase()) || 0
   )
   const [isColorGridOpen, setIsColorGridOpen] = useState(false)
 
-  const isEditing = !!labelToEdit
+  const isEditing = !!originalLabel
 
   useEffect(() => {
-    if (!isOpen) return
-
     setIsColorInputInvalid(false)
     setNameError(null)
     setColorError(null)
     setIsColorGridOpen(false)
 
-    if (labelToEdit) {
-      setName(labelToEdit.name)
-      setDescription(labelToEdit.description || '')
-      const normalizedLabelColor = labelToEdit.color.startsWith('#')
-        ? labelToEdit.color.slice(1)
-        : labelToEdit.color
-
-      if (normalizedLabelColor && /^[0-9A-Fa-f]{6}$/.test(normalizedLabelColor)) {
-        setColor(normalizedLabelColor)
-        setDisplayColorForToken(normalizedLabelColor)
-        const foundIndex = PREDEFINED_COLORS.findIndex(
-          color => color.toLowerCase() === normalizedLabelColor.toLowerCase()
-        )
-        setCurrentColorIndex(foundIndex !== -1 ? foundIndex : -1)
-      } else if (normalizedLabelColor) {
-        setColor(normalizedLabelColor)
-        setDisplayColorForToken(DEFAULT_LABEL_COLOR)
-        setIsColorInputInvalid(true)
-        setCurrentColorIndex(
-          PREDEFINED_COLORS.findIndex(
-            color => color.toLowerCase() === DEFAULT_LABEL_COLOR.toLowerCase()
-          ) || 0
-        )
-      } else {
-        setColor('')
-        setDisplayColorForToken(DEFAULT_LABEL_COLOR)
-        setCurrentColorIndex(
-          PREDEFINED_COLORS.findIndex(
-            color => color.toLowerCase() === DEFAULT_LABEL_COLOR.toLowerCase()
-          ) || 0
-        )
-      }
-    } else {
+    if (!originalLabel) {
       setName('')
       setDescription('')
       setColor('')
-      setDisplayColorForToken(DEFAULT_LABEL_COLOR)
+      setDisplayColorForToken(LABEL_DEFAULT_COLOR)
       setCurrentColorIndex(
-        PREDEFINED_COLORS.findIndex(
-          color => color.toLowerCase() === DEFAULT_LABEL_COLOR.toLowerCase()
+        CYCLE_COLORS.findIndex(
+          color => color.toUpperCase() === LABEL_DEFAULT_COLOR.toUpperCase()
+        ) || 0
+      )
+
+      return
+    }
+
+    setName(originalLabel.name)
+    setDescription(originalLabel.description || '')
+
+    const labelColor = originalLabel.color
+
+    if (labelColor && HEX_COLOR_REGEX.test(labelColor)) {
+      setColor(labelColor)
+      setDisplayColorForToken(labelColor)
+      const foundIndex = CYCLE_COLORS.findIndex(
+        color => color.toUpperCase() === labelColor.toUpperCase()
+      )
+      setCurrentColorIndex(foundIndex !== -1 ? foundIndex : -1)
+    } else if (labelColor) {
+      setColor(labelColor)
+      setDisplayColorForToken(LABEL_DEFAULT_COLOR)
+      setIsColorInputInvalid(true)
+      setCurrentColorIndex(
+        CYCLE_COLORS.findIndex(
+          color => color.toUpperCase() === LABEL_DEFAULT_COLOR.toUpperCase()
+        ) || 0
+      )
+    } else {
+      setColor('')
+      setDisplayColorForToken(LABEL_DEFAULT_COLOR)
+      setCurrentColorIndex(
+        CYCLE_COLORS.findIndex(
+          color => color.toUpperCase() === LABEL_DEFAULT_COLOR.toUpperCase()
         ) || 0
       )
     }
-  }, [isOpen, labelToEdit])
+  }, [originalLabel])
 
   const validate = () => {
     let isValid = true
-    if (!name.trim()) {
+
+    const formattedName = name.trim()
+
+    if (!formattedName) {
       setNameError('Label name is required.')
+      isValid = false
+    } else if (allLabelName.includes(formattedName)) {
+      setNameError('Name has already been taken.')
       isValid = false
     } else {
       setNameError(null)
     }
-    if (color.trim() && !/^[0-9A-Fa-f]{6}$/.test(color)) {
-      setColorError('Color must be a 6-character hex code (e.g., FF0000).')
+
+    if (color.trim() && !HEX_COLOR_REGEX.test(color)) {
+      setColorError('Color must be a 6-character hex code (e.g. FF0000).')
       setIsColorInputInvalid(true)
       isValid = false
     } else {
       setColorError(null)
       setIsColorInputInvalid(false)
     }
+
     return isValid
   }
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault()
-    if (!validate()) {
-      return
-    }
-    const finalColor = color.trim() ? color : DEFAULT_LABEL_COLOR
-    await onSave({name, color: `#${finalColor}`, description})
+    if (!validate()) return
+
+    await onSave({
+      name: name.trim(),
+      color: color.trim() || LABEL_DEFAULT_COLOR,
+      description: description.trim() || null,
+    })
   }
 
   const handleDelete = async () => {
-    if (labelToEdit && onDelete) {
-      await onDelete(labelToEdit.name)
+    if (originalLabel && onDelete) {
+      await onDelete(originalLabel.name)
     }
   }
 
@@ -143,24 +154,24 @@ export default function LabelEditDialog({
     setColor(newColorValue)
 
     if (newColorValue.trim() === '') {
-      setDisplayColorForToken(DEFAULT_LABEL_COLOR)
+      setDisplayColorForToken(LABEL_DEFAULT_COLOR)
       setIsColorInputInvalid(false)
       setColorError(null)
       setCurrentColorIndex(
-        PREDEFINED_COLORS.findIndex(
-          color => color.toLowerCase() === DEFAULT_LABEL_COLOR.toLowerCase()
+        CYCLE_COLORS.findIndex(
+          color => color.toUpperCase() === LABEL_DEFAULT_COLOR.toUpperCase()
         ) || 0
       )
-    } else if (/^[0-9A-Fa-f]{6}$/.test(newColorValue)) {
+    } else if (HEX_COLOR_REGEX.test(newColorValue)) {
       setDisplayColorForToken(newColorValue)
       setIsColorInputInvalid(false)
       setColorError(null)
-      const foundIndex = PREDEFINED_COLORS.findIndex(
-        color => color.toLowerCase() === newColorValue.toLowerCase()
+      const foundIndex = CYCLE_COLORS.findIndex(
+        color => color.toUpperCase() === newColorValue.toUpperCase()
       )
       setCurrentColorIndex(foundIndex !== -1 ? foundIndex : -1)
     } else {
-      setDisplayColorForToken(DEFAULT_LABEL_COLOR)
+      setDisplayColorForToken(LABEL_DEFAULT_COLOR)
       setIsColorInputInvalid(true)
       setColorError(null)
       setCurrentColorIndex(-1)
@@ -172,8 +183,8 @@ export default function LabelEditDialog({
     setColor(newColorValue)
     setDisplayColorForToken(newColorValue)
     setIsColorInputInvalid(false)
-    const foundIndex = PREDEFINED_COLORS.findIndex(
-      color => color.toLowerCase() === newColorValue.toLowerCase()
+    const foundIndex = CYCLE_COLORS.findIndex(
+      color => color.toUpperCase() === newColorValue.toUpperCase()
     )
     setCurrentColorIndex(foundIndex !== -1 ? foundIndex : -1)
     setColorError(null)
@@ -182,12 +193,12 @@ export default function LabelEditDialog({
 
   const handleCycleColor = () => {
     let nextIndex = currentColorIndex
-    if (currentColorIndex === -1 || currentColorIndex >= PREDEFINED_COLORS.length - 1) {
+    if (currentColorIndex === -1 || currentColorIndex >= CYCLE_COLORS.length - 1) {
       nextIndex = 0
     } else {
       nextIndex = currentColorIndex + 1
     }
-    const newColorValue = PREDEFINED_COLORS[nextIndex]
+    const newColorValue = CYCLE_COLORS[nextIndex]
     setCurrentColorIndex(nextIndex)
     setColor(newColorValue)
     setDisplayColorForToken(newColorValue)
@@ -195,10 +206,8 @@ export default function LabelEditDialog({
     setColorError(null)
   }
 
-  if (!isOpen) return null
-
   const isColorFieldValidForSubmission =
-    !color.trim() || (color.trim() && /^[0-9A-Fa-f]{6}$/.test(color))
+    !color.trim() || (color.trim() && HEX_COLOR_REGEX.test(color))
 
   const canSubmit =
     name.trim() && isColorFieldValidForSubmission && !nameError && !isSaving && !isDeleting
@@ -224,7 +233,7 @@ export default function LabelEditDialog({
           buttonType: 'primary',
           content: isSaving ? 'Saving...' : isEditing ? 'Save changes' : 'Create label',
           onClick: handleSubmit,
-          disabled: !canSubmit || isSaving,
+          // disabled: !canSubmit || isSaving,
         },
       ]}
     >
@@ -272,7 +281,7 @@ export default function LabelEditDialog({
                   leadingVisual="#"
                   value={color}
                   onChange={handleColorInputChange}
-                  placeholder={DEFAULT_LABEL_COLOR}
+                  placeholder={LABEL_DEFAULT_COLOR}
                   maxLength={6}
                   aria-label="Hex color code for Color input"
                   sx={{width: '100px'}}
@@ -291,30 +300,26 @@ export default function LabelEditDialog({
                     <Stack direction="vertical" gap="condensed">
                       <Text sx={{fontSize: 0, color: 'fg.muted'}}>Choose from default colors:</Text>
                       <Stack direction="horizontal" gap="condensed" wrap="wrap">
-                        {PREDEFINED_COLORS.map(color => (
-                          <Box
-                            key={color}
-                            as="button"
-                            type="button"
-                            aria-label={`Select color ${color}`}
-                            onClick={() => handlePredefinedColorClick(color)}
-                            sx={{
-                              width: '24px',
-                              height: '24px',
-                              bg: `#${color}`,
-                              borderRadius: '50%',
-                              border: '1px solid',
-                              cursor: 'pointer',
-                              borderColor:
-                                displayColorForToken.toLowerCase() === color.toLowerCase()
-                                  ? 'accent.fg'
-                                  : 'border.default',
-                              outlineOffset: '2px',
-                              '&:focus-visible': {
-                                boxShadow: `0 0 0 3px var(--brand-bgColor-accent-emphasis, var(--bgColor-accent-emphasis, #0969da))`,
-                              },
-                            }}
-                          />
+                        {CYCLE_COLORS.map(color => (
+                          <Stack.Item key={color} sx={{position: 'relative'}}>
+                            <IssueLabelToken
+                              text={<SparkleFillIcon size={16} />}
+                              size="large"
+                              fillColor={`#${color}`}
+                            />
+                            <Box
+                              aria-label={`Select color ${color}`}
+                              onClick={() => handlePredefinedColorClick(color)}
+                              sx={{
+                                position: 'absolute',
+                                top: 0,
+                                left: 0,
+                                width: '100%',
+                                height: '100%',
+                                cursor: 'pointer',
+                              }}
+                            />
+                          </Stack.Item>
                         ))}
                       </Stack>
                     </Stack>
@@ -325,7 +330,7 @@ export default function LabelEditDialog({
                 <IssueLabelToken
                   text={<SyncIcon size={16} />}
                   size="large"
-                  fillColor={`#${displayColorForToken || DEFAULT_LABEL_COLOR}`}
+                  fillColor={`#${displayColorForToken || LABEL_DEFAULT_COLOR}`}
                 />
                 <Box
                   onClick={handleCycleColor}

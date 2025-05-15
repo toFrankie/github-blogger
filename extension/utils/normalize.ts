@@ -36,7 +36,8 @@ export function normalizeIssueFromGraphql(issue: GraphqlIssue): MinimalIssue {
     labels: issue.labels.nodes.map(label => ({
       id: label.id,
       name: label.name,
-      description: label.description ?? '',
+      description: label.description,
+      color: label.color,
     })),
   }
 }
@@ -45,7 +46,7 @@ export function normalizeLabelFromRest(label: RestLabel): MinimalLabel {
   return {
     id: label.node_id,
     name: label.name,
-    description: label.description ?? '',
-    color: label.color ?? '',
+    description: label.description,
+    color: label.color,
   }
 }

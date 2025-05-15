@@ -136,8 +136,8 @@ declare global {
       nodes: {
         id: string
         name: string
-        description: string | undefined // TODO: 需要确认
-        color: string | undefined // TODO: 需要确认
+        description: string | null
+        color: string
       }[]
     }
   }
@@ -147,8 +147,8 @@ declare global {
   type MinimalLabel = {
     id: string // node id
     name: string
-    description?: string
-    color?: string
+    description: string | null
+    color: string
   }
 
   type MinimalLabels = MinimalLabel[]

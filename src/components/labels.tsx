@@ -1,6 +1,6 @@
 import {PlusIcon} from '@primer/octicons-react'
 import {Box, CounterLabel, Dialog, IssueLabelToken, Stack} from '@primer/react'
-import {useState} from 'react'
+import {useMemo, useState} from 'react'
 import LabelEditDialog from './label-edit-dialog'
 
 interface LabelsProps {
@@ -29,9 +29,15 @@ export default function Labels({
 }: LabelsProps) {
   const [hoveredId, setHoveredId] = useState<string>('')
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
-  const [editingLabel, setEditingLabel] = useState<MinimalLabel | null | undefined>(null)
+  const [editingLabel, setEditingLabel] = useState<MinimalLabel | null>(null)
   const [isSaving, setIsSaving] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
+
+  const allLabelName = useMemo(() => {
+    return allLabel
+      .filter(label => !editingLabel || label.id !== editingLabel.id)
+      .map(label => label.name)
+  }, [allLabel, editingLabel])
 
   const openEditDialog = (label: MinimalLabel) => {
     setEditingLabel(label)
@@ -39,7 +45,7 @@ export default function Labels({
   }
 
   const openCreateDialog = () => {
-    setEditingLabel(undefined)
+    setEditingLabel(null)
     setIsEditDialogOpen(true)
   }
 
@@ -48,7 +54,11 @@ export default function Labels({
     setEditingLabel(null)
   }
 
-  const handleSave = async (labelData: {name: string; color: string; description?: string}) => {
+  const handleSave = async (labelData: {
+    name: string
+    color: string
+    description: string | null
+  }) => {
     console.log('🚀 ~ handleSave ~ labelData:', labelData)
 
     // setIsSaving(true)
@@ -153,15 +163,17 @@ export default function Labels({
         </Stack>
       </Dialog>
 
-      <LabelEditDialog
-        isOpen={isEditDialogOpen}
-        onClose={closeEditDialog}
-        labelToEdit={editingLabel}
-        onSave={handleSave}
-        onDelete={editingLabel?.name ? handleDelete : undefined}
-        isSaving={isSaving}
-        isDeleting={isDeleting}
-      />
+      {isEditDialogOpen && (
+        <LabelEditDialog
+          onClose={closeEditDialog}
+          label={editingLabel}
+          allLabelName={allLabelName}
+          onSave={handleSave}
+          onDelete={editingLabel?.name ? handleDelete : undefined}
+          isSaving={isSaving}
+          isDeleting={isDeleting}
+        />
+      )}
     </>
   )
 }

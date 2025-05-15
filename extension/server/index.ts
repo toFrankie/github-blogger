@@ -4,7 +4,7 @@ import {isEmpty} from 'licia'
 import * as vscode from 'vscode'
 import {GRAPHQL_PAGINATION_SIZE_LIMIT, MESSAGE_TYPE} from '../constants'
 
-import {APIS, DEFAULT_LABEL_COLOR, DEFAULT_PAGINATION_SIZE} from '../constants'
+import {APIS, LABEL_DEFAULT_COLOR, DEFAULT_PAGINATION_SIZE} from '../constants'
 import {getSettings, to, cdnURL} from '../utils'
 import {
   normalizeIssueFromGraphql,
@@ -67,7 +67,7 @@ export default class Service {
       this.octokit.request(APIS.CREATE_LABEL, {
         owner: this.config.user,
         repo: this.config.repo,
-        color: DEFAULT_LABEL_COLOR,
+        color: LABEL_DEFAULT_COLOR,
         ...params,
       })
     )

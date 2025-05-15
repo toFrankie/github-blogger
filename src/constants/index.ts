@@ -5,9 +5,9 @@ export const SUBMIT_TYPE = {
 
 export const DEFAULT_PAGINATION_SIZE = 20
 
-export const DEFAULT_LABEL_COLOR = 'F5FEE6' // without leading #
+export const LABEL_DEFAULT_COLOR = 'F5FEE6'
 
-export const PREDEFINED_COLORS = [
+export const LABEL_PREDEFINED_COLORS = [
   'B60205',
   'D93F0B',
   'FBCA04',
