@@ -1,7 +1,7 @@
+import {SyncIcon} from '@primer/octicons-react'
 import {
   ActionMenu,
   Box,
-  Button,
   Dialog,
   FormControl,
   IssueLabelToken,
@@ -11,7 +11,6 @@ import {
 } from '@primer/react'
 import {type FormEvent, useEffect, useState} from 'react'
 import {DEFAULT_LABEL_COLOR, PREDEFINED_COLORS} from '../constants'
-import type {MinimalLabel} from '../types/label'
 
 interface LabelEditDialogProps {
   isOpen: boolean
@@ -40,7 +39,9 @@ export default function LabelEditDialog({
   const [colorError, setColorError] = useState<string | null>(null)
   const [isColorInputInvalid, setIsColorInputInvalid] = useState(false)
   const [currentColorIndex, setCurrentColorIndex] = useState<number>(
-    PREDEFINED_COLORS.findIndex(pc => pc.toLowerCase() === DEFAULT_LABEL_COLOR.toLowerCase()) || 0
+    PREDEFINED_COLORS.findIndex(
+      color => color.toLowerCase() === DEFAULT_LABEL_COLOR.toLowerCase()
+    ) || 0
   )
   const [isColorGridOpen, setIsColorGridOpen] = useState(false)
 
@@ -65,7 +66,7 @@ export default function LabelEditDialog({
         setColor(normalizedLabelColor)
         setDisplayColorForToken(normalizedLabelColor)
         const foundIndex = PREDEFINED_COLORS.findIndex(
-          pc => pc.toLowerCase() === normalizedLabelColor.toLowerCase()
+          color => color.toLowerCase() === normalizedLabelColor.toLowerCase()
         )
         setCurrentColorIndex(foundIndex !== -1 ? foundIndex : -1)
       } else if (normalizedLabelColor) {
@@ -74,7 +75,7 @@ export default function LabelEditDialog({
         setIsColorInputInvalid(true)
         setCurrentColorIndex(
           PREDEFINED_COLORS.findIndex(
-            pc => pc.toLowerCase() === DEFAULT_LABEL_COLOR.toLowerCase()
+            color => color.toLowerCase() === DEFAULT_LABEL_COLOR.toLowerCase()
           ) || 0
         )
       } else {
@@ -82,7 +83,7 @@ export default function LabelEditDialog({
         setDisplayColorForToken(DEFAULT_LABEL_COLOR)
         setCurrentColorIndex(
           PREDEFINED_COLORS.findIndex(
-            pc => pc.toLowerCase() === DEFAULT_LABEL_COLOR.toLowerCase()
+            color => color.toLowerCase() === DEFAULT_LABEL_COLOR.toLowerCase()
           ) || 0
         )
       }
@@ -92,8 +93,9 @@ export default function LabelEditDialog({
       setColor('')
       setDisplayColorForToken(DEFAULT_LABEL_COLOR)
       setCurrentColorIndex(
-        PREDEFINED_COLORS.findIndex(pc => pc.toLowerCase() === DEFAULT_LABEL_COLOR.toLowerCase()) ||
-          0
+        PREDEFINED_COLORS.findIndex(
+          color => color.toLowerCase() === DEFAULT_LABEL_COLOR.toLowerCase()
+        ) || 0
       )
     }
   }, [isOpen, labelToEdit])
@@ -145,15 +147,16 @@ export default function LabelEditDialog({
       setIsColorInputInvalid(false)
       setColorError(null)
       setCurrentColorIndex(
-        PREDEFINED_COLORS.findIndex(pc => pc.toLowerCase() === DEFAULT_LABEL_COLOR.toLowerCase()) ||
-          0
+        PREDEFINED_COLORS.findIndex(
+          color => color.toLowerCase() === DEFAULT_LABEL_COLOR.toLowerCase()
+        ) || 0
       )
     } else if (/^[0-9A-Fa-f]{6}$/.test(newColorValue)) {
       setDisplayColorForToken(newColorValue)
       setIsColorInputInvalid(false)
       setColorError(null)
       const foundIndex = PREDEFINED_COLORS.findIndex(
-        pc => pc.toLowerCase() === newColorValue.toLowerCase()
+        color => color.toLowerCase() === newColorValue.toLowerCase()
       )
       setCurrentColorIndex(foundIndex !== -1 ? foundIndex : -1)
     } else {
@@ -170,7 +173,7 @@ export default function LabelEditDialog({
     setDisplayColorForToken(newColorValue)
     setIsColorInputInvalid(false)
     const foundIndex = PREDEFINED_COLORS.findIndex(
-      pc => pc.toLowerCase() === newColorValue.toLowerCase()
+      color => color.toLowerCase() === newColorValue.toLowerCase()
     )
     setCurrentColorIndex(foundIndex !== -1 ? foundIndex : -1)
     setColorError(null)
@@ -201,7 +204,30 @@ export default function LabelEditDialog({
     name.trim() && isColorFieldValidForSubmission && !nameError && !isSaving && !isDeleting
 
   return (
-    <Dialog title={isEditing ? 'Edit label' : 'Create new label'} onClose={onClose}>
+    <Dialog
+      title={isEditing ? 'Edit label' : 'Create new label'}
+      onClose={onClose}
+      footerButtons={[
+        {
+          buttonType: 'danger',
+          content: isDeleting ? 'Deleting...' : 'Delete',
+          onClick: handleDelete,
+          disabled: isDeleting || isSaving,
+        },
+        {
+          buttonType: 'default',
+          content: 'Cancel',
+          onClick: onClose,
+          disabled: isSaving || isDeleting,
+        },
+        {
+          buttonType: 'primary',
+          content: isSaving ? 'Saving...' : isEditing ? 'Save changes' : 'Create label',
+          onClick: handleSubmit,
+          disabled: !canSubmit || isSaving,
+        },
+      ]}
+    >
       <Stack as="form" onSubmit={handleSubmit}>
         <Stack.Item>
           <FormControl required>
@@ -239,96 +265,83 @@ export default function LabelEditDialog({
         <Stack.Item>
           <FormControl>
             <FormControl.Label htmlFor="color-input">Color</FormControl.Label>
-            <Stack direction="horizontal" gap="condensed">
-              <TextInput
-                id="color-input"
-                leadingVisual="#"
-                value={color}
-                validationStatus={isColorInputInvalid ? 'error' : undefined}
-                onChange={handleColorInputChange}
-                placeholder={DEFAULT_LABEL_COLOR}
-                maxLength={6}
-                aria-label="Hex color code for Color input"
-                sx={{width: '100px'}}
-              />
-              <ActionMenu open={isColorGridOpen} onOpenChange={setIsColorGridOpen}>
-                <ActionMenu.Button
-                  aria-label="Open color picker"
-                  variant="default"
-                  sx={{paddingLeft: 'condensed', paddingRight: 'condensed'}}
-                >
-                  Colors
-                </ActionMenu.Button>
-                <ActionMenu.Overlay width="medium" sx={{p: 2}}>
-                  <Stack direction="vertical" gap="condensed">
-                    <Text sx={{fontSize: 0, color: 'fg.muted'}}>Choose from default colors:</Text>
-                    <Stack direction="horizontal" gap="condensed" wrap="wrap">
-                      {PREDEFINED_COLORS.map(color => (
-                        <Box
-                          key={color}
-                          as="button"
-                          type="button"
-                          aria-label={`Select color ${color}`}
-                          onClick={() => handlePredefinedColorClick(color)}
-                          sx={{
-                            width: '24px',
-                            height: '24px',
-                            bg: `#${color}`,
-                            borderRadius: '50%',
-                            border: '1px solid',
-                            cursor: 'pointer',
-                            borderColor:
-                              displayColorForToken.toLowerCase() === color.toLowerCase()
-                                ? 'accent.fg'
-                                : 'border.default',
-                            outlineOffset: '2px',
-                            '&:focus-visible': {
-                              boxShadow: `0 0 0 3px var(--brand-bgColor-accent-emphasis, var(--bgColor-accent-emphasis, #0969da))`,
-                            },
-                          }}
-                        />
-                      ))}
+            <Stack direction="horizontal" gap="condensed" align="center">
+              <Stack.Item>
+                <TextInput
+                  id="color-input"
+                  leadingVisual="#"
+                  value={color}
+                  onChange={handleColorInputChange}
+                  placeholder={DEFAULT_LABEL_COLOR}
+                  maxLength={6}
+                  aria-label="Hex color code for Color input"
+                  sx={{width: '100px'}}
+                />
+              </Stack.Item>
+              <Stack.Item>
+                <ActionMenu open={isColorGridOpen} onOpenChange={setIsColorGridOpen}>
+                  <ActionMenu.Button
+                    aria-label="Open color picker"
+                    variant="default"
+                    sx={{paddingLeft: 'condensed', paddingRight: 'condensed'}}
+                  >
+                    Colors
+                  </ActionMenu.Button>
+                  <ActionMenu.Overlay width="medium" sx={{p: 2}}>
+                    <Stack direction="vertical" gap="condensed">
+                      <Text sx={{fontSize: 0, color: 'fg.muted'}}>Choose from default colors:</Text>
+                      <Stack direction="horizontal" gap="condensed" wrap="wrap">
+                        {PREDEFINED_COLORS.map(color => (
+                          <Box
+                            key={color}
+                            as="button"
+                            type="button"
+                            aria-label={`Select color ${color}`}
+                            onClick={() => handlePredefinedColorClick(color)}
+                            sx={{
+                              width: '24px',
+                              height: '24px',
+                              bg: `#${color}`,
+                              borderRadius: '50%',
+                              border: '1px solid',
+                              cursor: 'pointer',
+                              borderColor:
+                                displayColorForToken.toLowerCase() === color.toLowerCase()
+                                  ? 'accent.fg'
+                                  : 'border.default',
+                              outlineOffset: '2px',
+                              '&:focus-visible': {
+                                boxShadow: `0 0 0 3px var(--brand-bgColor-accent-emphasis, var(--bgColor-accent-emphasis, #0969da))`,
+                              },
+                            }}
+                          />
+                        ))}
+                      </Stack>
                     </Stack>
-                  </Stack>
-                </ActionMenu.Overlay>
-              </ActionMenu>
+                  </ActionMenu.Overlay>
+                </ActionMenu>
+              </Stack.Item>
+              <Stack.Item sx={{position: 'relative'}}>
+                <IssueLabelToken
+                  text={<SyncIcon size={16} />}
+                  size="large"
+                  fillColor={`#${displayColorForToken || DEFAULT_LABEL_COLOR}`}
+                />
+                <Box
+                  onClick={handleCycleColor}
+                  sx={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                    cursor: 'pointer',
+                  }}
+                />
+              </Stack.Item>
             </Stack>
           </FormControl>
           {colorError && <Text sx={{color: 'danger.fg', fontSize: 0, mt: 1}}>{colorError}</Text>}
-        </Stack.Item>
-
-        <Stack.Item sx={{position: 'relative'}}>
-          <IssueLabelToken
-            text={name || 'Label preview'}
-            fillColor={`#${displayColorForToken || DEFAULT_LABEL_COLOR}`}
-          />
-          <Box
-            onClick={handleCycleColor}
-            sx={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              width: '100%',
-              height: '100%',
-              cursor: 'pointer',
-            }}
-          />
-        </Stack.Item>
-
-        <Stack.Item>
-          <Stack direction="horizontal" justify="end" gap="condensed">
-            {isEditing && onDelete && (
-              <Button variant="danger" onClick={handleDelete} disabled={isDeleting || isSaving}>
-                {isDeleting ? 'Deleting...' : 'Delete'}
-              </Button>
-            )}
-            <Button onClick={onClose} disabled={isSaving || isDeleting}>
-              Cancel
-            </Button>
-            <Button variant="primary" type="submit" disabled={!canSubmit || isSaving}>
-              {isSaving ? 'Saving...' : isEditing ? 'Save changes' : 'Create label'}
-            </Button>
-          </Stack>
         </Stack.Item>
       </Stack>
     </Dialog>

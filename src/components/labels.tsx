@@ -1,7 +1,6 @@
 import {PlusIcon} from '@primer/octicons-react'
-import {Box, Button, CounterLabel, Dialog, IssueLabelToken, Stack} from '@primer/react'
+import {Box, CounterLabel, Dialog, IssueLabelToken, Stack} from '@primer/react'
 import {useState} from 'react'
-import type {MinimalLabel, MinimalLabels} from '../types/label'
 import LabelEditDialog from './label-edit-dialog'
 
 interface LabelsProps {
@@ -117,43 +116,39 @@ export default function Labels({
           </Stack>
         }
       >
-        <Stack gap="condensed" direction="horizontal" wrap="wrap" sx={{p: 3}}>
+        <Stack gap="condensed" direction="horizontal" wrap="wrap">
           {allLabel.map(label => (
-            <Stack.Item key={label.id} sx={{position: 'relative'}}>
+            <Stack.Item
+              key={label.id}
+              sx={{position: 'relative'}}
+              onClick={() => openEditDialog(label)}
+            >
+              <IssueLabelToken
+                id={label.id}
+                text={label.name}
+                fillColor={`#${label.color}`}
+                size="large"
+                isSelected={hoveredId === label.id}
+              />
               <Box
-                onClick={() => openEditDialog(label)}
-                sx={{cursor: 'pointer', display: 'inline-block'}}
+                sx={{
+                  cursor: 'pointer',
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: '100%',
+                }}
                 onMouseEnter={() => setHoveredId(label.id)}
                 onMouseLeave={() => setHoveredId('')}
-              >
-                <IssueLabelToken
-                  text={label.name}
-                  fillColor={label.color.startsWith('#') ? label.color : `#${label.color}`}
-                  size="large"
-                />
-              </Box>
+              />
             </Stack.Item>
           ))}
 
-          <Stack.Item>
-            <Button
-              aria-label="Create new label"
-              onClick={openCreateDialog}
-              variant="default"
-              sx={{
-                color: 'fg.default',
-                p: 1,
-                border: 'none',
-                boxShadow: 'none',
-                bg: 'transparent',
-                '&:hover': {bg: 'canvas.subtle'},
-              }}
-            >
+          <Stack.Item onClick={openCreateDialog}>
+            <CounterLabel sx={{color: 'white', bg: 'success.emphasis', cursor: 'pointer'}}>
               <PlusIcon size={16} />
-              <Box as="span" sx={{ml: 1}}>
-                New label
-              </Box>
-            </Button>
+            </CounterLabel>
           </Stack.Item>
         </Stack>
       </Dialog>
