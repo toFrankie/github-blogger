@@ -8,6 +8,7 @@ import {
   Stack,
   Text,
   TextInput,
+  type DialogButtonProps,
 } from '@primer/react'
 import {type FormEvent, useEffect, useState} from 'react'
 import {LABEL_DEFAULT_COLOR, LABEL_PREDEFINED_COLORS} from '../constants'
@@ -212,30 +213,36 @@ export default function LabelEditDialog({
   const canSubmit =
     name.trim() && isColorFieldValidForSubmission && !nameError && !isSaving && !isDeleting
 
+  const footerButtons: DialogButtonProps[] = [
+    ...(isEditing
+      ? [
+          {
+            buttonType: 'danger' as const,
+            content: isDeleting ? 'Deleting...' : 'Delete',
+            onClick: handleDelete,
+            disabled: isDeleting || isSaving,
+          },
+        ]
+      : []),
+    {
+      buttonType: 'default' as const,
+      content: 'Cancel',
+      onClick: onClose,
+      disabled: isSaving || isDeleting,
+    },
+    {
+      buttonType: 'primary' as const,
+      content: isSaving ? 'Saving...' : isEditing ? 'Save changes' : 'Create label',
+      onClick: handleSubmit,
+      disabled: !canSubmit || isSaving,
+    },
+  ]
+
   return (
     <Dialog
       title={isEditing ? 'Edit label' : 'Create new label'}
       onClose={onClose}
-      footerButtons={[
-        {
-          buttonType: 'danger',
-          content: isDeleting ? 'Deleting...' : 'Delete',
-          onClick: handleDelete,
-          disabled: isDeleting || isSaving,
-        },
-        {
-          buttonType: 'default',
-          content: 'Cancel',
-          onClick: onClose,
-          disabled: isSaving || isDeleting,
-        },
-        {
-          buttonType: 'primary',
-          content: isSaving ? 'Saving...' : isEditing ? 'Save changes' : 'Create label',
-          onClick: handleSubmit,
-          // disabled: !canSubmit || isSaving,
-        },
-      ]}
+      footerButtons={footerButtons}
     >
       <Stack as="form" onSubmit={handleSubmit}>
         <Stack.Item>
@@ -257,6 +264,7 @@ export default function LabelEditDialog({
             )}
           </FormControl>
         </Stack.Item>
+
         <Stack.Item>
           <FormControl>
             <FormControl.Label>Description</FormControl.Label>
@@ -274,6 +282,11 @@ export default function LabelEditDialog({
         <Stack.Item>
           <FormControl>
             <FormControl.Label htmlFor="color-input">Color</FormControl.Label>
+            {colorError ? (
+              <FormControl.Validation variant="error">{colorError}</FormControl.Validation>
+            ) : (
+              <FormControl.Caption>A 6-character hex code (e.g. FF0000).</FormControl.Caption>
+            )}
             <Stack direction="horizontal" gap="condensed" align="center">
               <Stack.Item>
                 <TextInput
@@ -346,7 +359,6 @@ export default function LabelEditDialog({
               </Stack.Item>
             </Stack>
           </FormControl>
-          {colorError && <Text sx={{color: 'danger.fg', fontSize: 0, mt: 1}}>{colorError}</Text>}
         </Stack.Item>
       </Stack>
     </Dialog>
