@@ -77,6 +77,12 @@ declare global {
 
   type CreateCommitParams = Omit<RestApiParametersType<typeof APIS.CREATE_COMMIT>, 'owner' | 'repo'>
 
+  type CreateLabelParams = Omit<RestApiParametersType<typeof APIS.CREATE_LABEL>, 'owner' | 'repo'>
+
+  type UpdateLabelParams = Omit<RestApiParametersType<typeof APIS.UPDATE_LABEL>, 'owner' | 'repo'>
+
+  type DeleteLabelParams = Omit<RestApiParametersType<typeof APIS.DELETE_LABEL>, 'owner' | 'repo'>
+
   /** -------------------- GitHub GraphQL -------------------- */
 
   type GraphqlResponse<T> = Promise<T>
@@ -136,8 +142,8 @@ declare global {
       nodes: {
         id: string
         name: string
-        description: string | null
         color: string
+        description: string | null
       }[]
     }
   }
@@ -147,8 +153,8 @@ declare global {
   type MinimalLabel = {
     id: string // node id
     name: string
-    description: string | null
     color: string
+    description: string | null
   }
 
   type MinimalLabels = MinimalLabel[]
@@ -181,6 +187,19 @@ declare global {
     title: UpdateIssueParams['title'],
     body: UpdateIssueParams['body'],
     labels: string, // label names json string
+  ]
+
+  type UpdateLabelRpcArgs = [
+    new_name: UpdateLabelParams['new_name'],
+    name: UpdateLabelParams['name'],
+    color: UpdateLabelParams['color'],
+    description: UpdateLabelParams['description'],
+  ]
+
+  type CreateLabelRpcArgs = [
+    name: CreateLabelParams['name'],
+    color: CreateLabelParams['color'],
+    description: CreateLabelParams['description'],
   ]
 
   type GetCommitRpcArgs = [commit_sha: string]

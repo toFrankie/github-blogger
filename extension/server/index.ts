@@ -85,15 +85,16 @@ export default class Service {
     return res?.data ?? []
   }
 
-  private async updateLabel(params: {name: string; new_name: string}) {
-    const [_err, res] = await to(
+  private async updateLabel(params: UpdateLabelParams) {
+    const [err, res] = await to(
       this.octokit.request(APIS.UPDATE_LABEL, {
         owner: this.config.user,
         repo: this.config.repo,
         ...params,
       })
     )
-    return res?.data ?? []
+    if (err) return null
+    return normalizeLabelFromRest(res.data)
   }
 
   private async getIssues(params: GetIssuesParams) {
@@ -357,8 +358,14 @@ export default class Service {
       return await this.deleteLabel({name})
     }
 
-    const updateLabel = async (name: string, newName: string) => {
-      return await this.updateLabel({name, new_name: newName})
+    const updateLabel = async (...args: UpdateLabelRpcArgs) => {
+      const params: UpdateLabelParams = {
+        new_name: args[0] ?? undefined,
+        name: args[1],
+        color: args[2],
+        description: args[3],
+      }
+      return await this.updateLabel(params)
     }
 
     const createIssue = async (...args: CreateIssueRpcArgs) => {

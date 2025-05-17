@@ -1,14 +1,19 @@
 export function normalizeIssueFromRest(issue: RestIssue): MinimalIssue {
   let newIssue = issue.labels.map(item => {
     if (typeof item === 'string') {
-      // TODO:
-      return {id: item, name: item}
+      return {
+        id: item,
+        name: item,
+        color: '',
+        description: null,
+      }
     }
 
     return {
       id: item.node_id ?? '',
       name: item.name ?? '',
-      description: item.description ?? '',
+      color: item.color ?? '',
+      description: item.description ?? null,
     }
   })
 
@@ -36,8 +41,8 @@ export function normalizeIssueFromGraphql(issue: GraphqlIssue): MinimalIssue {
     labels: issue.labels.nodes.map(label => ({
       id: label.id,
       name: label.name,
-      description: label.description,
       color: label.color,
+      description: label.description,
     })),
   }
 }
@@ -46,7 +51,7 @@ export function normalizeLabelFromRest(label: RestLabel): MinimalLabel {
   return {
     id: label.node_id,
     name: label.name,
-    description: label.description,
     color: label.color,
+    description: label.description,
   }
 }

@@ -10,7 +10,7 @@ import {
   TextInput,
   type DialogButtonProps,
 } from '@primer/react'
-import {type FormEvent, useEffect, useState} from 'react'
+import {useEffect, useState} from 'react'
 import {LABEL_DEFAULT_COLOR, LABEL_PREDEFINED_COLORS} from '../constants'
 
 const CYCLE_COLORS = [...LABEL_PREDEFINED_COLORS, LABEL_DEFAULT_COLOR]
@@ -42,7 +42,6 @@ export default function LabelEditDialog({
   const [displayColorForToken, setDisplayColorForToken] = useState(LABEL_DEFAULT_COLOR)
   const [nameError, setNameError] = useState<string | null>(null)
   const [colorError, setColorError] = useState<string | null>(null)
-  const [isColorInputInvalid, setIsColorInputInvalid] = useState(false)
   const [currentColorIndex, setCurrentColorIndex] = useState<number>(
     CYCLE_COLORS.findIndex(color => color.toUpperCase() === LABEL_DEFAULT_COLOR.toUpperCase()) || 0
   )
@@ -51,7 +50,6 @@ export default function LabelEditDialog({
   const isEditing = !!originalLabel
 
   useEffect(() => {
-    setIsColorInputInvalid(false)
     setNameError(null)
     setColorError(null)
     setIsColorGridOpen(false)
@@ -85,7 +83,6 @@ export default function LabelEditDialog({
     } else if (labelColor) {
       setColor(labelColor)
       setDisplayColorForToken(LABEL_DEFAULT_COLOR)
-      setIsColorInputInvalid(true)
       setCurrentColorIndex(
         CYCLE_COLORS.findIndex(
           color => color.toUpperCase() === LABEL_DEFAULT_COLOR.toUpperCase()
@@ -119,25 +116,24 @@ export default function LabelEditDialog({
 
     if (color.trim() && !HEX_COLOR_REGEX.test(color)) {
       setColorError('Color must be a 6-character hex code (e.g. FF0000).')
-      setIsColorInputInvalid(true)
       isValid = false
     } else {
       setColorError(null)
-      setIsColorInputInvalid(false)
     }
 
     return isValid
   }
 
-  const handleSubmit = async (event: FormEvent) => {
-    event.preventDefault()
+  const handleSubmit = async () => {
     if (!validate()) return
 
-    await onSave({
+    const data = {
       name: name.trim(),
       color: color.trim() || LABEL_DEFAULT_COLOR,
       description: description.trim() || null,
-    })
+    }
+
+    await onSave(data)
   }
 
   const handleDelete = async () => {
@@ -156,7 +152,6 @@ export default function LabelEditDialog({
 
     if (newColorValue.trim() === '') {
       setDisplayColorForToken(LABEL_DEFAULT_COLOR)
-      setIsColorInputInvalid(false)
       setColorError(null)
       setCurrentColorIndex(
         CYCLE_COLORS.findIndex(
@@ -165,7 +160,6 @@ export default function LabelEditDialog({
       )
     } else if (HEX_COLOR_REGEX.test(newColorValue)) {
       setDisplayColorForToken(newColorValue)
-      setIsColorInputInvalid(false)
       setColorError(null)
       const foundIndex = CYCLE_COLORS.findIndex(
         color => color.toUpperCase() === newColorValue.toUpperCase()
@@ -173,7 +167,6 @@ export default function LabelEditDialog({
       setCurrentColorIndex(foundIndex !== -1 ? foundIndex : -1)
     } else {
       setDisplayColorForToken(LABEL_DEFAULT_COLOR)
-      setIsColorInputInvalid(true)
       setColorError(null)
       setCurrentColorIndex(-1)
     }
@@ -183,7 +176,6 @@ export default function LabelEditDialog({
     const newColorValue = selectedColorFromGrid
     setColor(newColorValue)
     setDisplayColorForToken(newColorValue)
-    setIsColorInputInvalid(false)
     const foundIndex = CYCLE_COLORS.findIndex(
       color => color.toUpperCase() === newColorValue.toUpperCase()
     )
@@ -203,7 +195,6 @@ export default function LabelEditDialog({
     setCurrentColorIndex(nextIndex)
     setColor(newColorValue)
     setDisplayColorForToken(newColorValue)
-    setIsColorInputInvalid(false)
     setColorError(null)
   }
 
@@ -244,7 +235,7 @@ export default function LabelEditDialog({
       onClose={onClose}
       footerButtons={footerButtons}
     >
-      <Stack as="form" onSubmit={handleSubmit}>
+      <Stack as="form">
         <Stack.Item>
           <FormControl required>
             <FormControl.Label requiredText="">Name</FormControl.Label>

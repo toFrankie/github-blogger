@@ -86,7 +86,7 @@ export async function to<T, U = Error>(
     console.log('🚀 to ~ data:', data)
     return result
   } catch (err) {
-    console.log('🚀 to ~ err:', err)
+    console.error('🚀 to ~ err:', err)
     if (errorExt) {
       Object.assign(err as object, errorExt)
     }

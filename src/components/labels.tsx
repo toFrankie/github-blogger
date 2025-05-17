@@ -1,37 +1,22 @@
 import {PlusIcon} from '@primer/octicons-react'
 import {Box, CounterLabel, Dialog, IssueLabelToken, Stack} from '@primer/react'
 import {useMemo, useState} from 'react'
+import {useLabels} from '@/hooks'
 import LabelEditDialog from './label-edit-dialog'
 
 interface LabelsProps {
   allLabel: MinimalLabels
   visible: boolean
-  isPendingLabels: boolean
-  onLabelCreate: (label: {name: string; color: string; description?: string}) => Promise<void>
-  onLabelDelete: (labelName: string) => Promise<void>
-  onLabelUpdate: (
-    oldLabelName: string,
-    newLabel: {name: string; color: string; description?: string}
-  ) => Promise<void>
   onSetLabelsVisible: (visible: boolean) => void
-  refetchAllIssues: () => void
 }
 
-export default function Labels({
-  allLabel,
-  visible,
-  onSetLabelsVisible,
-  onLabelCreate,
-  onLabelDelete,
-  onLabelUpdate,
-  isPendingLabels,
-  refetchAllIssues,
-}: LabelsProps) {
+export default function Labels({allLabel, visible, onSetLabelsVisible}: LabelsProps) {
   const [hoveredId, setHoveredId] = useState<string>('')
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [editingLabel, setEditingLabel] = useState<MinimalLabel | null>(null)
   const [isSaving, setIsSaving] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
+  const {createLabelAsync, updateLabelAsync, deleteLabelAsync} = useLabels()
 
   const allLabelName = useMemo(() => {
     return allLabel
@@ -59,52 +44,34 @@ export default function Labels({
     color: string
     description: string | null
   }) => {
-    console.log('🚀 ~ handleSave ~ labelData:', labelData)
-
-    // setIsSaving(true)
-
-    // try {
-    //   if (editingLabel && editingLabel.id) {
-    //     if (
-    //       labelData.name !== editingLabel.name &&
-    //       allLabel.some(l => l.name === labelData.name && l.id !== editingLabel.id)
-    //     ) {
-    //       console.error('Label name already exists')
-    //       setIsSaving(false)
-    //       return
-    //     }
-    //     await onLabelUpdate(editingLabel.name, labelData)
-    //   } else {
-    //     if (allLabel.some(l => l.name === labelData.name)) {
-    //       console.error('Label name already exists')
-    //       setIsSaving(false)
-    //       return
-    //     }
-    //     await onLabelCreate(labelData)
-    //   }
-    //   refetchAllIssues()
-    //   closeEditDialog()
-    // } catch (error) {
-    //   console.error('Failed to save label:', error)
-    // } finally {
-    //   setIsSaving(false)
-    // }
+    setIsSaving(true)
+    try {
+      if (editingLabel) {
+        await updateLabelAsync({
+          newLabel: labelData,
+          oldLabel: editingLabel,
+        })
+      } else {
+        await createLabelAsync(labelData)
+      }
+      closeEditDialog()
+    } catch (error) {
+      console.error('Failed to save label:', error)
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   const handleDelete = async (labelName: string) => {
-    console.log('🚀 ~ handleDelete ~ labelName:', labelName)
-
-    // setIsDeleting(true)
-
-    // try {
-    //   await onLabelDelete(labelName)
-    //   refetchAllIssues()
-    //   closeEditDialog()
-    // } catch (error) {
-    //   console.error('Failed to delete label:', error)
-    // } finally {
-    //   setIsDeleting(false)
-    // }
+    setIsDeleting(true)
+    try {
+      await deleteLabelAsync(labelName)
+      closeEditDialog()
+    } catch (error) {
+      console.error('Failed to delete label:', error)
+    } finally {
+      setIsDeleting(false)
+    }
   }
 
   if (!visible) return null

@@ -17,16 +17,27 @@ export async function getLabels() {
   return labels ?? []
 }
 
-export async function createLabel(label: string) {
-  await RPC.emit(MESSAGE_TYPE.CREATE_LABEL, [label])
+export async function createLabel(label: Omit<MinimalLabel, 'id'>) {
+  const args: CreateLabelRpcArgs = [label.name, label.color, label.description ?? undefined]
+  const data = (await RPC.emit(MESSAGE_TYPE.CREATE_LABEL, args)) as MinimalLabel
+  return data
 }
 
 export async function deleteLabel(label: string) {
   await RPC.emit(MESSAGE_TYPE.DELETE_LABEL, [label])
 }
 
-export async function updateLabel(oldLabel: string, newLabel: string) {
-  await RPC.emit(MESSAGE_TYPE.UPDATE_LABEL, [oldLabel, newLabel])
+export async function updateLabel(newLabel: Omit<MinimalLabel, 'id'>, oldLabel: MinimalLabel) {
+  const newLabelName = newLabel.name !== oldLabel.name ? newLabel.name : undefined
+  const oldLabelName = oldLabel.name
+  const args: UpdateLabelRpcArgs = [
+    newLabelName,
+    oldLabelName,
+    newLabel.color,
+    newLabel.description ?? undefined,
+  ]
+  const data = (await RPC.emit(MESSAGE_TYPE.UPDATE_LABEL, args)) as MinimalLabel
+  return data
 }
 
 export async function getIssueCount() {

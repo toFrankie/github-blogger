@@ -52,7 +52,7 @@ export default function App() {
       LabelNames: filterLabels,
       title: filterTitle,
     })
-  const {labels: allLabel, isPendingLabels, createLabel, deleteLabel, updateLabel} = useLabels()
+  const {labels: allLabel, isPendingLabels} = useLabels()
   const {upload: handleUploadImages} = useUploadImages()
 
   useEffect(() => {
@@ -123,30 +123,6 @@ export default function App() {
     setFilterLabels(labels)
   }
 
-  const onLabelCreate = async (label: string) => {
-    try {
-      await createLabel(label)
-    } catch (error) {
-      console.error('Create label failed:', error)
-    }
-  }
-
-  const onLabelDelete = async (label: string) => {
-    try {
-      await deleteLabel(label)
-    } catch (error) {
-      console.error('Delete label failed:', error)
-    }
-  }
-
-  const onLabelUpdate = async (oldLabel: string, newLabel: string) => {
-    try {
-      await updateLabel({oldLabel, newLabel})
-    } catch (error) {
-      console.error('Update label failed:', error)
-    }
-  }
-
   return (
     <div className="app">
       <Editor
@@ -184,10 +160,6 @@ export default function App() {
       <Labels
         allLabel={allLabel}
         visible={labelsVisible}
-        isPendingLabels={isPendingLabels}
-        onLabelCreate={onLabelCreate}
-        onLabelDelete={onLabelDelete}
-        onLabelUpdate={onLabelUpdate}
         onSetLabelsVisible={onLabelsVisibleChange}
       />
       <ActionBar

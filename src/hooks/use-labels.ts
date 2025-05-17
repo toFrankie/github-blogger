@@ -10,8 +10,13 @@ export default function useLabels() {
     queryFn: getLabels,
   })
 
-  const createLabelMutation = useMutation({
-    mutationFn: (label: string) => createLabel(label),
+  const {
+    mutateAsync: createLabelAsync,
+    isPending: isCreatingLabel,
+    isError: isErrorCreatingLabel,
+    isSuccess: isSuccessCreatingLabel,
+  } = useMutation({
+    mutationFn: (label: Omit<MinimalLabel, 'id'>) => createLabel(label),
     onSuccess: () => {
       queryClient.invalidateQueries({queryKey: ['labels']})
       message.success('Label created successfully')
@@ -21,7 +26,12 @@ export default function useLabels() {
     },
   })
 
-  const deleteLabelMutation = useMutation({
+  const {
+    mutateAsync: deleteLabelAsync,
+    isPending: isDeletingLabel,
+    isError: isErrorDeletingLabel,
+    isSuccess: isSuccessDeletingLabel,
+  } = useMutation({
     mutationFn: (label: string) => deleteLabel(label),
     onSuccess: () => {
       queryClient.invalidateQueries({queryKey: ['labels']})
@@ -32,9 +42,19 @@ export default function useLabels() {
     },
   })
 
-  const updateLabelMutation = useMutation({
-    mutationFn: ({oldLabel, newLabel}: {oldLabel: string; newLabel: string}) =>
-      updateLabel(oldLabel, newLabel),
+  const {
+    mutateAsync: updateLabelAsync,
+    isPending: isUpdatingLabel,
+    isError: isErrorUpdatingLabel,
+    isSuccess: isSuccessUpdatingLabel,
+  } = useMutation({
+    mutationFn: ({
+      newLabel,
+      oldLabel,
+    }: {
+      newLabel: Omit<MinimalLabel, 'id'>
+      oldLabel: MinimalLabel
+    }) => updateLabel(newLabel, oldLabel),
     onSuccess: () => {
       queryClient.invalidateQueries({queryKey: ['labels']})
       message.success('Label updated successfully')
@@ -46,9 +66,18 @@ export default function useLabels() {
 
   return {
     labels,
+    createLabelAsync,
+    deleteLabelAsync,
+    updateLabelAsync,
     isPendingLabels,
-    createLabel: createLabelMutation.mutateAsync,
-    deleteLabel: deleteLabelMutation.mutateAsync,
-    updateLabel: updateLabelMutation.mutateAsync,
+    isCreatingLabel,
+    isDeletingLabel,
+    isUpdatingLabel,
+    isErrorCreatingLabel,
+    isErrorDeletingLabel,
+    isErrorUpdatingLabel,
+    isSuccessCreatingLabel,
+    isSuccessDeletingLabel,
+    isSuccessUpdatingLabel,
   }
 }
