@@ -4,7 +4,7 @@ import {isEmpty} from 'licia'
 import * as vscode from 'vscode'
 import {GRAPHQL_PAGINATION_SIZE_LIMIT, MESSAGE_TYPE} from '../constants'
 
-import {APIS, LABEL_DEFAULT_COLOR, DEFAULT_PAGINATION_SIZE} from '../constants'
+import {APIS, DEFAULT_PAGINATION_SIZE} from '../constants'
 import {getSettings, to, cdnURL} from '../utils'
 import {
   normalizeIssueFromGraphql,
@@ -50,31 +50,39 @@ export default class Service {
     })
   }
 
-  private async getLabels(params: {page: number; per_page: number}) {
+  private async getLabels() {
     const [err, res] = await to(
       this.octokit.request(APIS.GET_LABELS, {
         owner: this.config.user,
         repo: this.config.repo,
-        ...params,
+        page: 0,
+        per_page: 100,
       })
     )
     if (err) return []
     return res.data.map(label => normalizeLabelFromRest(label))
   }
 
-  private async createLabel(params: {name: string}) {
+  private async createLabel(...args: CreateLabelRpcArgs) {
+    const params: CreateLabelParams = {
+      name: args[0],
+      color: args[1],
+      description: args[2],
+    }
     const [_err, res] = await to(
       this.octokit.request(APIS.CREATE_LABEL, {
         owner: this.config.user,
         repo: this.config.repo,
-        color: LABEL_DEFAULT_COLOR,
         ...params,
       })
     )
     return res?.data ?? {}
   }
 
-  private async deleteLabel(params: {name: string}) {
+  private async deleteLabel(...args: DeleteLabelRpcArgs) {
+    const params = {
+      name: args[0],
+    }
     const [_err, res] = await to(
       this.octokit.request(APIS.DELETE_LABEL, {
         owner: this.config.user,
@@ -85,7 +93,13 @@ export default class Service {
     return res?.data ?? []
   }
 
-  private async updateLabel(params: UpdateLabelParams) {
+  private async updateLabel(...args: UpdateLabelRpcArgs) {
+    const params: UpdateLabelParams = {
+      new_name: args[0] ?? undefined,
+      name: args[1],
+      color: args[2],
+      description: args[3],
+    }
     const [err, res] = await to(
       this.octokit.request(APIS.UPDATE_LABEL, {
         owner: this.config.user,
@@ -97,7 +111,11 @@ export default class Service {
     return normalizeLabelFromRest(res.data)
   }
 
-  private async getIssues(params: GetIssuesParams) {
+  private async getIssues(...args: GetIssuesRpcArgs) {
+    const params: GetIssuesParams = {
+      page: args[0],
+      labels: args[1],
+    }
     const [err, res] = await to(
       this.octokit.request(APIS.GET_ISSUES, {
         owner: this.config.user,
@@ -111,30 +129,28 @@ export default class Service {
     return res.data.map(issue => normalizeIssueFromRest(issue))
   }
 
-  private async getIssuesWithFilter(params: {
-    title: string
-    labels?: string[]
-    after?: string
-    first?: number
-  }) {
-    const variables = {
-      owner: this.config.user,
-      name: this.config.repo,
-      first: DEFAULT_PAGINATION_SIZE,
-      after: params.after,
-      labels: params.labels,
-    }
-
+  private async getIssuesWithFilter(after: string, labels: string[], title: string) {
     const [err, res] = await to(
-      this.octokit.graphql<GraphqlIssuesResponse>(query.getIssuesWithFilter(), variables)
+      this.octokit.graphql<GraphqlIssuesResponse>(query.getIssuesWithFilter(), {
+        owner: this.config.user,
+        name: this.config.repo,
+        first: DEFAULT_PAGINATION_SIZE,
+        after: after || undefined,
+        labels: isEmpty(labels) ? undefined : labels,
+      })
     )
 
     if (err) return []
-
     return res.repository.issues.nodes.map(node => normalizeIssueFromGraphql(node))
   }
 
-  private async updateIssue(params: UpdateIssueParams) {
+  private async updateIssue(...args: UpdateIssueRpcArgs) {
+    const params: UpdateIssueParams = {
+      issue_number: args[0],
+      title: args[1],
+      body: args[2],
+      labels: JSON.parse(args[3]),
+    }
     const [err, res] = await to(
       this.octokit.request(APIS.UPDATE_ISSUE, {
         owner: this.config.user,
@@ -146,7 +162,12 @@ export default class Service {
     return normalizeIssueFromRest(res.data)
   }
 
-  private async createIssue(params: CreateIssueParams) {
+  private async createIssue(...args: CreateIssueRpcArgs) {
+    const params: CreateIssueParams = {
+      title: args[0],
+      body: args[1],
+      labels: JSON.parse(args[2]),
+    }
     const [err, res] = await to(
       this.octokit.request(APIS.CREATE_ISSUE, {
         owner: this.config.user,
@@ -158,14 +179,15 @@ export default class Service {
     return normalizeIssueFromRest(res.data)
   }
 
-  private async uploadImage(params: {content: string; path: string}) {
+  private async uploadImage(content: string, path: string) {
     const [err] = await to(
       this.octokit.request(APIS.UPLOAD_IMAGE, {
         owner: this.config.user,
         repo: this.config.repo,
         branch: this.config.branch,
         message: 'chore: upload image',
-        ...params,
+        content,
+        path,
       })
     )
     if (!err) {
@@ -175,7 +197,7 @@ export default class Service {
             user: this.config.user,
             repo: this.config.repo,
             branch: this.config.branch,
-            filePath: params.path,
+            filePath: path,
           }),
         },
       ]
@@ -220,7 +242,10 @@ export default class Service {
     return res.data
   }
 
-  private async getCommit(params: GetCommitParams) {
+  private async getCommit(...args: GetCommitRpcArgs) {
+    const params: GetCommitParams = {
+      commit_sha: args[0],
+    }
     const [err, res] = await to(
       this.octokit.request(APIS.GET_COMMIT, {
         owner: this.config.user,
@@ -232,7 +257,10 @@ export default class Service {
     return res.data
   }
 
-  private async createBlob(params: CreateBlobParams) {
+  private async createBlob(...args: CreateBlobRpcArgs) {
+    const params: CreateBlobParams = {
+      content: args[0],
+    }
     const [err, res] = await to(
       this.octokit.request(APIS.CREATE_BLOB, {
         owner: this.config.user,
@@ -244,7 +272,11 @@ export default class Service {
     return res.data
   }
 
-  private async createTree(params: CreateTreeParams) {
+  private async createTree(...args: CreateTreeRpcArgs) {
+    const params: CreateTreeParams = {
+      base_tree: args[0],
+      tree: [{path: args[1], mode: '100644', type: 'blob', sha: args[2]}],
+    }
     const [err, res] = await to(
       this.octokit.request(APIS.CREATE_TREE, {
         owner: this.config.user,
@@ -256,7 +288,12 @@ export default class Service {
     return res.data
   }
 
-  private async createCommit(params: CreateCommitParams) {
+  private async createCommit(...args: CreateCommitRpcArgs) {
+    const params: CreateCommitParams = {
+      parents: [args[0]],
+      tree: args[1],
+      message: args[2],
+    }
     const [err, res] = await to(
       this.octokit.request(APIS.CREATE_COMMIT, {
         owner: this.config.user,
@@ -268,7 +305,10 @@ export default class Service {
     return res.data
   }
 
-  private async updateRef(params: UpdateRefParams) {
+  private async updateRef(...args: UpdateRefRpcArgs) {
+    const params: UpdateRefParams = {
+      sha: args[0],
+    }
     const [err, res] = await to(
       this.octokit.request(APIS.UPDATE_REF, {
         owner: this.config.user,
@@ -328,150 +368,35 @@ export default class Service {
   }
 
   private registerRpcListener() {
-    const getLabels = async () => {
-      const data = await this.getLabels({page: 0, per_page: 100})
-      return data
-    }
-
-    const getIssues = async (...args: GetIssuesRpcArgs) => {
-      const params: GetIssuesParams = {
-        page: args[0],
-        labels: args[1],
-      }
-      return await this.getIssues(params)
-    }
-
-    const getIssuesWithFilter = async (after: string, labels: string[], title: string) => {
-      return await this.getIssuesWithFilter({
-        title,
-        labels: isEmpty(labels) ? undefined : labels,
-        after: after || undefined,
-        first: DEFAULT_PAGINATION_SIZE,
-      })
-    }
-
-    const createLabel = async (name: string) => {
-      return await this.createLabel({name})
-    }
-
-    const deleteLabel = async (name: string) => {
-      return await this.deleteLabel({name})
-    }
-
-    const updateLabel = async (...args: UpdateLabelRpcArgs) => {
-      const params: UpdateLabelParams = {
-        new_name: args[0] ?? undefined,
-        name: args[1],
-        color: args[2],
-        description: args[3],
-      }
-      return await this.updateLabel(params)
-    }
-
-    const createIssue = async (...args: CreateIssueRpcArgs) => {
-      const params: CreateIssueParams = {
-        title: args[0],
-        body: args[1],
-        labels: JSON.parse(args[2]),
-      }
-      return await this.createIssue(params)
-    }
-
-    const updateIssue = async (...args: UpdateIssueRpcArgs) => {
-      const params: UpdateIssueParams = {
-        issue_number: args[0],
-        title: args[1],
-        body: args[2],
-        labels: JSON.parse(args[3]),
-      }
-      return await this.updateIssue(params)
-    }
-
-    const uploadImage = async (content, path) => {
-      return await this.uploadImage({content, path})
-    }
-
-    const getIssueCount = async () => {
-      return await this.getIssueCount()
-    }
-
-    const getIssueCountWithFilter = async (title: string, labels: string) => {
-      return await this.getIssueCountWithFilter(title, labels)
-    }
-
-    const getRef = async () => {
-      return await this.getRef()
-    }
-
-    const updateRef = async (...args: UpdateRefRpcArgs) => {
-      const params: UpdateRefParams = {sha: args[0]}
-      return await this.updateRef(params)
-    }
-
-    const getCommit = async (...args: GetCommitRpcArgs) => {
-      const params: GetCommitParams = {commit_sha: args[0]}
-      return await this.getCommit(params)
-    }
-
-    const createCommit = async (...args: CreateCommitRpcArgs) => {
-      const params: CreateCommitParams = {
-        parents: [args[0]],
-        tree: args[1],
-        message: args[2],
-      }
-      return await this.createCommit(params)
-    }
-
-    const createBlob = async (...args: CreateBlobRpcArgs) => {
-      const params: CreateBlobParams = {content: args[0]}
-      return await this.createBlob(params)
-    }
-
-    const createTree = async (...args: CreateTreeRpcArgs) => {
-      const params: CreateTreeParams = {
-        base_tree: args[0],
-        tree: [{path: args[1], mode: '100644', type: 'blob', sha: args[2]}],
-      }
-      return await this.createTree(params)
-    }
-
-    const getRepo = async () => {
-      return await this.getRepo()
-    }
-
-    const getPageCursor = async (page: number) => {
-      return await this.getPageCursor(page)
-    }
-
     const labelHandlers = {
-      [MESSAGE_TYPE.GET_LABELS]: getLabels,
-      [MESSAGE_TYPE.DELETE_LABEL]: deleteLabel,
-      [MESSAGE_TYPE.CREATE_LABEL]: createLabel,
-      [MESSAGE_TYPE.UPDATE_LABEL]: updateLabel,
+      [MESSAGE_TYPE.GET_LABELS]: this.getLabels,
+      [MESSAGE_TYPE.DELETE_LABEL]: this.deleteLabel,
+      [MESSAGE_TYPE.CREATE_LABEL]: this.createLabel,
+      [MESSAGE_TYPE.UPDATE_LABEL]: this.updateLabel,
     }
 
     const issueHandlers = {
-      [MESSAGE_TYPE.GET_ISSUES]: getIssues,
-      [MESSAGE_TYPE.GET_ISSUES_WITH_FILTER]: getIssuesWithFilter,
-      [MESSAGE_TYPE.UPDATE_ISSUE]: updateIssue,
-      [MESSAGE_TYPE.CREATE_ISSUE]: createIssue,
-      [MESSAGE_TYPE.GET_ISSUE_COUNT]: getIssueCount,
-      [MESSAGE_TYPE.GET_ISSUE_COUNT_WITH_FILTER]: getIssueCountWithFilter,
+      [MESSAGE_TYPE.GET_ISSUES]: this.getIssues,
+      [MESSAGE_TYPE.GET_ISSUES_WITH_FILTER]: this.getIssuesWithFilter,
+      [MESSAGE_TYPE.UPDATE_ISSUE]: this.updateIssue,
+      [MESSAGE_TYPE.CREATE_ISSUE]: this.createIssue,
+      [MESSAGE_TYPE.GET_ISSUE_COUNT]: this.getIssueCount,
+      [MESSAGE_TYPE.GET_ISSUE_COUNT_WITH_FILTER]: this.getIssueCountWithFilter,
     }
 
     const gitHandlers = {
-      [MESSAGE_TYPE.GET_REF]: getRef,
-      [MESSAGE_TYPE.UPDATE_REF]: updateRef,
-      [MESSAGE_TYPE.GET_COMMIT]: getCommit,
-      [MESSAGE_TYPE.CREATE_COMMIT]: createCommit,
-      [MESSAGE_TYPE.CREATE_BLOB]: createBlob,
-      [MESSAGE_TYPE.CREATE_TREE]: createTree,
+      [MESSAGE_TYPE.GET_REF]: this.getRef,
+      [MESSAGE_TYPE.UPDATE_REF]: this.updateRef,
+      [MESSAGE_TYPE.GET_COMMIT]: this.getCommit,
+      [MESSAGE_TYPE.CREATE_COMMIT]: this.createCommit,
+      [MESSAGE_TYPE.CREATE_BLOB]: this.createBlob,
+      [MESSAGE_TYPE.CREATE_TREE]: this.createTree,
     }
 
     const otherHandlers = {
-      [MESSAGE_TYPE.GET_REPO]: getRepo,
-      [MESSAGE_TYPE.GET_PAGE_CURSOR]: getPageCursor,
-      [MESSAGE_TYPE.UPLOAD_IMAGE]: uploadImage,
+      [MESSAGE_TYPE.GET_REPO]: this.getRepo,
+      [MESSAGE_TYPE.GET_PAGE_CURSOR]: this.getPageCursor,
+      [MESSAGE_TYPE.UPLOAD_IMAGE]: this.uploadImage,
     }
 
     Object.entries({
@@ -480,7 +405,7 @@ export default class Service {
       ...gitHandlers,
       ...otherHandlers,
     }).forEach(([type, handler]) => {
-      this.rpc.on(type, handler)
+      this.rpc.on(type, handler.bind(this))
     })
   }
 }

@@ -202,13 +202,13 @@ declare global {
     description: CreateLabelParams['description'],
   ]
 
+  type DeleteLabelRpcArgs = [name: string]
+
+  type GetLabelsRpcArgs = [page?: number, per_page?: number]
+
   type GetCommitRpcArgs = [commit_sha: string]
 
-  type GetRefRpcArgs = []
-
   type UpdateRefRpcArgs = [sha: string]
-
-  type CreateBlobRpcArgs = [content: string]
 
   type CreateBlobRpcArgs = [content: string]
 

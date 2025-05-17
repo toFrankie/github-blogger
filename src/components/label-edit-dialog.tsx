@@ -3,12 +3,12 @@ import {
   ActionMenu,
   Box,
   Dialog,
+  type DialogButtonProps,
   FormControl,
   IssueLabelToken,
   Stack,
   Text,
   TextInput,
-  type DialogButtonProps,
 } from '@primer/react'
 import {useEffect, useState} from 'react'
 import {LABEL_DEFAULT_COLOR, LABEL_PREDEFINED_COLORS} from '../constants'
