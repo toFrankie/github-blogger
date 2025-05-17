@@ -1,9 +1,6 @@
 import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query'
-import {message} from 'antd'
 import {useMemo} from 'react'
-import {SUBMIT_TYPE} from '@/constants'
 import {
-  archiveIssue,
   createIssue,
   getIssueCount,
   getIssueCountWithFilter,
@@ -14,13 +11,11 @@ import {
 
 interface UseIssuesParams {
   page: number
-  LabelNames?: string[]
+  labelNames?: string[]
   title?: string
 }
 
-export default function useIssues({page, LabelNames = [], title = ''}: UseIssuesParams) {
-  const queryClient = useQueryClient()
-
+export function useIssues({page, labelNames = [], title = ''}: UseIssuesParams) {
   const withCursor = page > 1
 
   const {
@@ -28,14 +23,13 @@ export default function useIssues({page, LabelNames = [], title = ''}: UseIssues
     isLoading: isCursorLoading,
     isPending: isPendingCursor,
   } = useQuery({
-    queryKey: ['issues', 'cursor', page, title, LabelNames.join(',')],
+    queryKey: ['issues', 'cursor', page, title, labelNames.join(',')],
     queryFn: () => getPageCursor(page),
     enabled: withCursor,
     gcTime: Infinity,
     staleTime: Infinity,
   })
 
-  // TODO: error
   const issuesEnabled = !withCursor || (withCursor && !isPendingCursor && !!targetCursor)
 
   const {
@@ -43,8 +37,8 @@ export default function useIssues({page, LabelNames = [], title = ''}: UseIssues
     isLoading: isLoadingIssues,
     isPending: isPendingIssues,
   } = useQuery({
-    queryKey: ['issues', 'list', page, title, LabelNames.join(',')],
-    queryFn: () => getIssues(page, LabelNames, title),
+    queryKey: ['issues', 'list', page, title, labelNames.join(',')],
+    queryFn: () => getIssues(page, labelNames, title),
     enabled: issuesEnabled,
   })
 
@@ -54,42 +48,13 @@ export default function useIssues({page, LabelNames = [], title = ''}: UseIssues
   })
 
   const withFilter = useMemo(() => {
-    return !!title || LabelNames.length > 0
-  }, [title, LabelNames])
+    return !!title || labelNames.length > 0
+  }, [title, labelNames])
 
   const {data: issueCountWithFilter, isPending: isPendingIssueCountWithFilter} = useQuery({
-    queryKey: ['issue', 'count', 'filtered', title, LabelNames.join(',')],
-    queryFn: () => getIssueCountWithFilter(title, LabelNames),
+    queryKey: ['issue', 'count', 'filtered', title, labelNames.join(',')],
+    queryFn: () => getIssueCountWithFilter(title, labelNames),
     enabled: withFilter,
-  })
-
-  // TODO: 将所有 issues 或 issueCount 查询失效
-  const createIssueMutation = useMutation({
-    mutationFn: (issue: MinimalIssue) => createIssue(issue),
-    onSuccess: async data => {
-      if (!data) return // 创建失败
-
-      await archiveIssue(data, SUBMIT_TYPE.CREATE)
-      queryClient.invalidateQueries({queryKey: ['issues']}) // TODO:
-      message.success('Issue created successfully')
-    },
-    onError: () => {
-      message.error('Failed to create issue')
-    },
-  })
-
-  const updateIssueMutation = useMutation({
-    mutationFn: (issue: MinimalIssue) => updateIssue(issue),
-    onSuccess: async data => {
-      if (!data) return // 更新失败
-
-      await archiveIssue(data, SUBMIT_TYPE.UPDATE)
-      queryClient.invalidateQueries({queryKey: ['issues']}) // TODO:
-      message.success('Issue updated successfully')
-    },
-    onError: () => {
-      message.error('Failed to update issue')
-    },
   })
 
   const withoutIssue = useMemo(() => {
@@ -115,7 +80,27 @@ export default function useIssues({page, LabelNames = [], title = ''}: UseIssues
     issueCount, // 总数量
     issueCountWithFilter, // 过滤后的数量
     issueStatus,
-    createIssue: createIssueMutation.mutateAsync,
-    updateIssue: updateIssueMutation.mutateAsync,
   }
+}
+
+export function useCreateIssue() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: createIssue,
+    onSuccess: () => {
+      queryClient.invalidateQueries({queryKey: ['issues']})
+    },
+  })
+}
+
+export function useUpdateIssue() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: updateIssue,
+    onSuccess: () => {
+      queryClient.invalidateQueries({queryKey: ['issues']})
+    },
+  })
 }

@@ -2,10 +2,11 @@ import {Octokit} from '@octokit/core'
 import {ExtensionRPC} from 'vscode-webview-rpc'
 import {isEmpty} from 'licia'
 import * as vscode from 'vscode'
-import {GRAPHQL_PAGINATION_SIZE_LIMIT, MESSAGE_TYPE} from '../constants'
 
+import {GRAPHQL_PAGINATION_SIZE_LIMIT, MESSAGE_TYPE} from '../constants'
 import {APIS, DEFAULT_PAGINATION_SIZE} from '../constants'
 import {getSettings, to, cdnURL} from '../utils'
+import {createResponse} from '../utils/response'
 import {
   normalizeIssueFromGraphql,
   normalizeIssueFromRest,
@@ -31,27 +32,10 @@ export default class Service {
     this.config = getSettings()
     this.octokit = new Octokit({auth: this.config.token})
     this.registerRpcListener()
-    this.octokit.hook.after('request', async (_response, options) => {
-      if (options.url.includes('/graphql')) return
-      if (options.url.includes('/git')) return
-
-      if (options.method === 'DELETE') {
-        return await this.rpc.emit(MESSAGE_TYPE.SHOW_SUCCESS, ['Removed Successfully'])
-      }
-      if (options.method === 'POST') {
-        return await this.rpc.emit(MESSAGE_TYPE.SHOW_SUCCESS, ['Created Successfully'])
-      }
-      if (options.method === 'PATCH') {
-        return await this.rpc.emit(MESSAGE_TYPE.SHOW_SUCCESS, ['Updated Successfully'])
-      }
-    })
-    this.octokit.hook.error('request', async (error, _options) => {
-      this.rpc.emit(MESSAGE_TYPE.SHOW_ERROR, [JSON.stringify(error)])
-    })
   }
 
   private async getLabels() {
-    const [err, res] = await to(
+    const res = await to(
       this.octokit.request(APIS.GET_LABELS, {
         owner: this.config.user,
         repo: this.config.repo,
@@ -59,89 +43,86 @@ export default class Service {
         per_page: 100,
       })
     )
-    if (err) return []
-    return res.data.map(label => normalizeLabelFromRest(label))
+
+    return createResponse(res, octokitRes =>
+      octokitRes.data.map(label => normalizeLabelFromRest(label))
+    )
   }
 
   private async createLabel(...args: CreateLabelRpcArgs) {
-    const params: CreateLabelParams = {
-      name: args[0],
-      color: args[1],
-      description: args[2],
-    }
-    const [_err, res] = await to(
+    const res = await to(
       this.octokit.request(APIS.CREATE_LABEL, {
         owner: this.config.user,
         repo: this.config.repo,
-        ...params,
+        name: args[0],
+        color: args[1],
+        description: args[2] ?? '',
       })
     )
-    return res?.data ?? {}
+
+    return createResponse(res, octokitRes => normalizeLabelFromRest(octokitRes.data))
   }
 
   private async deleteLabel(...args: DeleteLabelRpcArgs) {
-    const params = {
-      name: args[0],
-    }
-    const [_err, res] = await to(
+    const res = await to(
       this.octokit.request(APIS.DELETE_LABEL, {
         owner: this.config.user,
         repo: this.config.repo,
-        ...params,
+        name: args[0],
       })
     )
-    return res?.data ?? []
+
+    return createResponse(res)
   }
 
   private async updateLabel(...args: UpdateLabelRpcArgs) {
     const params: UpdateLabelParams = {
-      new_name: args[0] ?? undefined,
+      new_name: args[0],
       name: args[1],
       color: args[2],
       description: args[3],
     }
-    const [err, res] = await to(
+    const res = await to(
       this.octokit.request(APIS.UPDATE_LABEL, {
         owner: this.config.user,
         repo: this.config.repo,
         ...params,
       })
     )
-    if (err) return null
-    return normalizeLabelFromRest(res.data)
+
+    return createResponse(res, octokitRes => normalizeLabelFromRest(octokitRes.data))
   }
 
   private async getIssues(...args: GetIssuesRpcArgs) {
-    const params: GetIssuesParams = {
-      page: args[0],
-      labels: args[1],
-    }
-    const [err, res] = await to(
+    const res = await to(
       this.octokit.request(APIS.GET_ISSUES, {
         owner: this.config.user,
         repo: this.config.repo,
         per_page: DEFAULT_PAGINATION_SIZE,
-        ...params,
+        page: args[0],
+        labels: args[1],
       })
     )
 
-    if (err) return []
-    return res.data.map(issue => normalizeIssueFromRest(issue))
+    return createResponse(res, octokitRes =>
+      octokitRes.data.map(issue => normalizeIssueFromRest(issue))
+    )
   }
 
-  private async getIssuesWithFilter(after: string, labels: string[], title: string) {
-    const [err, res] = await to(
+  private async getIssuesWithFilter(...args: GetIssuesWithFilterRpcArgs) {
+    const res = await to(
       this.octokit.graphql<GraphqlIssuesResponse>(query.getIssuesWithFilter(), {
         owner: this.config.user,
         name: this.config.repo,
         first: DEFAULT_PAGINATION_SIZE,
-        after: after || undefined,
-        labels: isEmpty(labels) ? undefined : labels,
+        after: args[0] || undefined,
+        labels: isEmpty(args[1]) ? undefined : args[1],
       })
     )
 
-    if (err) return []
-    return res.repository.issues.nodes.map(node => normalizeIssueFromGraphql(node))
+    return createResponse(res, octokitRes =>
+      octokitRes.repository.issues.nodes.map(node => normalizeIssueFromGraphql(node))
+    )
   }
 
   private async updateIssue(...args: UpdateIssueRpcArgs) {
@@ -151,15 +132,15 @@ export default class Service {
       body: args[2],
       labels: JSON.parse(args[3]),
     }
-    const [err, res] = await to(
+    const res = await to(
       this.octokit.request(APIS.UPDATE_ISSUE, {
         owner: this.config.user,
         repo: this.config.repo,
         ...params,
       })
     )
-    if (err) return null
-    return normalizeIssueFromRest(res.data)
+
+    return createResponse(res, octokitRes => normalizeIssueFromRest(octokitRes.data))
   }
 
   private async createIssue(...args: CreateIssueRpcArgs) {
@@ -168,19 +149,19 @@ export default class Service {
       body: args[1],
       labels: JSON.parse(args[2]),
     }
-    const [err, res] = await to(
+    const res = await to(
       this.octokit.request(APIS.CREATE_ISSUE, {
         owner: this.config.user,
         repo: this.config.repo,
         ...params,
       })
     )
-    if (err) return null
-    return normalizeIssueFromRest(res.data)
+
+    return createResponse(res, octokitRes => normalizeIssueFromRest(octokitRes.data))
   }
 
   private async uploadImage(content: string, path: string) {
-    const [err] = await to(
+    const res = await to(
       this.octokit.request(APIS.UPLOAD_IMAGE, {
         owner: this.config.user,
         repo: this.config.repo,
@@ -190,33 +171,31 @@ export default class Service {
         path,
       })
     )
-    if (!err) {
-      return [
-        {
-          url: cdnURL({
-            user: this.config.user,
-            repo: this.config.repo,
-            branch: this.config.branch,
-            filePath: path,
-          }),
-        },
-      ]
-    }
-    return []
+
+    return createResponse(res, () => [
+      {
+        url: cdnURL({
+          user: this.config.user,
+          repo: this.config.repo,
+          branch: this.config.branch,
+          filePath: path,
+        }),
+      },
+    ])
   }
 
   private async getIssueCount() {
-    const [err, res] = await to(
+    const res = await to(
       this.octokit.graphql<GraphqlIssueCountResponse>(
         query.getIssueCount({username: this.config.user, repository: this.config.repo})
       )
     )
-    if (!err) return res.repository.issues.totalCount
-    return 0
+
+    return createResponse(res, octokitRes => octokitRes.repository.issues.totalCount)
   }
 
   private async getIssueCountWithFilter(title: string, labels: string) {
-    const [err, res] = await to<GraphqlIssueCountWithFilterResponse>(
+    const res = await to<GraphqlIssueCountWithFilterResponse>(
       this.octokit.graphql(
         query.getIssueCountWithFilter({
           username: this.config.user,
@@ -226,50 +205,50 @@ export default class Service {
         })
       )
     )
-    if (err) return 0
-    return res.search.issueCount
+
+    return createResponse(res, octokitRes => octokitRes.search.issueCount)
   }
 
   private async getRef() {
-    const [err, res] = await to(
+    const res = await to(
       this.octokit.request(APIS.GET_REF, {
         owner: this.config.user,
         repo: this.config.repo,
         ref: `heads/${this.config.branch}`,
       })
     )
-    if (err) return null
-    return res.data
+
+    return createResponse(res, octokitRes => octokitRes.data)
   }
 
   private async getCommit(...args: GetCommitRpcArgs) {
     const params: GetCommitParams = {
       commit_sha: args[0],
     }
-    const [err, res] = await to(
+    const res = await to(
       this.octokit.request(APIS.GET_COMMIT, {
         owner: this.config.user,
         repo: this.config.repo,
         ...params,
       })
     )
-    if (err) return null
-    return res.data
+
+    return createResponse(res, octokitRes => octokitRes.data)
   }
 
   private async createBlob(...args: CreateBlobRpcArgs) {
     const params: CreateBlobParams = {
       content: args[0],
     }
-    const [err, res] = await to(
+    const res = await to(
       this.octokit.request(APIS.CREATE_BLOB, {
         owner: this.config.user,
         repo: this.config.repo,
         ...params,
       })
     )
-    if (err) return null
-    return res.data
+
+    return createResponse(res, octokitRes => octokitRes.data)
   }
 
   private async createTree(...args: CreateTreeRpcArgs) {
@@ -277,15 +256,15 @@ export default class Service {
       base_tree: args[0],
       tree: [{path: args[1], mode: '100644', type: 'blob', sha: args[2]}],
     }
-    const [err, res] = await to(
+    const res = await to(
       this.octokit.request(APIS.CREATE_TREE, {
         owner: this.config.user,
         repo: this.config.repo,
         ...params,
       })
     )
-    if (err) return null
-    return res.data
+
+    return createResponse(res, octokitRes => octokitRes.data)
   }
 
   private async createCommit(...args: CreateCommitRpcArgs) {
@@ -294,22 +273,22 @@ export default class Service {
       tree: args[1],
       message: args[2],
     }
-    const [err, res] = await to(
+    const res = await to(
       this.octokit.request(APIS.CREATE_COMMIT, {
         owner: this.config.user,
         repo: this.config.repo,
         ...params,
       })
     )
-    if (err) return null
-    return res.data
+
+    return createResponse(res, octokitRes => octokitRes.data)
   }
 
   private async updateRef(...args: UpdateRefRpcArgs) {
     const params: UpdateRefParams = {
       sha: args[0],
     }
-    const [err, res] = await to(
+    const res = await to(
       this.octokit.request(APIS.UPDATE_REF, {
         owner: this.config.user,
         repo: this.config.repo,
@@ -317,37 +296,34 @@ export default class Service {
         ...params,
       })
     )
-    if (err) return null
-    return res.data
+
+    return createResponse(res, octokitRes => octokitRes.data)
   }
 
   private async getRepo() {
-    const [err, res] = await to(
+    const res = await to(
       this.octokit.request(APIS.GET_REPO, {
         owner: this.config.user,
         repo: this.config.repo,
       })
     )
-    if (err) return null
-    return res.data
+
+    return createResponse(res, octokitRes => octokitRes.data)
   }
 
   private async getPageCursor(page: number) {
     if (page <= 1) return null
 
     const chunkLimit = GRAPHQL_PAGINATION_SIZE_LIMIT
-
     const targetIndex = (page - 1) * DEFAULT_PAGINATION_SIZE
-
     const loopCount = Math.ceil(targetIndex / chunkLimit)
-
     let startCursor: string | null = null
 
     for (let i = 0; i < loopCount; i++) {
       const isLast = i === loopCount - 1
       const first = isLast ? targetIndex % chunkLimit : chunkLimit
 
-      const [err, res] = await to(
+      const res = await to(
         this.octokit.graphql<GraphqlPageCursorResponse>(query.getIssuePageCursor(), {
           owner: this.config.user,
           name: this.config.repo,
@@ -356,10 +332,10 @@ export default class Service {
         })
       )
 
-      if (err) return null
+      if (!res[1]) return null
 
-      startCursor = res.repository.issues.pageInfo.endCursor
-      const hasNextPage = res.repository.issues.pageInfo.hasNextPage
+      startCursor = res[1].repository.issues.pageInfo.endCursor
+      const hasNextPage = res[1].repository.issues.pageInfo.hasNextPage
 
       if (!hasNextPage) break
     }

@@ -25,8 +25,8 @@ const plugins = [
 
 interface EditorProps {
   issue: MinimalIssue
-  allLabel: MinimalLabels
-  isPendingLabels: boolean
+  allLabel: MinimalLabels | undefined
+  isLoadingLabels: boolean
   onTitleChange: (title: string) => void
   onBodyChange: (body: string) => void
   onAddLabel: (label: MinimalLabel) => void
@@ -37,7 +37,7 @@ interface EditorProps {
 export default function Editor({
   issue,
   allLabel,
-  isPendingLabels,
+  isLoadingLabels,
   onTitleChange,
   onBodyChange,
   onAddLabel,
@@ -65,11 +65,11 @@ export default function Editor({
         )}
       </div>
       <div className="app-labels">
-        {isPendingLabels ? (
+        {isLoadingLabels ? (
           <Spinner size="small" />
         ) : (
           <Stack direction="horizontal" gap="condensed" wrap="wrap">
-            {allLabel.map(label => {
+            {allLabel?.map(label => {
               const checked = issue.labels.some(l => l.id === label.id)
               return (
                 <Label

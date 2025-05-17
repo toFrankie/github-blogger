@@ -57,7 +57,7 @@ interface PostsProps {
   currentPage: number
   issueCount: number | undefined
   issueCountWithFilter: number | undefined
-  allLabel: MinimalLabels
+  allLabel: MinimalLabels | undefined
   visible: boolean
   issues: MinimalIssues | undefined
   issueStatus: {
@@ -78,7 +78,7 @@ export default function Posts({
   currentPage,
   issueCount,
   issueCountWithFilter,
-  allLabel,
+  allLabel = [],
   visible,
   issues,
   issueStatus,
@@ -165,8 +165,8 @@ export default function Posts({
       onClose={() => onSetPostsVisible(false)}
       renderBody={() => {
         return (
-          <Box sx={{px: 3, pt: 3, height: '100%', overflow: 'hidden'}}>
-            <Stack sx={{height: '100%', overflow: 'hidden'}}>
+          <Box sx={{px: 3, pt: 3, height: '100%'}}>
+            <Stack sx={{height: '100%'}}>
               <Stack.Item sx={{flexShrink: 0}}>
                 <Stack>
                   <Stack.Item>

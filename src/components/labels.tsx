@@ -1,22 +1,24 @@
 import {PlusIcon} from '@primer/octicons-react'
 import {Box, CounterLabel, Dialog, IssueLabelToken, Stack} from '@primer/react'
 import {useMemo, useState} from 'react'
-import {useLabels} from '@/hooks'
+import {useCreateLabel, useDeleteLabel, useUpdateLabel} from '@/hooks'
 import LabelEditDialog from './label-edit-dialog'
 
 interface LabelsProps {
-  allLabel: MinimalLabels
+  allLabel: MinimalLabels | undefined
   visible: boolean
   onSetLabelsVisible: (visible: boolean) => void
 }
 
-export default function Labels({allLabel, visible, onSetLabelsVisible}: LabelsProps) {
+export default function Labels({allLabel = [], visible, onSetLabelsVisible}: LabelsProps) {
   const [hoveredId, setHoveredId] = useState<string>('')
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [editingLabel, setEditingLabel] = useState<MinimalLabel | null>(null)
   const [isSaving, setIsSaving] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
-  const {createLabelAsync, updateLabelAsync, deleteLabelAsync} = useLabels()
+  const {mutateAsync: createLabelAsync} = useCreateLabel()
+  const {mutateAsync: updateLabelAsync} = useUpdateLabel()
+  const {mutateAsync: deleteLabelAsync} = useDeleteLabel()
 
   const allLabelName = useMemo(() => {
     return allLabel

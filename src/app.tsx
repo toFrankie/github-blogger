@@ -7,9 +7,9 @@ import {cloneDeep} from 'licia-es'
 import {useEffect, useState} from 'react'
 import {ActionBar, Editor, Labels, Posts} from '@/components'
 import {EMPTY_ISSUE, MESSAGE_TYPE} from '@/constants'
-import {useIssues, useLabels, useUploadImages} from '@/hooks'
+import {useCreateIssue, useIssues, useLabels, useUpdateIssue, useUploadImages} from '@/hooks'
 import {compareIssue} from '@/utils'
-import {getRepo, RPC} from '@/utils/rpc'
+import {getRepo, rpc} from '@/utils/rpc'
 
 import 'bytemd/dist/index.min.css'
 import '@/app.css'
@@ -46,18 +46,19 @@ export default function App() {
     staleTime: Infinity,
   })
 
-  const {issues, issueCount, issueCountWithFilter, createIssue, updateIssue, issueStatus} =
-    useIssues({
-      page: currentPage,
-      LabelNames: filterLabels,
-      title: filterTitle,
-    })
-  const {labels: allLabel, isPendingLabels} = useLabels()
+  const {issues, issueCount, issueCountWithFilter, issueStatus} = useIssues({
+    page: currentPage,
+    labelNames: filterLabels,
+    title: filterTitle,
+  })
+  const {mutateAsync: createIssue} = useCreateIssue()
+  const {mutateAsync: updateIssue} = useUpdateIssue()
+  const {data: allLabel, isLoading: isLoadingLabels} = useLabels()
   const {upload: handleUploadImages} = useUploadImages()
 
   useEffect(() => {
-    RPC.on(MESSAGE_TYPE.SHOW_SUCCESS, showSuccess)
-    RPC.on(MESSAGE_TYPE.SHOW_ERROR, showError)
+    rpc.on(MESSAGE_TYPE.SHOW_SUCCESS, showSuccess)
+    rpc.on(MESSAGE_TYPE.SHOW_ERROR, showError)
   }, [])
 
   const onIssueUpdate = async () => {
@@ -128,7 +129,7 @@ export default function App() {
       <Editor
         issue={currentIssue}
         allLabel={allLabel}
-        isPendingLabels={isPendingLabels}
+        isLoadingLabels={isLoadingLabels}
         onTitleChange={title => setCurrentIssue(prev => ({...prev, title}))}
         onBodyChange={body => setCurrentIssue(prev => ({...prev, body}))}
         onAddLabel={label =>

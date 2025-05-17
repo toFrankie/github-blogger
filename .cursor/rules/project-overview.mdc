@@ -25,6 +25,7 @@ alwaysApply: true
 - TanStack React Query v5 管理网络请求
 - licia-es 工具库（没有用到 lodash 库）
 - @tomjs/vite-plugin-vscode 基于该插件来开发 VSCode 扩展。
+- 使用 vscode-webview-rpc 将 Client（网页）与 Server（extension）进行通信
 
 ## 项目结构
 - `src/` - 源代码目录

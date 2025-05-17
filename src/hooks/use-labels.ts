@@ -1,53 +1,28 @@
 import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query'
-import {message} from 'antd'
 import {createLabel, deleteLabel, getLabels, updateLabel} from '@/utils/rpc'
 
-export default function useLabels() {
-  const queryClient = useQueryClient()
-
-  const {data: labels = [], isPending: isPendingLabels} = useQuery({
+export function useLabels() {
+  return useQuery({
     queryKey: ['labels'],
     queryFn: getLabels,
   })
+}
 
-  const {
-    mutateAsync: createLabelAsync,
-    isPending: isCreatingLabel,
-    isError: isErrorCreatingLabel,
-    isSuccess: isSuccessCreatingLabel,
-  } = useMutation({
+export function useCreateLabel() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
     mutationFn: (label: Omit<MinimalLabel, 'id'>) => createLabel(label),
     onSuccess: () => {
       queryClient.invalidateQueries({queryKey: ['labels']})
-      message.success('Label created successfully')
-    },
-    onError: () => {
-      message.error('Failed to create label')
     },
   })
+}
 
-  const {
-    mutateAsync: deleteLabelAsync,
-    isPending: isDeletingLabel,
-    isError: isErrorDeletingLabel,
-    isSuccess: isSuccessDeletingLabel,
-  } = useMutation({
-    mutationFn: (label: string) => deleteLabel(label),
-    onSuccess: () => {
-      queryClient.invalidateQueries({queryKey: ['labels']})
-      message.success('Label deleted successfully')
-    },
-    onError: () => {
-      message.error('Failed to delete label')
-    },
-  })
+export function useUpdateLabel() {
+  const queryClient = useQueryClient()
 
-  const {
-    mutateAsync: updateLabelAsync,
-    isPending: isUpdatingLabel,
-    isError: isErrorUpdatingLabel,
-    isSuccess: isSuccessUpdatingLabel,
-  } = useMutation({
+  return useMutation({
     mutationFn: ({
       newLabel,
       oldLabel,
@@ -57,27 +32,17 @@ export default function useLabels() {
     }) => updateLabel(newLabel, oldLabel),
     onSuccess: () => {
       queryClient.invalidateQueries({queryKey: ['labels']})
-      message.success('Label updated successfully')
-    },
-    onError: () => {
-      message.error('Failed to update label')
     },
   })
+}
 
-  return {
-    labels,
-    createLabelAsync,
-    deleteLabelAsync,
-    updateLabelAsync,
-    isPendingLabels,
-    isCreatingLabel,
-    isDeletingLabel,
-    isUpdatingLabel,
-    isErrorCreatingLabel,
-    isErrorDeletingLabel,
-    isErrorUpdatingLabel,
-    isSuccessCreatingLabel,
-    isSuccessDeletingLabel,
-    isSuccessUpdatingLabel,
-  }
+export function useDeleteLabel() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: deleteLabel,
+    onSuccess: () => {
+      queryClient.invalidateQueries({queryKey: ['labels']})
+    },
+  })
 }

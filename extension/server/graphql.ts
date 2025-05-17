@@ -135,12 +135,6 @@ export function getIssuesWithFilter() {
           states: OPEN
           orderBy: { field: CREATED_AT, direction: DESC }
         ) {
-          pageInfo {
-            startCursor
-            endCursor
-            hasNextPage
-            hasPreviousPage
-          }
           nodes {
             id
             number

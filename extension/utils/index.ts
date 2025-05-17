@@ -79,7 +79,7 @@ export function cdnURL({
 export async function to<T, U = Error>(
   promise: Promise<T>,
   errorExt?: object
-): Promise<[U, null] | [null, T]> {
+): Promise<ResultTuple<T, U>> {
   try {
     const data = await promise
     const result: [null, T] = [null, data]

@@ -6,25 +6,34 @@ import {generateMarkdown, getVscode} from '@/utils'
 
 const vscode = getVscode()
 
-export const RPC = new WebviewRPC(window, vscode)
+export const rpc = new WebviewRPC(window, vscode)
+
+async function rpcEmit<T, A extends any[] = any[]>(
+  type: string,
+  args: A = [] as unknown as A
+): Promise<T> {
+  const response = (await rpc.emit(type, args)) as ApiResponse<T>
+  if (!response.success) {
+    throw new Error(`${response.error.type}: ${response.error.message}`)
+  }
+  return response.data
+}
 
 export async function getRepo() {
-  return (await RPC.emit(MESSAGE_TYPE.GET_REPO)) as RestRepo
+  return rpcEmit<RestRepo>(MESSAGE_TYPE.GET_REPO)
 }
 
 export async function getLabels() {
-  const labels = (await RPC.emit(MESSAGE_TYPE.GET_LABELS, [])) as MinimalLabels
-  return labels ?? []
+  return rpcEmit<MinimalLabels>(MESSAGE_TYPE.GET_LABELS)
 }
 
 export async function createLabel(label: Omit<MinimalLabel, 'id'>) {
   const args: CreateLabelRpcArgs = [label.name, label.color, label.description ?? undefined]
-  const data = (await RPC.emit(MESSAGE_TYPE.CREATE_LABEL, args)) as MinimalLabel
-  return data
+  return rpcEmit<MinimalLabel, CreateLabelRpcArgs>(MESSAGE_TYPE.CREATE_LABEL, args)
 }
 
-export async function deleteLabel(label: string) {
-  await RPC.emit(MESSAGE_TYPE.DELETE_LABEL, [label])
+export async function deleteLabel(name: string) {
+  await rpcEmit<null, [string]>(MESSAGE_TYPE.DELETE_LABEL, [name])
 }
 
 export async function updateLabel(newLabel: Omit<MinimalLabel, 'id'>, oldLabel: MinimalLabel) {
@@ -36,12 +45,11 @@ export async function updateLabel(newLabel: Omit<MinimalLabel, 'id'>, oldLabel: 
     newLabel.color,
     newLabel.description ?? undefined,
   ]
-  const data = (await RPC.emit(MESSAGE_TYPE.UPDATE_LABEL, args)) as MinimalLabel
-  return data
+  return rpcEmit<MinimalLabel, UpdateLabelRpcArgs>(MESSAGE_TYPE.UPDATE_LABEL, args)
 }
 
 export async function getIssueCount() {
-  return (await RPC.emit(MESSAGE_TYPE.GET_ISSUE_COUNT)) as number
+  return rpcEmit<number>(MESSAGE_TYPE.GET_ISSUE_COUNT)
 }
 
 export async function getIssueCountWithFilter(
@@ -52,31 +60,34 @@ export async function getIssueCountWithFilter(
     return getIssueCount()
   }
 
-  return (await RPC.emit(MESSAGE_TYPE.GET_ISSUE_COUNT_WITH_FILTER, [
+  return rpcEmit<number, [string, string]>(MESSAGE_TYPE.GET_ISSUE_COUNT_WITH_FILTER, [
     filterTitle,
     filterLabelNames.join(','),
-  ])) as number
+  ])
 }
 
 export async function getIssues(page: number = 1, labels: string[] = [], title: string = '') {
   let pageCursor: string | null = null
 
   if (page > 1) {
-    pageCursor = (await RPC.emit(MESSAGE_TYPE.GET_PAGE_CURSOR, [page])) as string | null
+    pageCursor = await rpcEmit<string | null, [number]>(MESSAGE_TYPE.GET_PAGE_CURSOR, [page])
   }
 
-  const args = [pageCursor, labels, title]
-  const issues = (await RPC.emit(MESSAGE_TYPE.GET_ISSUES_WITH_FILTER, args)) as MinimalIssues
-  return issues || []
+  const args: GetIssuesWithFilterRpcArgs = [pageCursor, labels, title]
+  const res = await rpcEmit<MinimalIssues, GetIssuesWithFilterRpcArgs>(
+    MESSAGE_TYPE.GET_ISSUES_WITH_FILTER,
+    args
+  )
+  return res ?? []
 }
 
-export async function createIssue(params: MinimalIssue): Promise<MinimalIssue> {
+export async function createIssue(params: MinimalIssue) {
   const labelNames = params.labels.map(label => label.name)
   const args: CreateIssueRpcArgs = [params.title, params.body, JSON.stringify(labelNames)]
-  return await RPC.emit(MESSAGE_TYPE.CREATE_ISSUE, args)
+  return rpcEmit<MinimalIssue, CreateIssueRpcArgs>(MESSAGE_TYPE.CREATE_ISSUE, args)
 }
 
-export async function updateIssue(params: MinimalIssue): Promise<MinimalIssue> {
+export async function updateIssue(params: MinimalIssue) {
   const labelNames = params.labels.map(label => label.name)
   const args: UpdateIssueRpcArgs = [
     params.number,
@@ -84,7 +95,7 @@ export async function updateIssue(params: MinimalIssue): Promise<MinimalIssue> {
     params.body,
     JSON.stringify(labelNames),
   ]
-  return await RPC.emit(MESSAGE_TYPE.UPDATE_ISSUE, args)
+  return rpcEmit<MinimalIssue, UpdateIssueRpcArgs>(MESSAGE_TYPE.UPDATE_ISSUE, args)
 }
 
 type SubmitType = ValueOf<typeof SUBMIT_TYPE>
@@ -96,26 +107,25 @@ export async function archiveIssue(issue: MinimalIssue, type: SubmitType) {
     if (!Number.isInteger(issueNumber)) return
 
     // 1. 获取 Ref
-    const refResult = (await RPC.emit(MESSAGE_TYPE.GET_REF)) as RestRef
+    const refResult = await rpcEmit<RestRef>(MESSAGE_TYPE.GET_REF)
     const commitSha = refResult.object.sha
 
     // 2. 获取当前 Commit 的 Tree SHA
-    const commitResult = (await RPC.emit(MESSAGE_TYPE.GET_COMMIT, [commitSha])) as RestCommit
+    const commitResult = await rpcEmit<RestCommit, [string]>(MESSAGE_TYPE.GET_COMMIT, [commitSha])
     const treeSha = commitResult.tree.sha
 
     // 3. 生成 Blob
     const markdown = generateMarkdown(issue)
-    const blobResult = (await RPC.emit(MESSAGE_TYPE.CREATE_BLOB, [markdown])) as RestBlob
+    const blobResult = await rpcEmit<RestBlob, [string]>(MESSAGE_TYPE.CREATE_BLOB, [markdown])
     const blobSha = blobResult.sha
 
     // 4. 生成 Tree
     const year = dayjs(createdAt).year()
     const filePath = `archives/${year}/${issueNumber}.md`
-    const newTreeResult = (await RPC.emit(MESSAGE_TYPE.CREATE_TREE, [
-      treeSha,
-      filePath,
-      blobSha,
-    ])) as RestTree
+    const newTreeResult = await rpcEmit<RestTree, [string, string, string]>(
+      MESSAGE_TYPE.CREATE_TREE,
+      [treeSha, filePath, blobSha]
+    )
     const newTreeSha = newTreeResult.sha
 
     // 5. 生成 Commit
@@ -123,15 +133,14 @@ export async function archiveIssue(issue: MinimalIssue, type: SubmitType) {
       type === SUBMIT_TYPE.CREATE
         ? `docs: create issue ${issueNumber}`
         : `docs: update issue ${issueNumber}`
-    const newCommitResult = (await RPC.emit(MESSAGE_TYPE.CREATE_COMMIT, [
-      commitSha,
-      newTreeSha,
-      commitMessage,
-    ])) as RestCommit
+    const newCommitResult = await rpcEmit<RestCommit, [string, string, string]>(
+      MESSAGE_TYPE.CREATE_COMMIT,
+      [commitSha, newTreeSha, commitMessage]
+    )
     const newCommitSha = newCommitResult.sha
 
     // 6. 更新 Ref
-    ;(await RPC.emit(MESSAGE_TYPE.UPDATE_REF, [newCommitSha])) as RestRef
+    await rpcEmit<RestRef, [string]>(MESSAGE_TYPE.UPDATE_REF, [newCommitSha])
   } catch (e) {
     console.log('🚀 ~ archiveIssue failed:', e)
     message.error('Issue Archive Failed')
@@ -139,5 +148,5 @@ export async function archiveIssue(issue: MinimalIssue, type: SubmitType) {
 }
 
 export async function getPageCursor(page: number) {
-  return (await RPC.emit(MESSAGE_TYPE.GET_PAGE_CURSOR, [page])) as string | null
+  return rpcEmit<string | null, [number]>(MESSAGE_TYPE.GET_PAGE_CURSOR, [page])
 }
