@@ -65,3 +65,15 @@ export const EMPTY_ISSUE: MinimalIssue = {
   updatedAt: '',
   labels: [],
 }
+
+export const ERROR_TYPE = {
+  REST: 'REST',
+  GRAPHQL: 'GRAPHQL',
+  UNKNOWN: 'UNKNOWN',
+} as const
+
+export const ERROR_TYPE_MAP = {
+  [ERROR_TYPE.REST]: 'REST Error',
+  [ERROR_TYPE.GRAPHQL]: 'GraphQL Error',
+  [ERROR_TYPE.UNKNOWN]: 'Unknown Error',
+} as const

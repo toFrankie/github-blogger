@@ -1,4 +1,5 @@
 import {RequestError} from '@octokit/request-error'
+import {ERROR_TYPE} from '@/constants'
 
 type Transform<T, R> = (data: T) => R
 
@@ -21,12 +22,6 @@ export function createResponse<T, R>(
     error: null,
   }
 }
-
-const ERROR_TYPE = {
-  REST: 'REST',
-  GRAPHQL: 'GRAPHQL',
-  UNKNOWN: 'UNKNOWN',
-} as const
 
 function createApiError(error: unknown): ApiError {
   if (isRequestError(error)) {

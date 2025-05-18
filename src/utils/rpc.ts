@@ -1,7 +1,7 @@
 import {message} from 'antd'
 import dayjs from 'dayjs'
 import {WebviewRPC} from 'vscode-webview-rpc'
-import {MESSAGE_TYPE, SUBMIT_TYPE} from '@/constants'
+import {ERROR_TYPE_MAP, MESSAGE_TYPE, SUBMIT_TYPE} from '@/constants'
 import {generateMarkdown, getVscode} from '@/utils'
 
 const vscode = getVscode()
@@ -14,7 +14,7 @@ async function rpcEmit<T, A extends any[] = any[]>(
 ): Promise<T> {
   const response = (await rpc.emit(type, args)) as ApiResponse<T>
   if (!response.success) {
-    throw new Error(`${response.error.type}: ${response.error.message}`)
+    throw new Error(`${ERROR_TYPE_MAP[response.error.type]}: ${response.error.message}`)
   }
   return response.data
 }

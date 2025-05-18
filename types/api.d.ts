@@ -1,10 +1,13 @@
 import type {RequestError} from '@octokit/request-error'
+import {ERROR_TYPE} from '@/constants'
 
 export {}
 
 declare global {
+  type ApiErrorType = (typeof ERROR_TYPE)[keyof typeof ERROR_TYPE]
+
   interface ApiError {
-    type: 'REST' | 'GRAPHQL' | 'UNKNOWN'
+    type: ApiErrorType
     message: string
     detail?: unknown
   }

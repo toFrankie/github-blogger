@@ -74,3 +74,9 @@ export const MESSAGE_TYPE = {
   UPLOAD_IMAGE: 'upload_image',
   OPEN_EXTERNAL_LINK: 'open_external_link',
 } as const
+
+export const ERROR_TYPE = {
+  REST: 'REST',
+  GRAPHQL: 'GRAPHQL',
+  UNKNOWN: 'UNKNOWN',
+} as const
