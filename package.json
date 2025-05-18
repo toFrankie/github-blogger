@@ -110,6 +110,7 @@
     "@bytemd/plugin-mermaid": "1.22.0",
     "@bytemd/react": "1.22.0",
     "@octokit/core": "5.2.1",
+    "@primer/css": "21.5.1",
     "@primer/octicons-react": "19.15.2",
     "@primer/primitives": "10.6.0",
     "@primer/react": "37.24.0",

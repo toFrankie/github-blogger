@@ -1,0 +1,5 @@
+@import url('@primer/css/dist/primer.css');
+
+#__primerPortalRoot__ {
+  z-index: 100;
+}

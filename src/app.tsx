@@ -11,10 +11,7 @@ import {useCreateIssue, useIssues, useLabels, useUpdateIssue, useUploadImages} f
 import {compareIssue} from '@/utils'
 import {getRepo, rpc} from '@/utils/rpc'
 
-import 'bytemd/dist/index.min.css'
 import '@/app.css'
-import '@/github.custom.css'
-import '@/reset.css'
 
 window.Buffer = window.Buffer ?? Buffer
 

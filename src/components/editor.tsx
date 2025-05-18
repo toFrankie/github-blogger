@@ -88,14 +88,16 @@ export default function Editor({
         )}
       </div>
 
-      <BytemdEditor
-        placeholder="Leave your thought here..."
-        plugins={plugins}
-        previewDebounce={50}
-        uploadImages={onUploadImages}
-        value={issue.body}
-        onChange={onBodyChange}
-      />
+      <div className="app-editor">
+        <BytemdEditor
+          placeholder="Leave your thought here..."
+          plugins={plugins}
+          previewDebounce={50}
+          uploadImages={onUploadImages}
+          value={issue.body}
+          onChange={onBodyChange}
+        />
+      </div>
     </>
   )
 }
