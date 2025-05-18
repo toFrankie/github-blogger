@@ -1,6 +1,7 @@
 import {BaseStyles, ThemeProvider} from '@primer/react'
 import {QueryClient, QueryClientProvider} from '@tanstack/react-query'
 import App from '@/app'
+import {ToastProvider} from '@/providers/toast-provider'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -22,7 +23,9 @@ export default function AppProvider() {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         <BaseStyles>
-          <App />
+          <ToastProvider>
+            <App />
+          </ToastProvider>
         </BaseStyles>
       </ThemeProvider>
     </QueryClientProvider>
