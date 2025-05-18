@@ -1,4 +1,5 @@
 import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query'
+import {message} from 'antd'
 import {createLabel, deleteLabel, getLabels, updateLabel} from '@/utils/rpc'
 
 export function useLabels() {
@@ -15,6 +16,13 @@ export function useCreateLabel() {
     mutationFn: (label: Omit<MinimalLabel, 'id'>) => createLabel(label),
     onSuccess: () => {
       queryClient.invalidateQueries({queryKey: ['labels']})
+    },
+    onError: (error, variables) => {
+      if (error.message.includes('already_exists')) {
+        message.error(`Label (${variables.name}) has already been taken.`)
+        return
+      }
+      message.error(error.message)
     },
   })
 }
@@ -33,6 +41,13 @@ export function useUpdateLabel() {
     onSuccess: () => {
       queryClient.invalidateQueries({queryKey: ['labels']})
     },
+    onError: (error, variables) => {
+      if (error.message.includes('already_exists')) {
+        message.error(`Label (${variables.newLabel.name}) has already been taken.`)
+        return
+      }
+      message.error(error.message)
+    },
   })
 }
 
@@ -41,8 +56,12 @@ export function useDeleteLabel() {
 
   return useMutation({
     mutationFn: deleteLabel,
-    onSuccess: () => {
+    onSuccess: (_res, variables) => {
       queryClient.invalidateQueries({queryKey: ['labels']})
+      message.success(`Label (${variables}) deleted successfully`)
+    },
+    onError: error => {
+      message.error(error.message)
     },
   })
 }

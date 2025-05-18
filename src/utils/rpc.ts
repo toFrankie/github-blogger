@@ -38,10 +38,9 @@ export async function deleteLabel(name: string) {
 
 export async function updateLabel(newLabel: Omit<MinimalLabel, 'id'>, oldLabel: MinimalLabel) {
   const newLabelName = newLabel.name !== oldLabel.name ? newLabel.name : undefined
-  const oldLabelName = oldLabel.name
   const args: UpdateLabelRpcArgs = [
     newLabelName,
-    oldLabelName,
+    oldLabel.name,
     newLabel.color,
     newLabel.description ?? undefined,
   ]
