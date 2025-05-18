@@ -29,7 +29,7 @@ const ERROR_TYPE = {
 } as const
 
 function createApiError(error: unknown): ApiError {
-  if (error instanceof RequestError) {
+  if (isRequestError(error)) {
     const url = error.request.url
     const type = url.includes('graphql') ? ERROR_TYPE.GRAPHQL : ERROR_TYPE.REST
 
@@ -51,4 +51,16 @@ function createApiError(error: unknown): ApiError {
     type: ERROR_TYPE.UNKNOWN,
     message: String(error),
   }
+}
+
+// https://github.com/octokit/request-error.js#usage-with-octokit
+function isRequestError(error: any): error is RequestError {
+  return (
+    error &&
+    typeof error === 'object' &&
+    typeof error.message === 'string' &&
+    typeof error.status === 'number' &&
+    error.request &&
+    typeof error.request.url === 'string'
+  )
 }
