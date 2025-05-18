@@ -64,6 +64,10 @@ code {
   user-select: none;
 }
 
+.app-labels-skeleton {
+  background-color: #eaeef2;
+}
+
 .app > div:nth-child(3) {
   position: relative;
   flex: 1;

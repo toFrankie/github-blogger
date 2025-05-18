@@ -30,7 +30,7 @@ import {
   Truncate,
 } from '@primer/react'
 import {type ActionListItemInput} from '@primer/react/deprecated'
-import {Blankslate} from '@primer/react/experimental'
+import {Blankslate, SkeletonAvatar, SkeletonText} from '@primer/react/experimental'
 import {debounce, intersect, unique} from 'licia-es'
 import {useCallback, useMemo, useState} from 'react'
 import {DEFAULT_PAGINATION_SIZE, MESSAGE_TYPE} from '@/constants'
@@ -135,113 +135,32 @@ export default function Posts({
     [allLabel]
   )
 
-  const openExternalLink = (type: LinkType) => {
-    if (!repo || !type) return
-
-    const repoUrl = repo.html_url
-    const links = {
-      [LINK_TYPE.REPO]: repoUrl,
-      [LINK_TYPE.PROFILE]: repo.owner.html_url,
-      [LINK_TYPE.ISSUES]: `${repoUrl}/issues`,
-      [LINK_TYPE.LABELS]: `${repoUrl}/labels`,
-      [LINK_TYPE.ACTIONS]: `${repoUrl}/actions`,
-      [LINK_TYPE.INSIGHTS]: `${repoUrl}/graphs/traffic`,
-      [LINK_TYPE.SETTINGS]: `${repoUrl}/settings`,
-    }
-
-    vscode.postMessage({
-      command: MESSAGE_TYPE.OPEN_EXTERNAL_LINK,
-      externalLink: links[type],
-    })
-  }
-
   if (!visible) return null
 
   return (
     <Dialog
-      title="Posts"
       position="left"
       width="large"
       onClose={() => onSetPostsVisible(false)}
+      title={
+        <Stack align="center" gap="condensed" direction="horizontal">
+          <Stack.Item>Posts</Stack.Item>
+          {issueCount && issueStatus.withFilter && issueCountWithFilter ? (
+            <CounterLabel sx={{color: 'fg.muted'}}>
+              {issueCountWithFilter}/{issueCount}
+            </CounterLabel>
+          ) : issueCount ? (
+            <CounterLabel sx={{color: 'fg.muted'}}>{issueCount}</CounterLabel>
+          ) : null}
+        </Stack>
+      }
       renderBody={() => {
         return (
           <Box sx={{px: 3, pt: 3, height: '100%'}}>
             <Stack sx={{height: '100%'}}>
               <Stack.Item sx={{flexShrink: 0}}>
                 <Stack>
-                  <Stack.Item>
-                    <PageHeader role="banner" aria-label="Add-pageheader-docs">
-                      <PageHeader.TitleArea>
-                        <PageHeader.Title>
-                          <Stack gap="condensed" direction="horizontal" align="center">
-                            {repo?.owner.avatar_url ? (
-                              <Avatar
-                                size={32}
-                                src={repo?.owner.avatar_url}
-                                onClick={() => openExternalLink(LINK_TYPE.PROFILE)}
-                                sx={{cursor: 'pointer'}}
-                              />
-                            ) : (
-                              <MarkGithubIcon size={32} />
-                            )}
-                            <Link
-                              sx={{
-                                color: 'fg.default',
-                                cursor: 'pointer',
-                                textDecoration: 'none',
-                                '&:hover': {
-                                  color: 'fg.default',
-                                  textDecoration: 'underline',
-                                },
-                              }}
-                              onClick={() => openExternalLink(LINK_TYPE.REPO)}
-                            >
-                              {repo?.name}
-                            </Link>
-                            {issueCount && issueStatus.withFilter && issueCountWithFilter ? (
-                              <CounterLabel sx={{color: 'fg.muted'}}>
-                                {issueCountWithFilter}/{issueCount}
-                              </CounterLabel>
-                            ) : issueCount ? (
-                              <CounterLabel sx={{color: 'fg.muted'}}>{issueCount}</CounterLabel>
-                            ) : null}
-                          </Stack>
-                        </PageHeader.Title>
-                      </PageHeader.TitleArea>
-                      <PageHeader.Actions>
-                        <IconButton
-                          aria-label="Issues"
-                          icon={IssueOpenedIcon}
-                          tooltipDirection="n"
-                          onClick={() => openExternalLink(LINK_TYPE.ISSUES)}
-                        />
-                        <IconButton
-                          aria-label="Labels"
-                          icon={TagIcon}
-                          tooltipDirection="n"
-                          onClick={() => openExternalLink(LINK_TYPE.LABELS)}
-                        />
-                        <IconButton
-                          aria-label="Actions"
-                          icon={PlayIcon}
-                          tooltipDirection="n"
-                          onClick={() => openExternalLink(LINK_TYPE.ACTIONS)}
-                        />
-                        <IconButton
-                          aria-label="Insights"
-                          icon={GraphIcon}
-                          tooltipDirection="n"
-                          onClick={() => openExternalLink(LINK_TYPE.INSIGHTS)}
-                        />
-                        <IconButton
-                          aria-label="Settings"
-                          icon={GearIcon}
-                          tooltipDirection="n"
-                          onClick={() => openExternalLink(LINK_TYPE.SETTINGS)}
-                        />
-                      </PageHeader.Actions>
-                    </PageHeader>
-                  </Stack.Item>
+                  <Stack.Item>{repo ? <HeaderPosts repo={repo} /> : <HeaderSkeleton />}</Stack.Item>
                   <Stack.Item>
                     <TextInput
                       sx={{width: '100%'}}
@@ -367,6 +286,123 @@ export default function Posts({
         )
       }}
     />
+  )
+}
+
+function HeaderSkeleton() {
+  return (
+    <PageHeader role="banner">
+      <PageHeader.TitleArea>
+        <PageHeader.Title>
+          <Stack direction="horizontal" gap="condensed" align="center">
+            <SkeletonAvatar size={32} />
+            <SkeletonText width="50px" />
+          </Stack>
+        </PageHeader.Title>
+      </PageHeader.TitleArea>
+      <PageHeader.Actions>
+        <Stack direction="horizontal" gap="condensed">
+          <SkeletonAvatar square size={32} />
+          <SkeletonAvatar square size={32} />
+          <SkeletonAvatar square size={32} />
+          <SkeletonAvatar square size={32} />
+          <SkeletonAvatar square size={32} />
+        </Stack>
+      </PageHeader.Actions>
+    </PageHeader>
+  )
+}
+
+interface HeaderPostsProps {
+  repo: RestRepo
+}
+
+function HeaderPosts({repo}: HeaderPostsProps) {
+  const openExternalLink = (type: LinkType) => {
+    if (!type) return
+
+    const repoUrl = repo.html_url
+    const links = {
+      [LINK_TYPE.REPO]: repoUrl,
+      [LINK_TYPE.PROFILE]: repo.owner.html_url,
+      [LINK_TYPE.ISSUES]: `${repoUrl}/issues`,
+      [LINK_TYPE.LABELS]: `${repoUrl}/labels`,
+      [LINK_TYPE.ACTIONS]: `${repoUrl}/actions`,
+      [LINK_TYPE.INSIGHTS]: `${repoUrl}/graphs/traffic`,
+      [LINK_TYPE.SETTINGS]: `${repoUrl}/settings`,
+    }
+
+    vscode.postMessage({
+      command: MESSAGE_TYPE.OPEN_EXTERNAL_LINK,
+      externalLink: links[type],
+    })
+  }
+
+  return (
+    <PageHeader role="banner">
+      <PageHeader.TitleArea>
+        <PageHeader.Title>
+          <Stack gap="condensed" direction="horizontal" align="center">
+            {repo.owner.avatar_url ? (
+              <Avatar
+                size={32}
+                src={repo.owner.avatar_url}
+                onClick={() => openExternalLink(LINK_TYPE.PROFILE)}
+                sx={{cursor: 'pointer'}}
+              />
+            ) : (
+              <MarkGithubIcon size={32} />
+            )}
+            <Link
+              sx={{
+                color: 'fg.default',
+                cursor: 'pointer',
+                textDecoration: 'none',
+                '&:hover': {
+                  color: 'fg.default',
+                  textDecoration: 'underline',
+                },
+              }}
+              onClick={() => openExternalLink(LINK_TYPE.REPO)}
+            >
+              {repo.name}
+            </Link>
+          </Stack>
+        </PageHeader.Title>
+      </PageHeader.TitleArea>
+      <PageHeader.Actions>
+        <IconButton
+          aria-label="Issues"
+          icon={IssueOpenedIcon}
+          tooltipDirection="n"
+          onClick={() => openExternalLink(LINK_TYPE.ISSUES)}
+        />
+        <IconButton
+          aria-label="Labels"
+          icon={TagIcon}
+          tooltipDirection="n"
+          onClick={() => openExternalLink(LINK_TYPE.LABELS)}
+        />
+        <IconButton
+          aria-label="Actions"
+          icon={PlayIcon}
+          tooltipDirection="n"
+          onClick={() => openExternalLink(LINK_TYPE.ACTIONS)}
+        />
+        <IconButton
+          aria-label="Insights"
+          icon={GraphIcon}
+          tooltipDirection="n"
+          onClick={() => openExternalLink(LINK_TYPE.INSIGHTS)}
+        />
+        <IconButton
+          aria-label="Settings"
+          icon={GearIcon}
+          tooltipDirection="n"
+          onClick={() => openExternalLink(LINK_TYPE.SETTINGS)}
+        />
+      </PageHeader.Actions>
+    </PageHeader>
   )
 }
 

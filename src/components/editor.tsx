@@ -7,7 +7,8 @@ import math from '@bytemd/plugin-math'
 import mediumZoom from '@bytemd/plugin-medium-zoom'
 import mermaid from '@bytemd/plugin-mermaid'
 import {Editor as BytemdEditor} from '@bytemd/react'
-import {Label, Spinner, Stack, TextInput} from '@primer/react'
+import {Label, Stack, TextInput} from '@primer/react'
+import {SkeletonText} from '@primer/react/experimental'
 import {message} from 'antd'
 
 import 'bytemd/dist/index.min.css'
@@ -66,7 +67,7 @@ export default function Editor({
       </div>
       <div className="app-labels">
         {isLoadingLabels ? (
-          <Spinner size="small" />
+          <SkeletonText className="app-labels-skeleton" />
         ) : (
           <Stack direction="horizontal" gap="condensed" wrap="wrap">
             {allLabel?.map(label => {
