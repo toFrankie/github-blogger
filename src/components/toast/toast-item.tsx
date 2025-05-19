@@ -1,15 +1,15 @@
-import {AlertIcon, CheckIcon, InfoIcon, StopIcon, XIcon} from '@primer/octicons-react'
-import {Box, Button, Text} from '@primer/react'
+import {XIcon} from '@primer/octicons-react'
+import {Box, Flash, IconButton, Stack, Text} from '@primer/react'
 import {useEffect, useState} from 'react'
 import {type Toast} from '@/types/toast'
 
-const ICON_MAP = {
-  success: <CheckIcon />,
-  info: <InfoIcon />,
-  warning: <AlertIcon />,
-  error: <StopIcon />,
-  default: null,
-}
+const VARIANT_MAP = {
+  success: 'success',
+  info: 'default',
+  warning: 'warning',
+  error: 'danger',
+  default: 'default',
+} as const
 
 export default function ToastItem({toast, onClose}: {toast: Toast; onClose: () => void}) {
   const [isVisible, setIsVisible] = useState(false)
@@ -28,13 +28,6 @@ export default function ToastItem({toast, onClose}: {toast: Toast; onClose: () =
     <Box
       sx={{
         position: 'relative',
-        p: 3,
-        borderRadius: 2,
-        bg: 'canvas.default',
-        boxShadow: 'shadow.medium',
-        color: 'fg.default',
-        fontSize: 1,
-        lineHeight: 'default',
         width: '320px',
         height: '68px',
         transform: `translateX(${isVisible ? '0' : '100%'})`,
@@ -46,24 +39,18 @@ export default function ToastItem({toast, onClose}: {toast: Toast; onClose: () =
         willChange: 'transform, opacity',
       }}
     >
-      <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          height: '100%',
-        }}
-      >
-        <Box sx={{display: 'flex', alignItems: 'center', gap: 2}}>
-          {ICON_MAP[toast.type || 'default']}
-          <Text>{toast.content}</Text>
-        </Box>
-        {!toast.persistent && (
-          <Button variant="invisible" size="small" onClick={onClose} sx={{ml: 2}}>
-            <XIcon />
-          </Button>
-        )}
-      </Box>
+      <Flash variant={VARIANT_MAP[toast.type || 'default']}>
+        <Stack direction="horizontal" align="center" justify="space-between">
+          <Stack.Item>
+            <Text>{toast.content}</Text>
+          </Stack.Item>
+          {!toast.persistent && (
+            <Stack.Item>
+              <IconButton variant="invisible" icon={XIcon} onClick={onClose} aria-label="Close" />
+            </Stack.Item>
+          )}
+        </Stack>
+      </Flash>
     </Box>
   )
 }
