@@ -1,5 +1,5 @@
 import {AlertIcon, CheckIcon, InfoIcon, StopIcon, XIcon} from '@primer/octicons-react'
-import {Box, Button} from '@primer/react'
+import {Box, Button, Text} from '@primer/react'
 import {useEffect, useState} from 'react'
 import {type Toast} from '@/types/toast'
 
@@ -11,54 +11,59 @@ const ICON_MAP = {
   default: null,
 }
 
-export default function ToastItem({
-  toast,
-  onClose,
-  index,
-}: {
-  toast: Toast
-  onClose: () => void
-  index: number
-}) {
-  const [exiting, setExiting] = useState(false)
+export default function ToastItem({toast, onClose}: {toast: Toast; onClose: () => void}) {
+  const [isVisible, setIsVisible] = useState(false)
+  const [isExiting, setIsExiting] = useState(false)
 
   useEffect(() => {
-    if (exiting) {
-      const timeout = setTimeout(onClose, 300)
-      return () => clearTimeout(timeout)
-    }
-  }, [exiting, onClose])
-
-  const handleClose = () => setExiting(true)
+    setIsVisible(true)
+    const timer = setTimeout(() => {
+      setIsExiting(true)
+      setTimeout(onClose, 300) // 等待退出动画完成
+    }, toast.duration || 3000)
+    return () => clearTimeout(timer)
+  }, [toast.duration, onClose])
 
   return (
-    <div
-      className={`anim-fade-${exiting ? 'out' : 'in'} color-bg-subtle`}
-      style={{
-        transition: 'transform 0.3s ease, opacity 0.3s ease',
-        transform: exiting ? 'translateX(100%)' : 'translateX(0)',
-        opacity: exiting ? 0 : 1,
-        backgroundColor: 'red',
+    <Box
+      sx={{
+        position: 'relative',
+        p: 3,
+        borderRadius: 2,
+        bg: 'canvas.default',
+        boxShadow: 'shadow.medium',
+        color: 'fg.default',
+        fontSize: 1,
+        lineHeight: 'default',
+        width: '320px',
+        height: '68px',
+        transform: `translateX(${isVisible ? '0' : '100%'})`,
+        opacity: isExiting ? 0 : 1,
+        transition: isExiting
+          ? 'opacity 0.3s ease-out'
+          : 'transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)',
+        transformOrigin: 'right',
+        willChange: 'transform, opacity',
       }}
     >
       <Box
         sx={{
-          minWidth: 240,
-          maxWidth: 400,
-          boxShadow: 'shadow.medium',
-          animation: exiting ? 'fadeOut 0.3s' : 'fadeIn 0.3s',
-          backgroundColor: 'red',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          height: '100%',
         }}
       >
-        <div style={{display: 'flex', justifyContent: 'space-between'}}>
-          <span>{toast.content}</span>
-          {!toast.persistent && (
-            <Button variant="invisible" size="small" onClick={handleClose}>
-              <XIcon />
-            </Button>
-          )}
-        </div>
+        <Box sx={{display: 'flex', alignItems: 'center', gap: 2}}>
+          {ICON_MAP[toast.type || 'default']}
+          <Text>{toast.content}</Text>
+        </Box>
+        {!toast.persistent && (
+          <Button variant="invisible" size="small" onClick={onClose} sx={{ml: 2}}>
+            <XIcon />
+          </Button>
+        )}
       </Box>
-    </div>
+    </Box>
   )
 }
