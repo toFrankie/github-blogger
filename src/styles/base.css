@@ -13,34 +13,9 @@ code {
 
 .app {
   position: relative;
-  display: flex;
-  flex-direction: column;
   width: 100vw;
   height: 100vh;
-}
-
-.app-title {
-  display: flex;
-  align-items: center;
-  padding: 8px;
-}
-
-.app-title .title-input {
-  flex: 1;
-  font-weight: 500;
-  color: #1f2328;
-}
-
-.app-title .number {
-  margin-left: 8px;
-  font-size: 14px;
-  color: #808080;
-  cursor: pointer;
-}
-
-.app-labels {
-  padding: 0 8px 8px;
-  user-select: none;
+  background-color: #f6f8fa;
 }
 
 .app-labels-skeleton {
@@ -49,6 +24,4 @@ code {
 
 .app-editor {
   position: relative;
-  flex: 1;
-  margin: 0 8px 8px;
 }
