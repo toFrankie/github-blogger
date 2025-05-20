@@ -24,18 +24,18 @@ export default function ToastContainer({
       >
         <Stack gap="condensed">
           {toasts.map((toast, idx) => (
-            <Stack.Item key={toast.id}>
-              <Box
-                sx={{
-                  position: 'absolute',
-                  top: 0,
-                  right: 0,
-                  transform: `translateY(${idx * 76}px)`,
-                  transition: 'transform 0.3s ease-out',
-                }}
-              >
-                <ToastItem toast={toast} onClose={() => onDismiss(toast.id)} />
-              </Box>
+            <Stack.Item
+              key={toast.id}
+              sx={{
+                position: 'absolute',
+                width: '100%',
+                top: 0,
+                right: 0,
+                transform: `translateY(${idx * 76}px)`,
+                transition: 'transform 0.3s ease-out',
+              }}
+            >
+              <ToastItem toast={toast} onClose={() => onDismiss(toast.id)} />
             </Stack.Item>
           ))}
         </Stack>

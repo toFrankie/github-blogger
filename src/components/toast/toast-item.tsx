@@ -1,17 +1,14 @@
-import {XIcon} from '@primer/octicons-react'
-import {Box, Flash, IconButton, Stack, Text} from '@primer/react'
+import {Box} from '@primer/react'
+import {Banner} from '@primer/react/experimental'
 import {useEffect, useState} from 'react'
 import {type Toast} from '@/types/toast'
 
-const VARIANT_MAP = {
-  success: 'success',
-  info: 'default',
-  warning: 'warning',
-  error: 'danger',
-  default: 'default',
-} as const
+interface ToastItemProps {
+  toast: Toast
+  onClose: () => void
+}
 
-export default function ToastItem({toast, onClose}: {toast: Toast; onClose: () => void}) {
+export default function ToastItem({toast, onClose}: ToastItemProps) {
   const [isVisible, setIsVisible] = useState(false)
   const [isExiting, setIsExiting] = useState(false)
 
@@ -19,7 +16,7 @@ export default function ToastItem({toast, onClose}: {toast: Toast; onClose: () =
     setIsVisible(true)
     const timer = setTimeout(() => {
       setIsExiting(true)
-      setTimeout(onClose, 300) // 等待退出动画完成
+      setTimeout(onClose, 300)
     }, toast.duration || 3000)
     return () => clearTimeout(timer)
   }, [toast.duration, onClose])
@@ -28,8 +25,7 @@ export default function ToastItem({toast, onClose}: {toast: Toast; onClose: () =
     <Box
       sx={{
         position: 'relative',
-        width: '320px',
-        height: '68px',
+        width: '100%',
         transform: `translateX(${isVisible ? '0' : '100%'})`,
         opacity: isExiting ? 0 : 1,
         transition: isExiting
@@ -39,18 +35,14 @@ export default function ToastItem({toast, onClose}: {toast: Toast; onClose: () =
         willChange: 'transform, opacity',
       }}
     >
-      <Flash variant={VARIANT_MAP[toast.type || 'default']}>
-        <Stack direction="horizontal" align="center" justify="space-between">
-          <Stack.Item>
-            <Text>{toast.content}</Text>
-          </Stack.Item>
-          {!toast.persistent && (
-            <Stack.Item>
-              <IconButton variant="invisible" icon={XIcon} onClick={onClose} aria-label="Close" />
-            </Stack.Item>
-          )}
-        </Stack>
-      </Flash>
+      <Banner
+        hideTitle
+        title="Notice"
+        variant={toast.type || 'info'}
+        onDismiss={!toast.persistent ? onClose : undefined}
+      >
+        {toast.content}
+      </Banner>
     </Box>
   )
 }

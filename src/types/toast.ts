@@ -1,7 +1,6 @@
-export type ToastType = 'default' | 'info' | 'success' | 'warning' | 'error'
+export type ToastType = 'critical' | 'info' | 'success' | 'upsell' | 'warning'
 
 export interface ToastOptions {
-  content: React.ReactNode
   type?: ToastType
   duration?: number
   persistent?: boolean
@@ -9,8 +8,9 @@ export interface ToastOptions {
 
 export interface Toast extends ToastOptions {
   id: number
+  content: string
 }
 
 export interface ToastContextType {
-  addToast: (toast: ToastOptions) => void
+  addToast: (content: string, options?: ToastOptions) => void
 }

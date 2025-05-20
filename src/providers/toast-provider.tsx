@@ -4,21 +4,24 @@ import {type Toast, type ToastContextType, type ToastOptions} from '@/types/toas
 
 const ToastContext = createContext<ToastContextType | undefined>(undefined)
 
-let toastId = 0
+export function useToastContext() {
+  const context = useContext(ToastContext)
+  if (!context) {
+    throw new Error('useToastContext must be used within a ToastProvider')
+  }
+  return context
+}
 
 export function ToastProvider({children}: {children: React.ReactNode}) {
   const [toasts, setToasts] = useState<Toast[]>([])
 
-  const addToast = useCallback((options: ToastOptions) => {
-    const id = ++toastId
-    setToasts(prev => [...prev, {id, ...options}])
-    if (!options.persistent) {
-      setTimeout(() => removeToast(id), options.duration ?? 4000)
-    }
+  const addToast = useCallback((content: string, options?: ToastOptions) => {
+    const id = Date.now()
+    setToasts(prev => [...prev, {id, content, ...options}])
   }, [])
 
   const removeToast = useCallback((id: number) => {
-    setToasts(prev => prev.filter(t => t.id !== id))
+    setToasts(prev => prev.filter(toast => toast.id !== id))
   }, [])
 
   return (
@@ -27,10 +30,4 @@ export function ToastProvider({children}: {children: React.ReactNode}) {
       <ToastContainer toasts={toasts} onDismiss={removeToast} />
     </ToastContext.Provider>
   )
-}
-
-export function useToastContext() {
-  const ctx = useContext(ToastContext)
-  if (!ctx) throw new Error('useToastContext must be used within ToastProvider')
-  return ctx
 }
