@@ -241,7 +241,8 @@ export default function Posts({
                             aria-current={item.number === currentIssue.number ? 'page' : undefined}
                             key={item.id}
                             sx={{my: 1, '&:first-of-type': {mt: 0}, '&:last-of-type': {mb: 0}}}
-                            onClick={() => {
+                            onClick={e => {
+                              e.preventDefault()
                               onSetPostsVisible(false)
                               onSetCurrentIssue(item)
                             }}
