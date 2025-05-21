@@ -158,71 +158,75 @@ export default function Posts({
       }
       renderBody={() => {
         return (
-          <Box sx={{px: 3, pt: 3, height: '100%'}}>
+          <Box sx={{height: '100%'}}>
             <Stack sx={{height: '100%'}}>
               <Stack.Item sx={{flexShrink: 0}}>
-                <Stack>
-                  <Stack.Item>{repo ? <HeaderPosts repo={repo} /> : <HeaderSkeleton />}</Stack.Item>
-                  <Stack.Item>
-                    <TextInput
-                      sx={{width: '100%'}}
-                      placeholder="Title"
-                      onChange={handleTitleChange}
-                      value={titleValue}
-                      trailingAction={
-                        titleValue ? (
-                          <TextInput.Action
-                            icon={XCircleFillIcon}
-                            aria-label="Clear input"
+                <Box sx={{px: 3, pt: 3}}>
+                  <Stack>
+                    <Stack.Item>
+                      {repo ? <HeaderPosts repo={repo} /> : <HeaderSkeleton />}
+                    </Stack.Item>
+                    <Stack.Item>
+                      <TextInput
+                        sx={{width: '100%'}}
+                        placeholder="Title"
+                        onChange={handleTitleChange}
+                        value={titleValue}
+                        trailingAction={
+                          titleValue ? (
+                            <TextInput.Action
+                              icon={XCircleFillIcon}
+                              aria-label="Clear input"
+                              onClick={() => {
+                                setTitleValue('')
+                                searchByTitle('')
+                              }}
+                            />
+                          ) : (
+                            <></>
+                          )
+                        }
+                      />
+                    </Stack.Item>
+                    <Stack.Item>
+                      <SelectPanel
+                        renderAnchor={({children, ...anchorProps}) => (
+                          <Button
+                            {...anchorProps}
+                            sx={{width: '100%'}}
+                            alignContent="start"
+                            trailingAction={TriangleDownIcon}
+                            aria-haspopup="dialog"
+                            labelWrap
+                          >
+                            {sortSelectedItems(children as string, selectedItemsSortedFirst)}
+                          </Button>
+                        )}
+                        footer={
+                          <Button
+                            style={{width: '100%'}}
                             onClick={() => {
-                              setTitleValue('')
-                              searchByTitle('')
+                              setFilter('')
+                              setSelected([])
+                              searchByLabel([])
                             }}
-                          />
-                        ) : (
-                          <></>
-                        )
-                      }
-                    />
-                  </Stack.Item>
-                  <Stack.Item>
-                    <SelectPanel
-                      renderAnchor={({children, ...anchorProps}) => (
-                        <Button
-                          {...anchorProps}
-                          sx={{width: '100%'}}
-                          alignContent="start"
-                          trailingAction={TriangleDownIcon}
-                          aria-haspopup="dialog"
-                          labelWrap
-                        >
-                          {sortSelectedItems(children as string, selectedItemsSortedFirst)}
-                        </Button>
-                      )}
-                      footer={
-                        <Button
-                          style={{width: '100%'}}
-                          onClick={() => {
-                            setFilter('')
-                            setSelected([])
-                            searchByLabel([])
-                          }}
-                        >
-                          Clear filters
-                        </Button>
-                      }
-                      title="Select labels"
-                      placeholder={SELECT_PANEL_PLACEHOLDER}
-                      placeholderText="Filter label"
-                      open={open}
-                      onOpenChange={setOpen}
-                      items={selectedItemsSortedFirst}
-                      selected={selected}
-                      onSelectedChange={handleSelectedChange}
-                      onFilterChange={setFilter}
-                    />
-                  </Stack.Item>
-                </Stack>
+                          >
+                            Clear filters
+                          </Button>
+                        }
+                        title="Select labels"
+                        placeholder={SELECT_PANEL_PLACEHOLDER}
+                        placeholderText="Filter label"
+                        open={open}
+                        onOpenChange={setOpen}
+                        items={selectedItemsSortedFirst}
+                        selected={selected}
+                        onSelectedChange={handleSelectedChange}
+                        onFilterChange={setFilter}
+                      />
+                    </Stack.Item>
+                  </Stack>
+                </Box>
               </Stack.Item>
               <Stack.Item grow sx={{overflow: 'auto'}}>
                 <>
@@ -233,42 +237,46 @@ export default function Posts({
                   ) : issueStatus.withFilter && !issueStatus.isPending && !issues.length ? (
                     <NoFilterResult />
                   ) : (
-                    <NavList>
-                      {issues.map(item => {
-                        return (
-                          <NavList.Item
-                            href="#"
-                            aria-current={item.number === currentIssue.number ? 'page' : undefined}
-                            key={item.id}
-                            sx={{my: 1, '&:first-of-type': {mt: 0}, '&:last-of-type': {mb: 0}}}
-                            onClick={e => {
-                              e.preventDefault()
-                              onSetPostsVisible(false)
-                              onSetCurrentIssue(item)
-                            }}
-                          >
-                            <Stack direction="horizontal" gap="condensed" align="center">
-                              <Stack.Item sx={{minWidth: 0, flexGrow: 1}}>
-                                <Stack direction="horizontal" align="baseline" gap="condensed">
-                                  <Stack.Item sx={{fontWeight: 'semibold'}}>
-                                    <Truncate title={item.title} maxWidth="100%">
-                                      {item.title}
-                                    </Truncate>
-                                  </Stack.Item>
-                                  <Stack.Item sx={{flexShrink: 0}}>
-                                    <Text sx={{color: 'fg.muted', fontSize: 0}}>
-                                      #{item.number}
-                                    </Text>
-                                  </Stack.Item>
-                                </Stack>
-                              </Stack.Item>
-                              <Stack.Item sx={{flexShrink: 0, flexGrow: 0, color: 'fg.muted'}}>
-                                <ChevronRightIcon size={16} />
-                              </Stack.Item>
-                            </Stack>
-                          </NavList.Item>
-                        )
-                      })}
+                    <NavList sx={{px: 2, '&>ul': {pt: 0}}}>
+                      <Stack sx={{gap: 1}}>
+                        {issues.map(item => {
+                          const isCurrent = item.number === currentIssue.number
+                          return (
+                            <NavList.Item
+                              key={item.id}
+                              sx={{width: '100%'}}
+                              aria-current={isCurrent ? 'page' : undefined}
+                              onClick={e => {
+                                e.preventDefault()
+                                if (isCurrent) return
+                                onSetCurrentIssue(item)
+                              }}
+                            >
+                              <Stack direction="horizontal" gap="condensed" align="center">
+                                <Stack.Item sx={{minWidth: 0, flexGrow: 1}}>
+                                  <Stack direction="horizontal" align="baseline" gap="condensed">
+                                    <Stack.Item sx={{fontWeight: 'semibold'}}>
+                                      <Truncate title={item.title} maxWidth="100%">
+                                        {item.title}
+                                      </Truncate>
+                                    </Stack.Item>
+                                    <Stack.Item sx={{flexShrink: 0}}>
+                                      <Text
+                                        sx={{color: 'fg.muted', fontSize: 0, fontWeight: 'normal'}}
+                                      >
+                                        #{item.number}
+                                      </Text>
+                                    </Stack.Item>
+                                  </Stack>
+                                </Stack.Item>
+                                <Stack.Item sx={{flexShrink: 0, flexGrow: 0, color: 'fg.muted'}}>
+                                  <ChevronRightIcon size={16} />
+                                </Stack.Item>
+                              </Stack>
+                            </NavList.Item>
+                          )
+                        })}
+                      </Stack>
                     </NavList>
                   )}
                 </>
