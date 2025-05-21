@@ -134,6 +134,7 @@ export default function App() {
       />
       <Posts
         repo={repo}
+        currentIssue={currentIssue}
         currentPage={currentPage}
         issueStatus={issueStatus}
         issueCount={issueCount}

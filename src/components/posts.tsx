@@ -12,7 +12,6 @@ import {
   XCircleFillIcon,
 } from '@primer/octicons-react'
 import {
-  ActionList,
   Avatar,
   Box,
   Button,
@@ -20,6 +19,7 @@ import {
   Dialog,
   IconButton,
   Link,
+  NavList,
   PageHeader,
   Pagination,
   SelectPanel,
@@ -54,6 +54,7 @@ type LinkType = ValueOf<typeof LINK_TYPE>
 
 interface PostsProps {
   repo: RestRepo | undefined
+  currentIssue: MinimalIssue
   currentPage: number
   issueCount: number | undefined
   issueCountWithFilter: number | undefined
@@ -75,6 +76,7 @@ interface PostsProps {
 
 export default function Posts({
   repo,
+  currentIssue,
   currentPage,
   issueCount,
   issueCountWithFilter,
@@ -231,10 +233,12 @@ export default function Posts({
                   ) : issueStatus.withFilter && !issueStatus.isPending && !issues.length ? (
                     <NoFilterResult />
                   ) : (
-                    <ActionList variant="full" sx={{pb: 3}}>
+                    <NavList>
                       {issues.map(item => {
                         return (
-                          <ActionList.Item
+                          <NavList.Item
+                            href="#"
+                            aria-current={item.number === currentIssue.number ? 'page' : undefined}
                             key={item.id}
                             sx={{my: 1, '&:first-of-type': {mt: 0}, '&:last-of-type': {mb: 0}}}
                             onClick={() => {
@@ -261,10 +265,10 @@ export default function Posts({
                                 <ChevronRightIcon size={16} />
                               </Stack.Item>
                             </Stack>
-                          </ActionList.Item>
+                          </NavList.Item>
                         )
                       })}
-                    </ActionList>
+                    </NavList>
                   )}
                 </>
               </Stack.Item>
