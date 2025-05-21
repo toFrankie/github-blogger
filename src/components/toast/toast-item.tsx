@@ -17,7 +17,7 @@ export default function ToastItem({toast, onClose}: ToastItemProps) {
     const timer = setTimeout(() => {
       setIsExiting(true)
       setTimeout(onClose, 300)
-    }, toast.duration || 3000)
+    }, toast.duration)
     return () => clearTimeout(timer)
   }, [toast.duration, onClose])
 
@@ -36,6 +36,7 @@ export default function ToastItem({toast, onClose}: ToastItemProps) {
       }}
     >
       <Banner
+        className="color-shadow-medium"
         hideTitle
         title="Notice"
         variant={toast.type || 'info'}

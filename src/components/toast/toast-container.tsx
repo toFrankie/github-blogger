@@ -1,14 +1,29 @@
-import {Box, Portal, Stack} from '@primer/react'
+import {Box, Portal} from '@primer/react'
+import {useLayoutEffect, useRef, useState} from 'react'
 import {type Toast} from '@/types/toast'
 import ToastItem from './toast-item'
+
+const TOAST_CONTAINER_WIDTH = 600
+const GAP_HEIGHT = 8
 
 export default function ToastContainer({
   toasts,
   onDismiss,
 }: {
   toasts: Toast[]
-  onDismiss: (id: number) => void
+  onDismiss: (id: string) => void
 }) {
+  const itemRefs = useRef<(HTMLDivElement | null)[]>([])
+  const [heights, setHeights] = useState<number[]>([])
+
+  useLayoutEffect(() => {
+    setHeights(itemRefs.current.map(ref => ref?.offsetHeight || 0))
+  }, [toasts])
+
+  const getTranslateY = (index: number) => {
+    return heights.slice(0, index).reduce((sum, h) => sum + h + GAP_HEIGHT, 0)
+  }
+
   if (toasts.length === 0) return null
 
   return (
@@ -18,27 +33,27 @@ export default function ToastContainer({
           position: 'fixed',
           top: '8px',
           right: '8px',
-          width: '320px',
-          zIndex: 9999,
+          width: TOAST_CONTAINER_WIDTH,
+          zIndex: 500,
         }}
       >
-        <Stack gap="condensed">
-          {toasts.map((toast, idx) => (
-            <Stack.Item
-              key={toast.id}
-              sx={{
-                position: 'absolute',
-                width: '100%',
-                top: 0,
-                right: 0,
-                transform: `translateY(${idx * 76}px)`,
-                transition: 'transform 0.3s ease-out',
-              }}
-            >
+        {toasts.map((toast, index) => (
+          <Box
+            key={toast.id}
+            sx={{
+              position: 'absolute',
+              width: '100%',
+              top: 0,
+              right: 0,
+              transform: `translateY(${getTranslateY(index)}px)`,
+              transition: 'transform 0.3s ease-out',
+            }}
+          >
+            <div ref={el => (itemRefs.current[index] = el)}>
               <ToastItem toast={toast} onClose={() => onDismiss(toast.id)} />
-            </Stack.Item>
-          ))}
-        </Stack>
+            </div>
+          </Box>
+        ))}
       </Box>
     </Portal>
   )

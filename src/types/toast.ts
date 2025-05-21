@@ -7,7 +7,7 @@ export interface ToastOptions {
 }
 
 export interface Toast extends ToastOptions {
-  id: number
+  id: string
   content: string
 }
 
