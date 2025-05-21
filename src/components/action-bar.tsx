@@ -6,7 +6,7 @@ import {
   TagIcon,
 } from '@primer/octicons-react'
 import {IconButton, Stack} from '@primer/react'
-import {cloneDeep} from 'licia-es'
+import {cloneDeep} from 'licia'
 import {EMPTY_ISSUE, MESSAGE_TYPE} from '@/constants'
 import {getVscode} from '@/utils'
 

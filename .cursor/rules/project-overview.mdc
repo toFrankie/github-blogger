@@ -23,7 +23,7 @@ alwaysApply: true
 - GitHub REST API 和 GraphQL API 创建、保存、查询 Issue 和 Label 等信息
   - @octokit/core v5
 - TanStack React Query v5 管理网络请求
-- licia-es 工具库（没有用到 lodash 库）
+- licia 工具库（没有用到 lodash 库）
 - @tomjs/vite-plugin-vscode 基于该插件来开发 VSCode 扩展。
 - 使用 vscode-webview-rpc 将 Client（网页）与 Server（extension）进行通信
 

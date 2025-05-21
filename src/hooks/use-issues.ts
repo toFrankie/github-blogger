@@ -1,6 +1,8 @@
 import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query'
 import {useMemo} from 'react'
+import {SUBMIT_TYPE} from '@/constants'
 import {
+  archiveIssue,
   createIssue,
   getIssueCount,
   getIssueCountWithFilter,
@@ -8,6 +10,7 @@ import {
   getPageCursor,
   updateIssue,
 } from '@/utils/rpc'
+import {useToast} from './use-toast'
 
 interface UseIssuesParams {
   page: number
@@ -84,23 +87,35 @@ export function useIssues({page, labelNames = [], title = ''}: UseIssuesParams) 
 }
 
 export function useCreateIssue() {
+  const toast = useToast()
   const queryClient = useQueryClient()
 
   return useMutation({
     mutationFn: createIssue,
-    onSuccess: () => {
+    onSuccess: newIssue => {
       queryClient.invalidateQueries({queryKey: ['issues']})
+
+      archiveIssue(newIssue, SUBMIT_TYPE.CREATE).catch(err => {
+        console.log('🚀 ~ archiveIssue failed:', err)
+        toast.warning('Issue Archive Failed')
+      })
     },
   })
 }
 
 export function useUpdateIssue() {
+  const toast = useToast()
   const queryClient = useQueryClient()
 
   return useMutation({
     mutationFn: updateIssue,
-    onSuccess: () => {
+    onSuccess: newIssue => {
       queryClient.invalidateQueries({queryKey: ['issues']})
+
+      archiveIssue(newIssue, SUBMIT_TYPE.UPDATE).catch(err => {
+        console.log('🚀 ~ archiveIssue failed:', err)
+        toast.warning('Issue Archive Failed')
+      })
     },
   })
 }

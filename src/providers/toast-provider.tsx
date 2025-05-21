@@ -1,4 +1,4 @@
-import {uuid} from 'licia-es'
+import {uuid} from 'licia'
 import {createContext, useCallback, useContext, useState} from 'react'
 import ToastContainer from '@/components/toast/toast-container'
 import {type Toast, type ToastContextType, type ToastOptions} from '@/types/toast'

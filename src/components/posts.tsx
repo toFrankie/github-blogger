@@ -31,7 +31,7 @@ import {
 } from '@primer/react'
 import {type ActionListItemInput} from '@primer/react/deprecated'
 import {Blankslate, SkeletonAvatar, SkeletonText} from '@primer/react/experimental'
-import {debounce, intersect, unique} from 'licia-es'
+import {debounce, intersect, unique} from 'licia'
 import {useCallback, useMemo, useState} from 'react'
 import {DEFAULT_PAGINATION_SIZE, MESSAGE_TYPE} from '@/constants'
 import {getVscode} from '@/utils'

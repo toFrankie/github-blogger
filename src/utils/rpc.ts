@@ -1,4 +1,3 @@
-import {message} from 'antd'
 import dayjs from 'dayjs'
 import {WebviewRPC} from 'vscode-webview-rpc'
 import {ERROR_TYPE_MAP, MESSAGE_TYPE, SUBMIT_TYPE} from '@/constants'
@@ -100,50 +99,45 @@ export async function updateIssue(params: MinimalIssue) {
 type SubmitType = ValueOf<typeof SUBMIT_TYPE>
 
 export async function archiveIssue(issue: MinimalIssue, type: SubmitType) {
-  try {
-    const {number: issueNumber, createdAt} = issue
+  const {number: issueNumber, createdAt} = issue
 
-    if (!Number.isInteger(issueNumber)) return
+  if (!Number.isInteger(issueNumber)) return
 
-    // 1. 获取 Ref
-    const refResult = await rpcEmit<RestRef>(MESSAGE_TYPE.GET_REF)
-    const commitSha = refResult.object.sha
+  // 1. 获取 Ref
+  const refResult = await rpcEmit<RestRef>(MESSAGE_TYPE.GET_REF)
+  const commitSha = refResult.object.sha
 
-    // 2. 获取当前 Commit 的 Tree SHA
-    const commitResult = await rpcEmit<RestCommit, [string]>(MESSAGE_TYPE.GET_COMMIT, [commitSha])
-    const treeSha = commitResult.tree.sha
+  // 2. 获取当前 Commit 的 Tree SHA
+  const commitResult = await rpcEmit<RestCommit, [string]>(MESSAGE_TYPE.GET_COMMIT, [commitSha])
+  const treeSha = commitResult.tree.sha
 
-    // 3. 生成 Blob
-    const markdown = generateMarkdown(issue)
-    const blobResult = await rpcEmit<RestBlob, [string]>(MESSAGE_TYPE.CREATE_BLOB, [markdown])
-    const blobSha = blobResult.sha
+  // 3. 生成 Blob
+  const markdown = generateMarkdown(issue)
+  const blobResult = await rpcEmit<RestBlob, [string]>(MESSAGE_TYPE.CREATE_BLOB, [markdown])
+  const blobSha = blobResult.sha
 
-    // 4. 生成 Tree
-    const year = dayjs(createdAt).year()
-    const filePath = `archives/${year}/${issueNumber}.md`
-    const newTreeResult = await rpcEmit<RestTree, [string, string, string]>(
-      MESSAGE_TYPE.CREATE_TREE,
-      [treeSha, filePath, blobSha]
-    )
-    const newTreeSha = newTreeResult.sha
+  // 4. 生成 Tree
+  const year = dayjs(createdAt).year()
+  const filePath = `archives/${year}/${issueNumber}.md`
+  const newTreeResult = await rpcEmit<RestTree, [string, string, string]>(
+    MESSAGE_TYPE.CREATE_TREE,
+    [treeSha, filePath, blobSha]
+  )
+  const newTreeSha = newTreeResult.sha
 
-    // 5. 生成 Commit
-    const commitMessage =
-      type === SUBMIT_TYPE.CREATE
-        ? `docs: create issue ${issueNumber}`
-        : `docs: update issue ${issueNumber}`
-    const newCommitResult = await rpcEmit<RestCommit, [string, string, string]>(
-      MESSAGE_TYPE.CREATE_COMMIT,
-      [commitSha, newTreeSha, commitMessage]
-    )
-    const newCommitSha = newCommitResult.sha
+  // 5. 生成 Commit
+  const commitMessage =
+    type === SUBMIT_TYPE.CREATE
+      ? `docs: create issue ${issueNumber}`
+      : `docs: update issue ${issueNumber}`
+  const newCommitResult = await rpcEmit<RestCommit, [string, string, string]>(
+    MESSAGE_TYPE.CREATE_COMMIT,
+    [commitSha, newTreeSha, commitMessage]
+  )
+  const newCommitSha = newCommitResult.sha
 
-    // 6. 更新 Ref
-    await rpcEmit<RestRef, [string]>(MESSAGE_TYPE.UPDATE_REF, [newCommitSha])
-  } catch (e) {
-    console.log('🚀 ~ archiveIssue failed:', e)
-    message.error('Issue Archive Failed')
-  }
+  // 6. 更新 Ref
+  await rpcEmit<RestRef, [string]>(MESSAGE_TYPE.UPDATE_REF, [newCommitSha])
 }
 
 export async function getPageCursor(page: number) {

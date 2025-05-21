@@ -1,29 +1,16 @@
 import 'github-markdown-css'
 
 import {useQuery} from '@tanstack/react-query'
-import {message} from 'antd'
-import {Buffer} from 'buffer'
-import {cloneDeep} from 'licia-es'
+import {cloneDeep} from 'licia'
 import {useEffect, useState} from 'react'
 import {ActionBar, Editor, Labels, Posts} from '@/components'
 import {EMPTY_ISSUE, MESSAGE_TYPE} from '@/constants'
 import {useCreateIssue, useIssues, useLabels, useUpdateIssue, useUploadImages} from '@/hooks'
 import {compareIssue} from '@/utils'
 import {getRepo, rpc} from '@/utils/rpc'
+import {useToast} from './hooks/use-toast'
 
 import '@/app.css'
-
-window.Buffer = window.Buffer ?? Buffer
-
-const showError = async (res: string) => {
-  message.error(res)
-  await Promise.resolve()
-}
-
-const showSuccess = async (res: string) => {
-  message.success(res)
-  await Promise.resolve()
-}
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState(1)
@@ -53,7 +40,12 @@ export default function App() {
   const {data: allLabel, isLoading: isLoadingLabels} = useLabels()
   const {upload: handleUploadImages} = useUploadImages()
 
+  const toast = useToast()
+
   useEffect(() => {
+    const showSuccess = (res: string) => toast.success(res)
+    const showError = (res: string) => toast.critical(res)
+
     rpc.on(MESSAGE_TYPE.SHOW_SUCCESS, showSuccess)
     rpc.on(MESSAGE_TYPE.SHOW_ERROR, showError)
   }, [])
@@ -61,7 +53,7 @@ export default function App() {
   const onIssueUpdate = async () => {
     const {number, title, body} = currentIssue
     if (!title || !body) {
-      message.error('Please enter the content...')
+      toast.critical('Please enter the content...')
       return
     }
 
@@ -84,7 +76,7 @@ export default function App() {
     // check diff
     const isDiff = compareIssue(currentIssue, currentIssueOriginal)
     if (!isDiff) {
-      message.warning('No changes made.')
+      toast.warning('No changes made.')
       return
     }
 

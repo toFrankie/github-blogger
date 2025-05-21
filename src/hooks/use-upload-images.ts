@@ -1,14 +1,11 @@
 import {useMutation} from '@tanstack/react-query'
-import {message} from 'antd'
 import dayjs from 'dayjs'
 import {MESSAGE_TYPE} from '@/constants'
 import {rpc} from '@/utils/rpc'
+import {useToast} from './use-toast'
 
-function checkFile(file: File) {
+function checkFileSize(file: File) {
   const isLt2M = file.size / 1024 / 1024 < 2
-  if (!isLt2M) {
-    message.error('Image maxsize is 2MB')
-  }
   return isLt2M
 }
 
@@ -19,6 +16,8 @@ type UploadImagesResult = {
 }[]
 
 export function useUploadImages() {
+  const toast = useToast()
+
   const uploadMutation = useMutation<UploadImagesResult, Error, File[]>({
     mutationFn: async (files: File[]) => {
       if (files.length === 0) {
@@ -26,7 +25,8 @@ export function useUploadImages() {
       }
 
       const img = files[0]
-      if (!checkFile(img)) {
+      const isLt2M = checkFileSize(img)
+      if (!isLt2M) {
         throw new Error('Image maxsize is 2MB')
       }
 
@@ -49,10 +49,10 @@ export function useUploadImages() {
       })
     },
     onSuccess: () => {
-      message.success('Uploaded Successfully')
+      toast.success('Uploaded Successfully')
     },
     onError: (error: Error) => {
-      message.error(error.message || 'Upload Failed')
+      toast.critical(error.message || 'Upload Failed')
     },
   })
 

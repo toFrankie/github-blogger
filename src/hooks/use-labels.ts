@@ -1,6 +1,6 @@
 import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query'
-import {message} from 'antd'
 import {createLabel, deleteLabel, getLabels, updateLabel} from '@/utils/rpc'
+import {useToast} from './use-toast'
 
 export function useLabels() {
   return useQuery({
@@ -10,6 +10,7 @@ export function useLabels() {
 }
 
 export function useCreateLabel() {
+  const toast = useToast()
   const queryClient = useQueryClient()
 
   return useMutation({
@@ -19,15 +20,16 @@ export function useCreateLabel() {
     },
     onError: (error, variables) => {
       if (error.message.includes('already_exists')) {
-        message.error(`Label (${variables.name}) has already been taken.`)
+        toast.critical(`Label (${variables.name}) has already been taken.`)
         return
       }
-      message.error(error.message)
+      toast.critical(error.message)
     },
   })
 }
 
 export function useUpdateLabel() {
+  const toast = useToast()
   const queryClient = useQueryClient()
 
   return useMutation({
@@ -43,25 +45,26 @@ export function useUpdateLabel() {
     },
     onError: (error, variables) => {
       if (error.message.includes('already_exists')) {
-        message.error(`Label (${variables.newLabel.name}) has already been taken.`)
+        toast.critical(`Label (${variables.newLabel.name}) has already been taken.`)
         return
       }
-      message.error(error.message)
+      toast.critical(error.message)
     },
   })
 }
 
 export function useDeleteLabel() {
+  const toast = useToast()
   const queryClient = useQueryClient()
 
   return useMutation({
     mutationFn: deleteLabel,
     onSuccess: (_res, variables) => {
       queryClient.invalidateQueries({queryKey: ['labels']})
-      message.success(`Label (${variables}) deleted successfully`)
+      toast.success(`Label (${variables}) deleted successfully`)
     },
     onError: error => {
-      message.error(error.message)
+      toast.critical(error.message)
     },
   })
 }

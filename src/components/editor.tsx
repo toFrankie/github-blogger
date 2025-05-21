@@ -9,7 +9,7 @@ import mermaid from '@bytemd/plugin-mermaid'
 import {Editor as BytemdEditor} from '@bytemd/react'
 import {Label, Stack, Text, TextInput} from '@primer/react'
 import {SkeletonText} from '@primer/react/experimental'
-import {message} from 'antd'
+import {useToast} from '@/hooks/use-toast'
 
 import 'bytemd/dist/index.min.css'
 
@@ -45,9 +45,11 @@ export default function Editor({
   onRemoveLabel,
   onUploadImages,
 }: EditorProps) {
+  const toast = useToast()
+
   const copyLink = () => {
     navigator.clipboard.writeText(issue.url)
-    message.success('Link copied.')
+    toast.success('Link copied.')
   }
 
   return (
