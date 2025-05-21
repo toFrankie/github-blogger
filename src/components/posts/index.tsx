@@ -23,18 +23,18 @@ import {
   PageHeader,
   Pagination,
   SelectPanel,
-  Spinner,
   Stack,
   Text,
   TextInput,
   Truncate,
 } from '@primer/react'
 import {type ActionListItemInput} from '@primer/react/deprecated'
-import {Blankslate, SkeletonAvatar, SkeletonText} from '@primer/react/experimental'
+import {Blankslate} from '@primer/react/experimental'
 import {debounce, intersect, unique} from 'licia'
 import {useCallback, useMemo, useState} from 'react'
 import {DEFAULT_PAGINATION_SIZE, MESSAGE_TYPE} from '@/constants'
 import {getVscode} from '@/utils'
+import {ListSkeleton, PostSkeleton} from './skeleton'
 
 const SELECT_PANEL_PLACEHOLDER = 'Filter labels'
 
@@ -137,6 +137,11 @@ export default function Posts({
     [allLabel]
   )
 
+  const handleIssueClick = (e: React.MouseEvent<HTMLAnchorElement>, issue: MinimalIssue) => {
+    e.preventDefault()
+    onSetCurrentIssue(issue)
+  }
+
   if (!visible) return null
 
   return (
@@ -157,87 +162,83 @@ export default function Posts({
         </Stack>
       }
       renderBody={() => {
+        if (!repo) return <PostSkeleton />
+
         return (
           <Box sx={{height: '100%'}}>
             <Stack sx={{height: '100%'}}>
               <Stack.Item sx={{flexShrink: 0}}>
                 <Box sx={{px: 3, pt: 3}}>
                   <Stack>
-                    <Stack.Item>
-                      {repo ? <HeaderPosts repo={repo} /> : <HeaderSkeleton />}
-                    </Stack.Item>
-                    <Stack.Item>
-                      <TextInput
-                        sx={{width: '100%'}}
-                        placeholder="Title"
-                        onChange={handleTitleChange}
-                        value={titleValue}
-                        trailingAction={
-                          titleValue ? (
-                            <TextInput.Action
-                              icon={XCircleFillIcon}
-                              aria-label="Clear input"
-                              onClick={() => {
-                                setTitleValue('')
-                                searchByTitle('')
-                              }}
-                            />
-                          ) : (
-                            <></>
-                          )
-                        }
-                      />
-                    </Stack.Item>
-                    <Stack.Item>
-                      <SelectPanel
-                        renderAnchor={({children, ...anchorProps}) => (
-                          <Button
-                            {...anchorProps}
-                            sx={{width: '100%'}}
-                            alignContent="start"
-                            trailingAction={TriangleDownIcon}
-                            aria-haspopup="dialog"
-                            labelWrap
-                          >
-                            {sortSelectedItems(children as string, selectedItemsSortedFirst)}
-                          </Button>
-                        )}
-                        footer={
-                          <Button
-                            style={{width: '100%'}}
+                    <HeaderPosts repo={repo} />
+                    <TextInput
+                      sx={{width: '100%'}}
+                      placeholder="Title"
+                      onChange={handleTitleChange}
+                      value={titleValue}
+                      trailingAction={
+                        titleValue ? (
+                          <TextInput.Action
+                            icon={XCircleFillIcon}
+                            aria-label="Clear input"
                             onClick={() => {
-                              setFilter('')
-                              setSelected([])
-                              searchByLabel([])
+                              setTitleValue('')
+                              searchByTitle('')
                             }}
-                          >
-                            Clear filters
-                          </Button>
-                        }
-                        title="Select labels"
-                        placeholder={SELECT_PANEL_PLACEHOLDER}
-                        placeholderText="Filter label"
-                        open={open}
-                        onOpenChange={setOpen}
-                        items={selectedItemsSortedFirst}
-                        selected={selected}
-                        onSelectedChange={handleSelectedChange}
-                        onFilterChange={setFilter}
-                      />
-                    </Stack.Item>
+                          />
+                        ) : (
+                          <></>
+                        )
+                      }
+                    />
+                    <SelectPanel
+                      renderAnchor={({children, ...anchorProps}) => (
+                        <Button
+                          {...anchorProps}
+                          sx={{width: '100%'}}
+                          alignContent="start"
+                          trailingAction={TriangleDownIcon}
+                          aria-haspopup="dialog"
+                          labelWrap
+                        >
+                          {sortSelectedItems(children as string, selectedItemsSortedFirst)}
+                        </Button>
+                      )}
+                      footer={
+                        <Button
+                          style={{width: '100%'}}
+                          onClick={() => {
+                            setFilter('')
+                            setSelected([])
+                            searchByLabel([])
+                          }}
+                        >
+                          Clear filters
+                        </Button>
+                      }
+                      title="Select labels"
+                      placeholder={SELECT_PANEL_PLACEHOLDER}
+                      placeholderText="Filter label"
+                      open={open}
+                      onOpenChange={setOpen}
+                      items={selectedItemsSortedFirst}
+                      selected={selected}
+                      onSelectedChange={handleSelectedChange}
+                      onFilterChange={setFilter}
+                    />
                   </Stack>
                 </Box>
               </Stack.Item>
-              <Stack.Item grow sx={{overflow: 'auto'}}>
+              <Stack.Item grow sx={{px: 3, overflow: 'auto'}}>
                 <>
                   {!issues || issueStatus.isLoading ? (
-                    <Loading />
+                    <ListSkeleton />
                   ) : issueStatus.withoutIssue ? (
                     <WithoutIssue onActionClick={() => onSetPostsVisible(false)} />
                   ) : issueStatus.withFilter && !issueStatus.isPending && !issues.length ? (
                     <NoFilterResult />
                   ) : (
-                    <NavList sx={{px: 2, '&>ul': {pt: 0}}}>
+                    <NavList sx={{mx: -2, '&>ul': {pt: 0}}}>
                       <Stack sx={{gap: 1}}>
                         {issues.map(item => {
                           const isCurrent = item.number === currentIssue.number
@@ -246,11 +247,7 @@ export default function Posts({
                               key={item.id}
                               sx={{width: '100%'}}
                               aria-current={isCurrent ? 'page' : undefined}
-                              onClick={e => {
-                                e.preventDefault()
-                                if (isCurrent) return
-                                onSetCurrentIssue(item)
-                              }}
+                              onClick={e => handleIssueClick(e, item)}
                             >
                               <Stack direction="horizontal" gap="condensed" align="center">
                                 <Stack.Item sx={{minWidth: 0, flexGrow: 1}}>
@@ -302,30 +299,6 @@ export default function Posts({
   )
 }
 
-function HeaderSkeleton() {
-  return (
-    <PageHeader role="banner">
-      <PageHeader.TitleArea>
-        <PageHeader.Title>
-          <Stack direction="horizontal" gap="condensed" align="center">
-            <SkeletonAvatar size={32} />
-            <SkeletonText width="50px" />
-          </Stack>
-        </PageHeader.Title>
-      </PageHeader.TitleArea>
-      <PageHeader.Actions>
-        <Stack direction="horizontal" gap="condensed">
-          <SkeletonAvatar square size={32} />
-          <SkeletonAvatar square size={32} />
-          <SkeletonAvatar square size={32} />
-          <SkeletonAvatar square size={32} />
-          <SkeletonAvatar square size={32} />
-        </Stack>
-      </PageHeader.Actions>
-    </PageHeader>
-  )
-}
-
 interface HeaderPostsProps {
   repo: RestRepo
 }
@@ -352,7 +325,7 @@ function HeaderPosts({repo}: HeaderPostsProps) {
   }
 
   return (
-    <PageHeader role="banner">
+    <PageHeader>
       <PageHeader.TitleArea>
         <PageHeader.Title>
           <Stack gap="condensed" direction="horizontal" align="center">
@@ -416,17 +389,6 @@ function HeaderPosts({repo}: HeaderPostsProps) {
         />
       </PageHeader.Actions>
     </PageHeader>
-  )
-}
-
-function Loading() {
-  return (
-    <Blankslate spacious>
-      <Blankslate.Visual>
-        <Spinner size="medium" />
-      </Blankslate.Visual>
-      <Blankslate.Heading>Searching...</Blankslate.Heading>
-    </Blankslate>
   )
 }
 
