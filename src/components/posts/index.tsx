@@ -283,11 +283,12 @@ export default function Posts({
         )
       }}
       renderFooter={() => {
+        const count = issueStatus.withFilter ? issueCountWithFilter : issueCount
         return (
           <Box sx={{borderTop: '1px solid', borderColor: 'border.default'}}>
             <Pagination
               currentPage={currentPage}
-              pageCount={Math.ceil((issueCount ?? 0) / DEFAULT_PAGINATION_SIZE)}
+              pageCount={Math.ceil((count ?? 0) / DEFAULT_PAGINATION_SIZE)}
               surroundingPageCount={1}
               showPages={{narrow: false}}
               onPageChange={(_event, number) => onSetCurrentPage(number)}

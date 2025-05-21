@@ -311,8 +311,10 @@ export default class Service {
     return createResponse(res, octokitRes => octokitRes.data)
   }
 
-  private async getPageCursor(page: number) {
-    if (page <= 1) return null
+  private async getPageCursor(...args: GetPageCursorRpcArgs) {
+    const [page, labels, title] = args
+
+    if (page <= 1) return createResponse([null, null])
 
     const chunkLimit = GRAPHQL_PAGINATION_SIZE_LIMIT
     const targetIndex = (page - 1) * DEFAULT_PAGINATION_SIZE
@@ -329,10 +331,12 @@ export default class Service {
           name: this.config.repo,
           first,
           after: startCursor,
+          labels: labels.length > 0 ? labels : undefined,
+          title: title || undefined,
         })
       )
 
-      if (!res[1]) return null
+      if (!res[1]) return createResponse(res)
 
       startCursor = res[1].repository.issues.pageInfo.endCursor
       const hasNextPage = res[1].repository.issues.pageInfo.hasNextPage
@@ -340,7 +344,7 @@ export default class Service {
       if (!hasNextPage) break
     }
 
-    return startCursor
+    return createResponse([null, startCursor])
   }
 
   private registerRpcListener() {

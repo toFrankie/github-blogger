@@ -64,13 +64,11 @@ export async function getIssueCountWithFilter(
   ])
 }
 
-export async function getIssues(page: number = 1, labels: string[] = [], title: string = '') {
-  let pageCursor: string | null = null
-
-  if (page > 1) {
-    pageCursor = await rpcEmit<string | null, [number]>(MESSAGE_TYPE.GET_PAGE_CURSOR, [page])
-  }
-
+export async function getIssues(
+  pageCursor: string | null = null,
+  labels: string[] = [],
+  title: string = ''
+) {
   const args: GetIssuesWithFilterRpcArgs = [pageCursor, labels, title]
   const res = await rpcEmit<MinimalIssues, GetIssuesWithFilterRpcArgs>(
     MESSAGE_TYPE.GET_ISSUES_WITH_FILTER,
@@ -140,6 +138,10 @@ export async function archiveIssue(issue: MinimalIssue, type: SubmitType) {
   await rpcEmit<RestRef, [string]>(MESSAGE_TYPE.UPDATE_REF, [newCommitSha])
 }
 
-export async function getPageCursor(page: number) {
-  return rpcEmit<string | null, [number]>(MESSAGE_TYPE.GET_PAGE_CURSOR, [page])
+export async function getPageCursor(page: number, labels: string[] = [], title: string = '') {
+  return rpcEmit<string | null, GetPageCursorRpcArgs>(MESSAGE_TYPE.GET_PAGE_CURSOR, [
+    page,
+    labels,
+    title,
+  ])
 }

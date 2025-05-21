@@ -5,6 +5,8 @@ declare global {
 
   type GetIssuesWithFilterRpcArgs = [after: string | null, labels: string[], title: string]
 
+  type GetPageCursorRpcArgs = [page: number, labels: string[], title: string]
+
   type CreateIssueRpcArgs = [
     title: CreateIssueParams['title'],
     body: CreateIssueParams['body'],

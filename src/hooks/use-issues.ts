@@ -27,12 +27,13 @@ export function useIssues({page, labelNames = [], title = ''}: UseIssuesParams) 
     isPending: isPendingCursor,
   } = useQuery({
     queryKey: ['issues', 'cursor', page, title, labelNames.join(',')],
-    queryFn: () => getPageCursor(page),
+    queryFn: () => getPageCursor(page, labelNames, title),
     enabled: withCursor,
     gcTime: Infinity,
     staleTime: Infinity,
   })
 
+  // TODO: error
   const issuesEnabled = !withCursor || (withCursor && !isPendingCursor && !!targetCursor)
 
   const {
@@ -41,7 +42,7 @@ export function useIssues({page, labelNames = [], title = ''}: UseIssuesParams) 
     isPending: isPendingIssues,
   } = useQuery({
     queryKey: ['issues', 'list', page, title, labelNames.join(',')],
-    queryFn: () => getIssues(page, labelNames, title),
+    queryFn: () => getIssues(targetCursor, labelNames, title),
     enabled: issuesEnabled,
   })
 

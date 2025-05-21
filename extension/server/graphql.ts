@@ -118,6 +118,7 @@ export function getIssuesWithFilterLegacy({
   `
 }
 
+// TODO: support title
 export function getIssuesWithFilter() {
   return `
     query IssuesWithFilter(
@@ -129,10 +130,10 @@ export function getIssuesWithFilter() {
     ) {
       repository(owner: $owner, name: $name) {
         issues(
+          states: OPEN
           first: $first
           labels: $labels
           after: $after
-          states: OPEN
           orderBy: { field: CREATED_AT, direction: DESC }
         ) {
           nodes {
@@ -158,19 +159,22 @@ export function getIssuesWithFilter() {
   `
 }
 
+// TODO: support title
 export function getIssuePageCursor() {
   return `
     query GetIssuePageCursor(
       $owner: String!
       $name: String!
+      $labels: [String!]
       $first: Int
       $after: String
     ) {
       repository(owner: $owner, name: $name) {
         issues(
-          first: $first
-          after: $after
           states: OPEN
+          first: $first
+          labels: $labels
+          after: $after
           orderBy: { field: CREATED_AT, direction: DESC }
         ) {
           pageInfo {
