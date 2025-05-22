@@ -49,6 +49,7 @@ code {
 .app-bytemd .bytemd {
   min-height: 100%;
   max-height: 100%;
+  border-color: var(--borderColor-default);
   border-radius: 6px;
 }
 
@@ -62,9 +63,35 @@ code {
   border-color: var(--borderColor-accent-muted, var(--color-accent-muted, rgba(84, 174, 255, 0.4)));
 }
 
+.app-bytemd .bytemd .bytemd-toolbar {
+  background-color: var(--bgColor-muted, var(--color-canvas-subtle));
+  border-color: var(--borderColor-default);
+}
+
+.app-bytemd .bytemd .bytemd-status,
+.app-bytemd .bytemd .bytemd-sidebar,
+.app-bytemd .bytemd .bytemd-preview {
+  border-color: var(--borderColor-default);
+}
+
 .app-bytemd-changed .bytemd .bytemd-toolbar {
   background-color: var(--bgColor-accent-muted, var(--color-accent-subtle, #ddf4ff));
   border-color: var(--borderColor-accent-muted, var(--color-accent-muted, rgba(84, 174, 255, 0.4)));
+}
+
+.app-bytemd .bytemd .bytemd-toolbar .bytemd-toolbar-icon {
+  color: var(--fgColor-muted);
+}
+
+.app-bytemd .bytemd .bytemd-toolbar .bytemd-toolbar-icon-active {
+  color: var(--fgColor-accent, var(--color-accent-fg));
+}
+
+.app-bytemd .bytemd .bytemd-toolbar .bytemd-toolbar-icon:hover {
+  background-color: var(
+    --button-invisible-bgColor-hover,
+    var(--color-action-list-item-default-hover-bg)
+  );
 }
 
 .app-bytemd-changed .bytemd .bytemd-toolbar .bytemd-toolbar-icon:hover {
