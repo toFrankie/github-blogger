@@ -28,15 +28,7 @@ export default function ActionBar({
   onSetPostsVisible,
 }: ActionBoxProps) {
   return (
-    <Stack
-      gap="condensed"
-      sx={{
-        position: 'fixed',
-        right: 16,
-        bottom: 40,
-        zIndex: 50,
-      }}
-    >
+    <Stack className="app-action-bar" gap="condensed">
       <IconButton
         icon={CloudIcon}
         onClick={onUpdateIssue}

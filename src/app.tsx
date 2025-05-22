@@ -2,13 +2,13 @@ import 'github-markdown-css'
 
 import {useQuery} from '@tanstack/react-query'
 import {cloneDeep} from 'licia'
-import {useEffect, useState} from 'react'
+import {useEffect, useMemo, useState} from 'react'
 import {ActionBar, Editor, Labels, Posts} from '@/components'
 import {EMPTY_ISSUE, MESSAGE_TYPE} from '@/constants'
 import {useCreateIssue, useIssues, useLabels, useUpdateIssue, useUploadImages} from '@/hooks'
+import {useToast} from '@/hooks/use-toast'
 import {compareIssue} from '@/utils'
 import {getRepo, rpc} from '@/utils/rpc'
-import {useToast} from './hooks/use-toast'
 
 import '@/app.css'
 
@@ -22,6 +22,11 @@ export default function App() {
   )
   const [postsVisible, setPostsVisible] = useState(false)
   const [labelsVisible, setLabelsVisible] = useState(false)
+
+  const isIssueChanged = useMemo(
+    () => compareIssue(currentIssue, currentIssueOriginal),
+    [currentIssue, currentIssueOriginal]
+  )
 
   const {data: repo} = useQuery({
     queryKey: ['repo'],
@@ -74,8 +79,7 @@ export default function App() {
     }
 
     // check diff
-    const isDiff = compareIssue(currentIssue, currentIssueOriginal)
-    if (!isDiff) {
+    if (!isIssueChanged) {
       toast.warning('No changes made.')
       return
     }
@@ -119,6 +123,7 @@ export default function App() {
         issue={currentIssue}
         allLabel={allLabel}
         isLoadingLabels={isLoadingLabels}
+        isIssueChanged={isIssueChanged}
         onTitleChange={title => setCurrentIssue(prev => ({...prev, title}))}
         onBodyChange={body => setCurrentIssue(prev => ({...prev, body}))}
         onAddLabel={label =>

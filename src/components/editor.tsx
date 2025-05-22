@@ -28,6 +28,7 @@ interface EditorProps {
   issue: MinimalIssue
   allLabel: MinimalLabels | undefined
   isLoadingLabels: boolean
+  isIssueChanged: boolean
   onTitleChange: (title: string) => void
   onBodyChange: (body: string) => void
   onAddLabel: (label: MinimalLabel) => void
@@ -39,6 +40,7 @@ export default function Editor({
   issue,
   allLabel,
   isLoadingLabels,
+  isIssueChanged,
   onTitleChange,
   onBodyChange,
   onAddLabel,
@@ -53,7 +55,7 @@ export default function Editor({
   }
 
   return (
-    <Stack className="app" gap="condensed" padding="condensed">
+    <Stack className="app-editor" gap="condensed" padding="condensed">
       <Stack.Item sx={{flexShrink: 0}}>
         <Stack direction="horizontal" align="center" gap="condensed">
           <Stack.Item grow>
@@ -76,7 +78,7 @@ export default function Editor({
       <Stack.Item sx={{flexShrink: 0}}>
         <>
           {isLoadingLabels ? (
-            <SkeletonText className="app-labels-skeleton" />
+            <SkeletonText className="labels-skeleton" />
           ) : (
             <Stack direction="horizontal" gap="condensed" wrap="wrap">
               {allLabel?.map(label => {
@@ -97,7 +99,7 @@ export default function Editor({
           )}
         </>
       </Stack.Item>
-      <Stack.Item grow className="app-editor">
+      <Stack.Item grow className={`app-bytemd ${isIssueChanged ? 'app-bytemd-changed' : ''}`}>
         <BytemdEditor
           placeholder="Leave your thought here..."
           plugins={plugins}

@@ -18,10 +18,67 @@ code {
   background-color: #f6f8fa;
 }
 
-.app-labels-skeleton {
-  background-color: #eaeef2;
+.app-action-bar {
+  position: fixed;
+  right: 17px;
+  bottom: 42px;
+  z-index: 50;
 }
 
 .app-editor {
+  height: 100%;
+}
+
+.app-editor .labels-skeleton {
+  background-color: #eaeef2;
+}
+
+.app-bytemd {
   position: relative;
+}
+
+.app-bytemd .markdown-body {
+  font-size: 14px;
+}
+
+/* 占满高度，且避免整个编辑器容器滚动 */
+.app-bytemd > div {
+  height: 100%;
+}
+
+.app-bytemd .bytemd {
+  min-height: 100%;
+  max-height: 100%;
+  border-radius: 6px;
+}
+
+.app-bytemd .bytemd .bytemd-toolbar {
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
+}
+
+/* 编辑器内容有变化时，添加高亮 */
+.app-bytemd-changed .bytemd {
+  border-color: var(--borderColor-accent-muted, var(--color-accent-muted, rgba(84, 174, 255, 0.4)));
+}
+
+.app-bytemd-changed .bytemd .bytemd-toolbar {
+  background-color: var(--bgColor-accent-muted, var(--color-accent-subtle, #ddf4ff));
+  border-color: var(--borderColor-accent-muted, var(--color-accent-muted, rgba(84, 174, 255, 0.4)));
+}
+
+.app-bytemd-changed .bytemd .bytemd-toolbar .bytemd-toolbar-icon:hover {
+  background-color: var(
+    --button-invisible-bgColor-hover,
+    var(--color-action-list-item-default-hover-bg)
+  );
+}
+
+/* 编辑器全屏时，去掉圆角 */
+.app-bytemd .bytemd-fullscreen {
+  border-radius: 0;
+}
+
+.app-bytemd .bytemd-fullscreen .bytemd-toolbar {
+  border-radius: 0;
 }

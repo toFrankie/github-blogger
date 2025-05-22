@@ -11,7 +11,7 @@ import {
   TextInput,
 } from '@primer/react'
 import {useEffect, useState} from 'react'
-import {LABEL_DEFAULT_COLOR, LABEL_PREDEFINED_COLORS} from '../constants'
+import {LABEL_DEFAULT_COLOR, LABEL_PREDEFINED_COLORS} from '@/constants'
 
 const CYCLE_COLORS = [...LABEL_PREDEFINED_COLORS, LABEL_DEFAULT_COLOR]
 
