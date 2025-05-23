@@ -7,7 +7,6 @@ import {
   getIssueCount,
   getIssueCountWithFilter,
   getIssues,
-  getPageCursor,
   updateIssue,
 } from '@/utils/rpc'
 import {useToast} from './use-toast'
@@ -19,31 +18,13 @@ interface UseIssuesParams {
 }
 
 export function useIssues({page, labelNames = [], title = ''}: UseIssuesParams) {
-  const withCursor = page > 1
-
-  const {
-    data: targetCursor,
-    isLoading: isCursorLoading,
-    isPending: isPendingCursor,
-  } = useQuery({
-    queryKey: ['issues', 'cursor', page, title, labelNames.join(',')],
-    queryFn: () => getPageCursor(page, labelNames, title),
-    enabled: withCursor,
-    gcTime: Infinity,
-    staleTime: Infinity,
-  })
-
-  // TODO: error
-  const issuesEnabled = !withCursor || (withCursor && !isPendingCursor && !!targetCursor)
-
   const {
     data: issues,
     isLoading: isLoadingIssues,
     isPending: isPendingIssues,
   } = useQuery({
     queryKey: ['issues', 'list', page, title, labelNames.join(',')],
-    queryFn: () => getIssues(targetCursor, labelNames, title),
-    enabled: issuesEnabled,
+    queryFn: () => getIssues(page, labelNames, title),
   })
 
   const {data: issueCount, isFetched: isFetchedIssueCount} = useQuery({
@@ -65,18 +46,13 @@ export function useIssues({page, labelNames = [], title = ''}: UseIssuesParams) 
     return isFetchedIssueCount && issueCount === 0
   }, [isFetchedIssueCount, issueCount])
 
-  const isLoading = useMemo(
-    () => isCursorLoading || isLoadingIssues,
-    [isCursorLoading, isLoadingIssues]
-  )
-
   const isPending = useMemo(() => {
     return isPendingIssues || (withFilter && isPendingIssueCountWithFilter)
   }, [isPendingIssues, withFilter, isPendingIssueCountWithFilter])
 
   const issueStatus = useMemo(
-    () => ({withoutIssue, isLoading, isPending, withFilter}),
-    [withoutIssue, isLoading, isPending, withFilter]
+    () => ({withoutIssue, isLoading: isLoadingIssues, isPending, withFilter}),
+    [withoutIssue, isLoadingIssues, isPending, withFilter]
   )
 
   return {

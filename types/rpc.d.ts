@@ -1,11 +1,11 @@
 export {}
 
 declare global {
-  type GetIssuesRpcArgs = [page: number, labels: string]
+  type GetIssuesRpcArgs = [page: number, labels: string[]]
 
   type GetIssuesWithFilterRpcArgs = [after: string | null, labels: string[], title: string]
 
-  type GetPageCursorRpcArgs = [page: number, labels: string[], title: string]
+  type GetIssueCountWithFilterRpcArgs = [title: string, labels: string[]]
 
   type CreateIssueRpcArgs = [
     title: CreateIssueParams['title'],

@@ -21,28 +21,12 @@ declare global {
     }
   }
 
-  type GraphqlPageCursorResponse = {
-    repository: {
-      issues: {
-        pageInfo: {
-          hasNextPage: boolean
-          endCursor: string | null
-        }
-      }
-    }
-  }
-
   type GraphqlIssuesResponse = {
-    repository: {
-      issues: {
-        nodes: Array<GraphqlIssue>
-        pageInfo: {
-          startCursor: string
-          endCursor: string
-          hasNextPage: boolean
-          hasPreviousPage: boolean
-        }
-      }
+    search: {
+      issueCount: number
+      edges: Array<{
+        node: GraphqlIssue
+      }>
     }
   }
 
@@ -61,6 +45,9 @@ declare global {
         color: string
         description: string | null
       }[]
+    }
+    repository: {
+      nameWithOwner: string
     }
   }
 }

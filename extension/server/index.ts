@@ -3,7 +3,7 @@ import {ExtensionRPC} from 'vscode-webview-rpc'
 import {isEmpty} from 'licia'
 import * as vscode from 'vscode'
 
-import {GRAPHQL_PAGINATION_SIZE_LIMIT, MESSAGE_TYPE} from '../constants'
+import {MESSAGE_TYPE} from '../constants'
 import {APIS, DEFAULT_PAGINATION_SIZE} from '../constants'
 import {getSettings, to, cdnURL} from '../utils'
 import {createResponse} from '../utils/response'
@@ -12,7 +12,7 @@ import {
   normalizeIssueFromRest,
   normalizeLabelFromRest,
 } from '../utils/normalize'
-import * as query from './graphql'
+import * as graphqlQuery from './graphql'
 
 export default class Service {
   public config: Settings
@@ -100,7 +100,7 @@ export default class Service {
         repo: this.config.repo,
         per_page: DEFAULT_PAGINATION_SIZE,
         page: args[0],
-        labels: args[1],
+        labels: args[1].join(',') || undefined,
       })
     )
 
@@ -110,18 +110,31 @@ export default class Service {
   }
 
   private async getIssuesWithFilter(...args: GetIssuesWithFilterRpcArgs) {
+    const queryParts = {
+      sort: 'sort:created-desc',
+      user: `user:${this.config.user}`,
+      repo: `repo:${this.config.repo}`,
+      state: 'state:open',
+      label: isEmpty(args[1]) ? undefined : `label:${args[1].join(',')}`,
+      title: args[2] ? `in:title ${args[2]}` : '',
+    }
+
+    const variables = {
+      first: DEFAULT_PAGINATION_SIZE,
+      after: args[0] || undefined,
+      queryStr: Object.values(queryParts).filter(Boolean).join(' '),
+    }
+
     const res = await to(
-      this.octokit.graphql<GraphqlIssuesResponse>(query.getIssuesWithFilter(), {
-        owner: this.config.user,
-        name: this.config.repo,
-        first: DEFAULT_PAGINATION_SIZE,
-        after: args[0] || undefined,
-        labels: isEmpty(args[1]) ? undefined : args[1],
-      })
+      this.octokit.graphql<GraphqlIssuesResponse>(graphqlQuery.getIssuesWithFilter(), variables)
     )
 
+    const repoNameWithOwner = `${this.config.user}/${this.config.repo}`
+
     return createResponse(res, octokitRes =>
-      octokitRes.repository.issues.nodes.map(node => normalizeIssueFromGraphql(node))
+      octokitRes.search.edges
+        .filter(edge => edge.node.repository.nameWithOwner === repoNameWithOwner)
+        .map(edge => normalizeIssueFromGraphql(edge.node))
     )
   }
 
@@ -187,23 +200,29 @@ export default class Service {
   private async getIssueCount() {
     const res = await to(
       this.octokit.graphql<GraphqlIssueCountResponse>(
-        query.getIssueCount({username: this.config.user, repository: this.config.repo})
+        graphqlQuery.getIssueCount({username: this.config.user, repository: this.config.repo})
       )
     )
 
     return createResponse(res, octokitRes => octokitRes.repository.issues.totalCount)
   }
 
-  private async getIssueCountWithFilter(title: string, labels: string) {
+  private async getIssueCountWithFilter(...args: GetIssueCountWithFilterRpcArgs) {
+    const queryParts = {
+      sort: 'sort:created-desc',
+      user: `user:${this.config.user}`,
+      repo: `repo:${this.config.repo}`,
+      state: 'state:open',
+      label: isEmpty(args[1]) ? undefined : `label:${args[1].join(',')}`,
+      title: args[0] ? `in:title ${args[0]}` : '',
+    }
+
+    const variables = {
+      queryStr: Object.values(queryParts).filter(Boolean).join(' '),
+    }
+
     const res = await to<GraphqlIssueCountWithFilterResponse>(
-      this.octokit.graphql(
-        query.getIssueCountWithFilter({
-          username: this.config.user,
-          repository: this.config.repo,
-          title,
-          labels,
-        })
-      )
+      this.octokit.graphql(graphqlQuery.getIssueCountWithFilter(), variables)
     )
 
     return createResponse(res, octokitRes => octokitRes.search.issueCount)
@@ -311,42 +330,6 @@ export default class Service {
     return createResponse(res, octokitRes => octokitRes.data)
   }
 
-  private async getPageCursor(...args: GetPageCursorRpcArgs) {
-    const [page, labels, title] = args
-
-    if (page <= 1) return createResponse([null, null])
-
-    const chunkLimit = GRAPHQL_PAGINATION_SIZE_LIMIT
-    const targetIndex = (page - 1) * DEFAULT_PAGINATION_SIZE
-    const loopCount = Math.ceil(targetIndex / chunkLimit)
-    let startCursor: string | null = null
-
-    for (let i = 0; i < loopCount; i++) {
-      const isLast = i === loopCount - 1
-      const first = isLast ? targetIndex % chunkLimit : chunkLimit
-
-      const res = await to(
-        this.octokit.graphql<GraphqlPageCursorResponse>(query.getIssuePageCursor(), {
-          owner: this.config.user,
-          name: this.config.repo,
-          first,
-          after: startCursor,
-          labels: labels.length > 0 ? labels : undefined,
-          title: title || undefined,
-        })
-      )
-
-      if (!res[1]) return createResponse(res)
-
-      startCursor = res[1].repository.issues.pageInfo.endCursor
-      const hasNextPage = res[1].repository.issues.pageInfo.hasNextPage
-
-      if (!hasNextPage) break
-    }
-
-    return createResponse([null, startCursor])
-  }
-
   private registerRpcListener() {
     const labelHandlers = {
       [MESSAGE_TYPE.GET_LABELS]: this.getLabels,
@@ -375,7 +358,6 @@ export default class Service {
 
     const otherHandlers = {
       [MESSAGE_TYPE.GET_REPO]: this.getRepo,
-      [MESSAGE_TYPE.GET_PAGE_CURSOR]: this.getPageCursor,
       [MESSAGE_TYPE.UPLOAD_IMAGE]: this.uploadImage,
     }
 

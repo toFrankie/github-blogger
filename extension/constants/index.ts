@@ -9,8 +9,6 @@ export const EXTENSION_COMMAND = {
 
 export const DEFAULT_PAGINATION_SIZE = 20
 
-export const GRAPHQL_PAGINATION_SIZE_LIMIT = 100
-
 export const APIS = {
   /** Get a repository. {@link https://docs.github.com/zh/rest/repos/repos?apiVersion=2022-11-28#get-a-repository|More} */
   GET_REPO: 'GET /repos/{owner}/{repo}',
@@ -48,7 +46,6 @@ export const APIS = {
 
 export const MESSAGE_TYPE = {
   GET_REPO: 'get_repo',
-  GET_PAGE_CURSOR: 'get_page_cursor',
   GET_ISSUES: 'get_issues',
   GET_ISSUES_WITH_FILTER: 'get_issues_with_filter',
   GET_ISSUE_COUNT: 'get_issue_count',

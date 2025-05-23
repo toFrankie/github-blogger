@@ -38,27 +38,14 @@ export function getIssueCount({username, repository}: IssueCountParams) {
   `
 }
 
-export function getIssueCountWithFilter({
-  username,
-  repository,
-  title,
-  labels,
-}: IssueCountParamsWithFilter) {
-  const queryParts = {
-    user: `user:${username}`,
-    repo: `repo:${repository}`,
-    state: 'state:open',
-    label: labels ? `label:${labels}` : '',
-    title: title ? `in:title ${title}` : '',
-  }
-
-  const query = Object.values(queryParts).filter(Boolean).join(' ')
-
+export function getIssueCountWithFilter() {
   return `
-    {
+    query IssueCountWithFilter(
+      $queryStr: String!
+    ) {
       search(
         type: ISSUE
-        query: "${query}"
+        query: $queryStr
       ) {
         issueCount
       }
@@ -66,32 +53,18 @@ export function getIssueCountWithFilter({
   `
 }
 
-export function getIssuesWithFilterLegacy({
-  username,
-  repository,
-  first,
-  labels,
-  title,
-  cursor,
-}: IssueParamsWithFilter) {
-  const queryParts = {
-    user: `user:${username}`,
-    repo: `repo:${repository}`,
-    state: 'state:open',
-    label: labels ? `label:${labels}` : '',
-    title: title ? `in:title ${title}` : '',
-  }
-
-  const query = Object.values(queryParts).filter(Boolean).join(' ')
-
+export function getIssuesWithFilter() {
   return `
-    {
+    query IssuesWithFilter(
+      $first: Int!
+      $after: String
+      $queryStr: String!
+    ) {
       search(
         type: ISSUE
-        states: OPEN
-        first: ${first}
-        ${cursor ? `after: "${cursor}"` : ''}
-        query: "${query}"
+        first: $first
+        after: $after
+        query: $queryStr
       ) {
         edges {
           node {
@@ -107,79 +80,14 @@ export function getIssuesWithFilterLegacy({
                 nodes {
                   id
                   name
+                  color
                   description
                 }
               }
-            }
-          }
-        }
-      }
-    }
-  `
-}
-
-// TODO: support title
-export function getIssuesWithFilter() {
-  return `
-    query IssuesWithFilter(
-      $owner: String!
-      $name: String!
-      $labels: [String!]
-      $first: Int
-      $after: String
-    ) {
-      repository(owner: $owner, name: $name) {
-        issues(
-          states: OPEN
-          first: $first
-          labels: $labels
-          after: $after
-          orderBy: { field: CREATED_AT, direction: DESC }
-        ) {
-          nodes {
-            id
-            number
-            url
-            title
-            body
-            createdAt
-            updatedAt
-            labels(first: 100) {
-              nodes {
-                id
-                name
-                description
-                color
+              repository {
+                nameWithOwner
               }
             }
-          }
-        }
-      }
-    }
-  `
-}
-
-// TODO: support title
-export function getIssuePageCursor() {
-  return `
-    query GetIssuePageCursor(
-      $owner: String!
-      $name: String!
-      $labels: [String!]
-      $first: Int
-      $after: String
-    ) {
-      repository(owner: $owner, name: $name) {
-        issues(
-          states: OPEN
-          first: $first
-          labels: $labels
-          after: $after
-          orderBy: { field: CREATED_AT, direction: DESC }
-        ) {
-          pageInfo {
-            hasNextPage
-            endCursor
           }
         }
       }

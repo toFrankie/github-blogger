@@ -1,6 +1,7 @@
 import dayjs from 'dayjs'
+import {encode} from 'js-base64'
 import {WebviewRPC} from 'vscode-webview-rpc'
-import {ERROR_TYPE_MAP, MESSAGE_TYPE, SUBMIT_TYPE} from '@/constants'
+import {DEFAULT_PAGINATION_SIZE, ERROR_TYPE_MAP, MESSAGE_TYPE, SUBMIT_TYPE} from '@/constants'
 import {generateMarkdown, getVscode} from '@/utils'
 
 const vscode = getVscode()
@@ -58,23 +59,30 @@ export async function getIssueCountWithFilter(
     return getIssueCount()
   }
 
-  return rpcEmit<number, [string, string]>(MESSAGE_TYPE.GET_ISSUE_COUNT_WITH_FILTER, [
+  return rpcEmit<number, GetIssueCountWithFilterRpcArgs>(MESSAGE_TYPE.GET_ISSUE_COUNT_WITH_FILTER, [
     filterTitle,
-    filterLabelNames.join(','),
+    filterLabelNames,
   ])
 }
 
-export async function getIssues(
-  pageCursor: string | null = null,
-  labels: string[] = [],
-  title: string = ''
-) {
-  const args: GetIssuesWithFilterRpcArgs = [pageCursor, labels, title]
-  const res = await rpcEmit<MinimalIssues, GetIssuesWithFilterRpcArgs>(
-    MESSAGE_TYPE.GET_ISSUES_WITH_FILTER,
-    args
-  )
-  return res ?? []
+export async function getIssues(page: number = 1, labels: string[] = [], title: string = '') {
+  const useRest = !title && labels.length <= 1
+
+  let res: MinimalIssues = []
+  if (useRest) {
+    const args: GetIssuesRpcArgs = [page, labels]
+    res = await rpcEmit<MinimalIssues, GetIssuesRpcArgs>(MESSAGE_TYPE.GET_ISSUES, args)
+  } else {
+    const offset = (page - 1) * DEFAULT_PAGINATION_SIZE
+    const after = page > 1 ? encode(`cursor:${offset}`) : null
+    const args: GetIssuesWithFilterRpcArgs = [after, labels, title]
+    res = await rpcEmit<MinimalIssues, GetIssuesWithFilterRpcArgs>(
+      MESSAGE_TYPE.GET_ISSUES_WITH_FILTER,
+      args
+    )
+  }
+
+  return res
 }
 
 export async function createIssue(params: MinimalIssue) {
@@ -136,12 +144,4 @@ export async function archiveIssue(issue: MinimalIssue, type: SubmitType) {
 
   // 6. 更新 Ref
   await rpcEmit<RestRef, [string]>(MESSAGE_TYPE.UPDATE_REF, [newCommitSha])
-}
-
-export async function getPageCursor(page: number, labels: string[] = [], title: string = '') {
-  return rpcEmit<string | null, GetPageCursorRpcArgs>(MESSAGE_TYPE.GET_PAGE_CURSOR, [
-    page,
-    labels,
-    title,
-  ])
 }
