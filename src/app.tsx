@@ -147,6 +147,7 @@ export default function App() {
         allLabel={allLabel}
         visible={postsVisible}
         issues={issues}
+        isIssueChanged={isIssueChanged}
         onSetCurrentPage={onCurrentPageChange}
         onSetFilterTitle={onFilterTitleChange}
         onSetFilterLabels={onFilterLabelChange}
@@ -160,6 +161,7 @@ export default function App() {
       />
       <ActionBar
         issue={currentIssue}
+        isIssueChanged={isIssueChanged}
         onUpdateIssue={onIssueUpdate}
         onSetCurrentIssue={onCurrentIssueChange}
         onSetLabelsVisible={onLabelsVisibleChange}

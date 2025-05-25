@@ -33,6 +33,7 @@ import {Blankslate} from '@primer/react/experimental'
 import {debounce, intersect, unique} from 'licia'
 import {useCallback, useMemo, useState} from 'react'
 import {DEFAULT_PAGINATION_SIZE, MESSAGE_TYPE} from '@/constants'
+import {useUnsavedChangesConfirm} from '@/hooks/use-unsaved-changes-confirm'
 import {getVscode} from '@/utils'
 import {ListSkeleton, PostSkeleton} from './skeleton'
 
@@ -67,6 +68,7 @@ interface PostsProps {
     isLoading: boolean
     withFilter: boolean
   }
+  isIssueChanged: boolean
   onSetCurrentPage: (page: number) => void
   onSetFilterTitle: (title: string) => void
   onSetFilterLabels: (labels: string[]) => void
@@ -84,6 +86,7 @@ export default function Posts({
   visible,
   issues,
   issueStatus,
+  isIssueChanged,
   onSetCurrentPage,
   onSetFilterTitle,
   onSetFilterLabels,
@@ -94,6 +97,15 @@ export default function Posts({
   const [selected, setSelected] = useState<ActionListItemInput[]>([])
   const [filter, setFilter] = useState('')
   const [open, setOpen] = useState(false)
+
+  const handleWithUnsavedChanges = useUnsavedChangesConfirm<MinimalIssue>({
+    onConfirm: issue => {
+      if (issue) {
+        onSetCurrentIssue(issue)
+        onSetPostsVisible(false)
+      }
+    },
+  })
 
   const items = useMemo(() => {
     return allLabel.map(item => ({text: item.name}))
@@ -139,7 +151,7 @@ export default function Posts({
 
   const handleIssueClick = (e: React.MouseEvent<HTMLAnchorElement>, issue: MinimalIssue) => {
     e.preventDefault()
-    onSetCurrentIssue(issue)
+    handleWithUnsavedChanges(isIssueChanged, issue)
   }
 
   if (!visible) return null

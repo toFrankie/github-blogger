@@ -7,13 +7,16 @@ import {
 } from '@primer/octicons-react'
 import {IconButton, Stack} from '@primer/react'
 import {cloneDeep} from 'licia'
+import {useMemo, useState} from 'react'
 import {EMPTY_ISSUE, MESSAGE_TYPE} from '@/constants'
+import {useUnsavedChangesConfirm} from '@/hooks/use-unsaved-changes-confirm'
 import {getVscode} from '@/utils'
 
 const vscode = getVscode()
 
 interface ActionBoxProps {
   issue: MinimalIssue
+  isIssueChanged: boolean
   onUpdateIssue: () => Promise<void>
   onSetCurrentIssue: (issue: MinimalIssue) => void
   onSetLabelsVisible: (visible: boolean) => void
@@ -23,23 +26,44 @@ interface ActionBoxProps {
 export default function ActionBar({
   issue,
   onUpdateIssue,
+  isIssueChanged,
   onSetCurrentIssue,
   onSetLabelsVisible,
   onSetPostsVisible,
 }: ActionBoxProps) {
+  const [isSaving, setIsSaving] = useState(false)
+  const canSubmit = useMemo(
+    () => issue.title && issue.body && isIssueChanged,
+    [issue, isIssueChanged]
+  )
+
+  const handleSave = async () => {
+    setIsSaving(true)
+    onUpdateIssue().finally(() => {
+      setIsSaving(false)
+    })
+  }
+
+  const handleWithUnsavedChanges = useUnsavedChangesConfirm({
+    onConfirm: () => onSetCurrentIssue(cloneDeep(EMPTY_ISSUE)),
+  })
+
   return (
     <Stack className="app-action-bar" gap="condensed">
       <IconButton
         icon={CloudIcon}
-        onClick={onUpdateIssue}
-        description="Update issue"
-        aria-label="Update issue"
+        onClick={handleSave}
+        disabled={!canSubmit || isSaving}
+        description="Save"
+        aria-label="Save"
         tooltipDirection="w"
         variant="primary"
+        loading={isSaving}
       />
       <IconButton
         icon={PlusIcon}
-        onClick={() => onSetCurrentIssue(cloneDeep(EMPTY_ISSUE))}
+        onClick={() => handleWithUnsavedChanges(isIssueChanged)}
+        disabled={isSaving}
         description="Create new issue"
         aria-label="Create new issue"
         tooltipDirection="w"
