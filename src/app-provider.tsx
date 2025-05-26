@@ -1,5 +1,6 @@
 import {BaseStyles, ThemeProvider} from '@primer/react'
 import {QueryClient, QueryClientProvider} from '@tanstack/react-query'
+import {ReactQueryDevtools} from '@tanstack/react-query-devtools'
 import App from '@/app'
 import {ToastProvider} from '@/providers/toast-provider'
 
@@ -28,6 +29,7 @@ export default function AppProvider() {
           </ToastProvider>
         </BaseStyles>
       </ThemeProvider>
+      <ReactQueryDevtools />
     </QueryClientProvider>
   )
 }
