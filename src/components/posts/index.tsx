@@ -34,6 +34,7 @@ import {debounce, intersect, unique} from 'licia'
 import {useCallback, useMemo, useState} from 'react'
 import {DEFAULT_PAGINATION_SIZE, MESSAGE_TYPE} from '@/constants'
 import {useUnsavedChangesConfirm} from '@/hooks/use-unsaved-changes-confirm'
+import {useEditorStore} from '@/stores/use-editor-store'
 import {getVscode} from '@/utils'
 import {ListSkeleton, PostSkeleton} from './skeleton'
 
@@ -55,7 +56,6 @@ type LinkType = ValueOf<typeof LINK_TYPE>
 
 interface PostsProps {
   repo: RestRepo | undefined
-  currentIssue: MinimalIssue
   currentPage: number
   issueCount: number | undefined
   issueCountWithFilter: number | undefined
@@ -68,17 +68,14 @@ interface PostsProps {
     isLoading: boolean
     withFilter: boolean
   }
-  isIssueChanged: boolean
   onSetCurrentPage: (page: number) => void
   onSetFilterTitle: (title: string) => void
   onSetFilterLabels: (labels: string[]) => void
-  onSetCurrentIssue: (issue: MinimalIssue) => void
   onSetPostsVisible: (visible: boolean) => void
 }
 
 export default function Posts({
   repo,
-  currentIssue,
   currentPage,
   issueCount,
   issueCountWithFilter,
@@ -86,11 +83,9 @@ export default function Posts({
   visible,
   issues,
   issueStatus,
-  isIssueChanged,
   onSetCurrentPage,
   onSetFilterTitle,
   onSetFilterLabels,
-  onSetCurrentIssue,
   onSetPostsVisible,
 }: PostsProps) {
   const [titleValue, setTitleValue] = useState('')
@@ -98,10 +93,14 @@ export default function Posts({
   const [filter, setFilter] = useState('')
   const [open, setOpen] = useState(false)
 
+  const currentIssue = useEditorStore(state => state.issue)
+  const isChanged = useEditorStore(state => state.isChanged)
+  const setIssue = useEditorStore(state => state.setIssue)
+
   const handleWithUnsavedChanges = useUnsavedChangesConfirm<MinimalIssue>({
     onConfirm: issue => {
       if (issue) {
-        onSetCurrentIssue(issue)
+        setIssue(issue)
         onSetPostsVisible(false)
       }
     },
@@ -151,7 +150,7 @@ export default function Posts({
 
   const handleIssueClick = (e: React.MouseEvent<HTMLAnchorElement>, issue: MinimalIssue) => {
     e.preventDefault()
-    handleWithUnsavedChanges(isIssueChanged, issue)
+    handleWithUnsavedChanges(isChanged, issue)
   }
 
   if (!visible) return null

@@ -1,13 +1,12 @@
 import 'github-markdown-css'
 
 import {useQuery} from '@tanstack/react-query'
-import {cloneDeep} from 'licia'
-import {useEffect, useMemo, useState} from 'react'
+import {useEffect, useState} from 'react'
 import {ActionBar, Editor, Labels, Posts} from '@/components'
-import {EMPTY_ISSUE, MESSAGE_TYPE} from '@/constants'
+import {MESSAGE_TYPE} from '@/constants'
 import {useCreateIssue, useIssues, useLabels, useUpdateIssue, useUploadImages} from '@/hooks'
 import {useToast} from '@/hooks/use-toast'
-import {compareIssue} from '@/utils'
+import {useEditorStore} from '@/stores/use-editor-store'
 import {getRepo, rpc} from '@/utils/rpc'
 
 import '@/app.css'
@@ -16,17 +15,16 @@ export default function App() {
   const [currentPage, setCurrentPage] = useState(1)
   const [filterTitle, setFilterTitle] = useState('')
   const [filterLabels, setFilterLabels] = useState<string[]>([])
-  const [currentIssue, setCurrentIssue] = useState<MinimalIssue>(cloneDeep(EMPTY_ISSUE))
-  const [currentIssueOriginal, setCurrentIssueOriginal] = useState<MinimalIssue>(
-    cloneDeep(EMPTY_ISSUE)
-  )
+  const issue = useEditorStore(state => state.issue)
+  const setIssue = useEditorStore(state => state.setIssue)
+  const setTitle = useEditorStore(state => state.setTitle)
+  const setBody = useEditorStore(state => state.setBody)
+  const addLabel = useEditorStore(state => state.addLabel)
+  const removeLabel = useEditorStore(state => state.removeLabel)
+  const isIssueChanged = useEditorStore(state => state.isChanged)
+
   const [postsVisible, setPostsVisible] = useState(false)
   const [labelsVisible, setLabelsVisible] = useState(false)
-
-  const isIssueChanged = useMemo(
-    () => compareIssue(currentIssue, currentIssueOriginal),
-    [currentIssue, currentIssueOriginal]
-  )
 
   const {data: repo} = useQuery({
     queryKey: ['repo'],
@@ -56,45 +54,28 @@ export default function App() {
   }, [])
 
   const onIssueUpdate = async () => {
-    const {number, title, body} = currentIssue
-    if (!title || !body) {
-      toast.critical('Please enter the content...')
-      return
-    }
+    const {number} = issue
 
     // create
     if (number === -1) {
-      const data = await createIssue(currentIssue)
+      const data = await createIssue(issue)
       if (data) {
-        setCurrentIssue(prev => ({
-          ...prev,
+        setIssue({
+          ...issue,
           number: data.number,
           url: data.url,
           createdAt: data.createdAt,
           updatedAt: data.updatedAt,
-        }))
-        setCurrentIssueOriginal(cloneDeep(currentIssue))
+        })
       }
       return
     }
 
-    // check diff
-    if (!isIssueChanged) {
-      toast.warning('No changes made.')
-      return
-    }
-
     // update
-    const data = await updateIssue(currentIssue)
+    const data = await updateIssue(issue)
     if (data) {
-      setCurrentIssue(prev => ({...prev, updatedAt: data.updatedAt}))
-      setCurrentIssueOriginal(cloneDeep(currentIssue))
+      setIssue({...issue, updatedAt: data.updatedAt})
     }
-  }
-
-  const onCurrentIssueChange = (issue: any) => {
-    setCurrentIssue(issue)
-    setCurrentIssueOriginal(cloneDeep(issue))
   }
 
   const onPostsVisibleChange = (visible: boolean) => {
@@ -120,26 +101,18 @@ export default function App() {
   return (
     <div className="app">
       <Editor
-        issue={currentIssue}
+        issue={issue}
         allLabel={allLabel}
         isLoadingLabels={isLoadingLabels}
         isIssueChanged={isIssueChanged}
-        onTitleChange={title => setCurrentIssue(prev => ({...prev, title}))}
-        onBodyChange={body => setCurrentIssue(prev => ({...prev, body}))}
-        onAddLabel={label =>
-          setCurrentIssue(prev => ({...prev, labels: prev.labels.concat(label)}))
-        }
-        onRemoveLabel={label =>
-          setCurrentIssue(prev => ({
-            ...prev,
-            labels: prev.labels.filter(item => item.id !== label.id),
-          }))
-        }
+        onTitleChange={setTitle}
+        onBodyChange={setBody}
+        onAddLabel={addLabel}
+        onRemoveLabel={removeLabel}
         onUploadImages={handleUploadImages}
       />
       <Posts
         repo={repo}
-        currentIssue={currentIssue}
         currentPage={currentPage}
         issueStatus={issueStatus}
         issueCount={issueCount}
@@ -147,11 +120,9 @@ export default function App() {
         allLabel={allLabel}
         visible={postsVisible}
         issues={issues}
-        isIssueChanged={isIssueChanged}
         onSetCurrentPage={onCurrentPageChange}
         onSetFilterTitle={onFilterTitleChange}
         onSetFilterLabels={onFilterLabelChange}
-        onSetCurrentIssue={onCurrentIssueChange}
         onSetPostsVisible={onPostsVisibleChange}
       />
       <Labels
@@ -160,10 +131,7 @@ export default function App() {
         onSetLabelsVisible={onLabelsVisibleChange}
       />
       <ActionBar
-        issue={currentIssue}
-        isIssueChanged={isIssueChanged}
         onUpdateIssue={onIssueUpdate}
-        onSetCurrentIssue={onCurrentIssueChange}
         onSetLabelsVisible={onLabelsVisibleChange}
         onSetPostsVisible={onPostsVisibleChange}
       />

@@ -15,7 +15,7 @@ alwaysApply: true
 - 使用 React 和 TypeScript 开发
 
 ## 技术栈
-- React v18 + Vite v6 + TypeScript v5 开发与构建
+- React v18 + Vite v6 + TypeScript v5 + React Query v5 + zustand v5 + pnpm 开发与构建
 - Primer React UI 组件库
   - @primer/react
   - @primer/primitives
@@ -23,6 +23,7 @@ alwaysApply: true
 - GitHub REST API 和 GraphQL API 创建、保存、查询 Issue 和 Label 等信息
   - @octokit/core v5
 - TanStack React Query v5 管理网络请求
+- zustand 全局状态管理
 - licia 工具库（没有用到 lodash 库）
 - @tomjs/vite-plugin-vscode 基于该插件来开发 VSCode 扩展。
 - 使用 vscode-webview-rpc 将 Client（网页）与 Server（extension）进行通信

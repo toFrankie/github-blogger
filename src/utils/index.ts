@@ -74,15 +74,3 @@ export function generateMarkdown(issue: MinimalIssue) {
     labels: issue.labels.map(({name}) => name),
   })
 }
-
-export function compareIssue(newIssue: MinimalIssue, oldIssue: MinimalIssue) {
-  if (newIssue.title !== oldIssue.title) return true
-  if (newIssue.body !== oldIssue.body) return true
-  if (newIssue.labels.length !== oldIssue.labels.length) return true
-
-  for (const label of newIssue.labels) {
-    if (oldIssue.labels.findIndex(({id}) => id === label.id) === -1) return true
-  }
-
-  return false
-}

@@ -10,31 +10,32 @@ import {cloneDeep} from 'licia'
 import {useMemo, useState} from 'react'
 import {EMPTY_ISSUE, MESSAGE_TYPE} from '@/constants'
 import {useUnsavedChangesConfirm} from '@/hooks/use-unsaved-changes-confirm'
+import {useEditorStore} from '@/stores/use-editor-store'
 import {getVscode} from '@/utils'
 
 const vscode = getVscode()
 
 interface ActionBoxProps {
-  issue: MinimalIssue
-  isIssueChanged: boolean
   onUpdateIssue: () => Promise<void>
-  onSetCurrentIssue: (issue: MinimalIssue) => void
   onSetLabelsVisible: (visible: boolean) => void
   onSetPostsVisible: (visible: boolean) => void
 }
 
 export default function ActionBar({
-  issue,
   onUpdateIssue,
-  isIssueChanged,
-  onSetCurrentIssue,
   onSetLabelsVisible,
   onSetPostsVisible,
 }: ActionBoxProps) {
+  const issue = useEditorStore(state => state.issue)
+  const isChanged = useEditorStore(state => state.isChanged)
+  const canSubmit = useEditorStore(state => state.canSubmit)
+  const setIssue = useEditorStore(state => state.setIssue)
+
   const [isSaving, setIsSaving] = useState(false)
-  const canSubmit = useMemo(
-    () => issue.title && issue.body && isIssueChanged,
-    [issue, isIssueChanged]
+
+  const saveBtnEnabled = useMemo(
+    () => canSubmit && isChanged && !isSaving,
+    [canSubmit, isChanged, isSaving]
   )
 
   const handleSave = async () => {
@@ -45,7 +46,7 @@ export default function ActionBar({
   }
 
   const handleWithUnsavedChanges = useUnsavedChangesConfirm({
-    onConfirm: () => onSetCurrentIssue(cloneDeep(EMPTY_ISSUE)),
+    onConfirm: () => setIssue(cloneDeep(EMPTY_ISSUE)),
   })
 
   return (
@@ -53,7 +54,7 @@ export default function ActionBar({
       <IconButton
         icon={CloudIcon}
         onClick={handleSave}
-        disabled={!canSubmit || isSaving}
+        disabled={!saveBtnEnabled}
         description="Save"
         aria-label="Save"
         tooltipDirection="w"
@@ -62,7 +63,7 @@ export default function ActionBar({
       />
       <IconButton
         icon={PlusIcon}
-        onClick={() => handleWithUnsavedChanges(isIssueChanged)}
+        onClick={() => handleWithUnsavedChanges(isChanged)}
         disabled={isSaving}
         description="Create new issue"
         aria-label="Create new issue"
