@@ -5,12 +5,11 @@ import {
   PlusIcon,
   TagIcon,
 } from '@primer/octicons-react'
-import {IconButton, Stack} from '@primer/react'
+import {IconButton, Stack, useConfirm} from '@primer/react'
 import {cloneDeep} from 'licia'
 import {useMemo, useState} from 'react'
 import {EMPTY_ISSUE, MESSAGE_TYPE} from '@/constants'
 import {useCreateIssue, useUpdateIssue} from '@/hooks'
-import {useUnsavedChangesConfirm} from '@/hooks/use-unsaved-changes-confirm'
 import {useEditorStore} from '@/stores/use-editor-store'
 import {getVscode} from '@/utils'
 
@@ -27,17 +26,19 @@ export default function ActionBar({onSetLabelsVisible, onSetPostsVisible}: Actio
   const canSubmit = useEditorStore(state => state.canSubmit)
   const setIssue = useEditorStore(state => state.setIssue)
 
-  const [isSaving, setIsSaving] = useState(false)
-
   const {mutateAsync: createIssue} = useCreateIssue()
   const {mutateAsync: updateIssue} = useUpdateIssue()
+
+  const confirm = useConfirm()
+
+  const [isSaving, setIsSaving] = useState(false)
 
   const saveBtnEnabled = useMemo(
     () => canSubmit && isChanged && !isSaving,
     [canSubmit, isChanged, isSaving]
   )
 
-  const handleSave = async () => {
+  const onSave = async () => {
     setIsSaving(true)
 
     try {
@@ -60,15 +61,24 @@ export default function ActionBar({onSetLabelsVisible, onSetPostsVisible}: Actio
     }
   }
 
-  const handleWithUnsavedChanges = useUnsavedChangesConfirm({
-    onConfirm: () => setIssue(cloneDeep(EMPTY_ISSUE)),
-  })
+  const onSwitch = async () => {
+    const result = await confirm({
+      title: 'Tips',
+      content:
+        'You have unsaved changes. Creating a new issue will discard your current changes. Do you want to continue?',
+      cancelButtonContent: 'Cancel',
+      confirmButtonContent: 'Continue',
+      confirmButtonType: 'danger',
+    })
+    if (!result) return
+    setIssue(cloneDeep(EMPTY_ISSUE))
+  }
 
   return (
     <Stack className="app-action-bar" gap="condensed">
       <IconButton
         icon={CloudIcon}
-        onClick={handleSave}
+        onClick={onSave}
         disabled={!saveBtnEnabled}
         description="Save"
         aria-label="Save"
@@ -78,7 +88,7 @@ export default function ActionBar({onSetLabelsVisible, onSetPostsVisible}: Actio
       />
       <IconButton
         icon={PlusIcon}
-        onClick={() => handleWithUnsavedChanges(isChanged)}
+        onClick={onSwitch}
         disabled={isSaving}
         description="Create new issue"
         aria-label="Create new issue"

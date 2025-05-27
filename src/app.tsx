@@ -1,35 +1,18 @@
 import 'github-markdown-css'
 
-import {useQuery} from '@tanstack/react-query'
 import {useEffect, useState} from 'react'
 import {ActionBar, Editor, Labels, Posts} from '@/components'
 import {MESSAGE_TYPE} from '@/constants'
-import {useIssues, useLabels, useUploadImages} from '@/hooks'
+import {useLabels, useUploadImages} from '@/hooks'
 import {useToast} from '@/hooks/use-toast'
-import {getRepo, rpc} from '@/utils/rpc'
+import {rpc} from '@/utils/rpc'
 
 import '@/app.css'
 
 export default function App() {
-  const [currentPage, setCurrentPage] = useState(1)
-  const [filterTitle, setFilterTitle] = useState('')
-  const [filterLabels, setFilterLabels] = useState<string[]>([])
-
-  const [postsVisible, setPostsVisible] = useState(false)
+  const [postsVisible, setPostsVisible] = useState(true)
   const [labelsVisible, setLabelsVisible] = useState(false)
 
-  const {data: repo} = useQuery({
-    queryKey: ['repo'],
-    queryFn: () => getRepo(),
-    gcTime: Infinity,
-    staleTime: Infinity,
-  })
-
-  const {issues, issueCount, issueCountWithFilter, issueStatus} = useIssues({
-    page: currentPage,
-    labelNames: filterLabels,
-    title: filterTitle,
-  })
   const {data: allLabel, isLoading: isLoadingLabels} = useLabels()
   const {upload: handleUploadImages} = useUploadImages()
 
@@ -51,18 +34,6 @@ export default function App() {
     setLabelsVisible(visible)
   }
 
-  const onCurrentPageChange = (page: number) => {
-    setCurrentPage(page)
-  }
-
-  const onFilterTitleChange = (title: string) => {
-    setFilterTitle(title)
-  }
-
-  const onFilterLabelChange = (labels: string[]) => {
-    setFilterLabels(labels)
-  }
-
   return (
     <div className="app">
       <Editor
@@ -70,20 +41,7 @@ export default function App() {
         isLoadingLabels={isLoadingLabels}
         onUploadImages={handleUploadImages}
       />
-      <Posts
-        repo={repo}
-        currentPage={currentPage}
-        issueStatus={issueStatus}
-        issueCount={issueCount}
-        issueCountWithFilter={issueCountWithFilter}
-        allLabel={allLabel}
-        visible={postsVisible}
-        issues={issues}
-        onSetCurrentPage={onCurrentPageChange}
-        onSetFilterTitle={onFilterTitleChange}
-        onSetFilterLabels={onFilterLabelChange}
-        onSetPostsVisible={onPostsVisibleChange}
-      />
+      <Posts allLabel={allLabel} visible={postsVisible} onSetPostsVisible={onPostsVisibleChange} />
       <Labels
         allLabel={allLabel}
         visible={labelsVisible}

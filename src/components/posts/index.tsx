@@ -27,15 +27,18 @@ import {
   Text,
   TextInput,
   Truncate,
+  useConfirm,
 } from '@primer/react'
 import {type ActionListItemInput} from '@primer/react/deprecated'
 import {Blankslate} from '@primer/react/experimental'
+import {useQuery} from '@tanstack/react-query'
 import {debounce, intersect, unique} from 'licia'
 import {useCallback, useMemo, useState} from 'react'
 import {DEFAULT_PAGINATION_SIZE, MESSAGE_TYPE} from '@/constants'
-import {useUnsavedChangesConfirm} from '@/hooks/use-unsaved-changes-confirm'
+import {useIssues} from '@/hooks'
 import {useEditorStore} from '@/stores/use-editor-store'
 import {getVscode} from '@/utils'
+import {getRepo} from '@/utils/rpc'
 import {ListSkeleton, PostSkeleton} from './skeleton'
 
 const SELECT_PANEL_PLACEHOLDER = 'Filter labels'
@@ -55,56 +58,39 @@ const LINK_TYPE = {
 type LinkType = ValueOf<typeof LINK_TYPE>
 
 interface PostsProps {
-  repo: RestRepo | undefined
-  currentPage: number
-  issueCount: number | undefined
-  issueCountWithFilter: number | undefined
   allLabel: MinimalLabels | undefined
   visible: boolean
-  issues: MinimalIssues | undefined
-  issueStatus: {
-    withoutIssue: boolean
-    isPending: boolean
-    isLoading: boolean
-    withFilter: boolean
-  }
-  onSetCurrentPage: (page: number) => void
-  onSetFilterTitle: (title: string) => void
-  onSetFilterLabels: (labels: string[]) => void
   onSetPostsVisible: (visible: boolean) => void
 }
 
-export default function Posts({
-  repo,
-  currentPage,
-  issueCount,
-  issueCountWithFilter,
-  allLabel = [],
-  visible,
-  issues,
-  issueStatus,
-  onSetCurrentPage,
-  onSetFilterTitle,
-  onSetFilterLabels,
-  onSetPostsVisible,
-}: PostsProps) {
+export default function Posts({allLabel = [], visible, onSetPostsVisible}: PostsProps) {
+  const [currentPage, setCurrentPage] = useState(1)
+  const [filterTitle, setFilterTitle] = useState('')
+  const [filterLabelNames, setFilterLabelNames] = useState<string[]>([])
+
   const [titleValue, setTitleValue] = useState('')
   const [selected, setSelected] = useState<ActionListItemInput[]>([])
   const [filter, setFilter] = useState('')
   const [open, setOpen] = useState(false)
 
-  const currentIssue = useEditorStore(state => state.issue)
+  const confirm = useConfirm()
+
+  const {data: repo} = useQuery({
+    queryKey: ['repo'],
+    queryFn: () => getRepo(),
+    gcTime: Infinity,
+    staleTime: Infinity,
+  })
+
+  const {issues, issueCount, issueCountWithFilter, issueStatus} = useIssues({
+    page: currentPage,
+    labelNames: filterLabelNames,
+    title: filterTitle,
+  })
+
+  const currentIssueNumber = useEditorStore(state => state.issue.number)
   const isChanged = useEditorStore(state => state.isChanged)
   const setIssue = useEditorStore(state => state.setIssue)
-
-  const handleWithUnsavedChanges = useUnsavedChangesConfirm<MinimalIssue>({
-    onConfirm: issue => {
-      if (issue) {
-        setIssue(issue)
-        onSetPostsVisible(false)
-      }
-    },
-  })
 
   const items = useMemo(() => {
     return allLabel.map(item => ({text: item.name}))
@@ -132,8 +118,8 @@ export default function Posts({
 
   const searchByTitle = useCallback(
     debounce((title: string) => {
-      onSetFilterTitle(title)
-      onSetCurrentPage(1)
+      setFilterTitle(title)
+      setCurrentPage(1)
     }, 500),
     []
   )
@@ -142,15 +128,35 @@ export default function Posts({
     debounce((labels: string[]) => {
       const allName = allLabel.map(l => l.name)
       const filteredNames: string[] = intersect(allName, labels)
-      onSetCurrentPage(1)
-      onSetFilterLabels(filteredNames)
+      setCurrentPage(1)
+      setFilterLabelNames(filteredNames)
     }, 500),
     [allLabel]
   )
 
-  const handleIssueClick = (e: React.MouseEvent<HTMLAnchorElement>, issue: MinimalIssue) => {
+  const handleIssueClick = async (e: React.MouseEvent<HTMLAnchorElement>, issue: MinimalIssue) => {
     e.preventDefault()
-    handleWithUnsavedChanges(isChanged, issue)
+
+    if (issue.number === currentIssueNumber) {
+      onSetPostsVisible(false)
+      return
+    }
+
+    if (isChanged) {
+      const result = await confirm({
+        title: 'Tips',
+        content:
+          'You have unsaved changes. Switching to another issue will discard your current changes. Do you want to continue?',
+        cancelButtonContent: 'Cancel',
+        confirmButtonContent: 'Continue',
+        confirmButtonType: 'danger',
+      })
+
+      if (!result) return
+    }
+
+    setIssue(issue)
+    onSetPostsVisible(false)
   }
 
   if (!visible) return null
@@ -252,7 +258,7 @@ export default function Posts({
                     <NavList sx={{mx: -2, '&>ul': {pt: 0}}}>
                       <Stack sx={{gap: 1}}>
                         {issues.map(item => {
-                          const isCurrent = item.number === currentIssue.number
+                          const isCurrent = item.number === currentIssueNumber
                           return (
                             <NavList.Item
                               key={item.id}
@@ -302,7 +308,7 @@ export default function Posts({
               pageCount={Math.ceil((count ?? 0) / DEFAULT_PAGINATION_SIZE)}
               surroundingPageCount={1}
               showPages={{narrow: false}}
-              onPageChange={(_event, number) => onSetCurrentPage(number)}
+              onPageChange={(_event, number) => setCurrentPage(number)}
             />
           </Box>
         )
