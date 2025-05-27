@@ -10,6 +10,7 @@ import {Editor as BytemdEditor} from '@bytemd/react'
 import {Label, Stack, Text, TextInput} from '@primer/react'
 import {SkeletonText} from '@primer/react/experimental'
 import {useToast} from '@/hooks/use-toast'
+import {useEditorStore} from '@/stores/use-editor-store'
 
 import 'bytemd/dist/index.min.css'
 
@@ -25,29 +26,20 @@ const plugins = [
 ]
 
 interface EditorProps {
-  issue: MinimalIssue
   allLabel: MinimalLabels | undefined
   isLoadingLabels: boolean
-  isIssueChanged: boolean
-  onTitleChange: (title: string) => void
-  onBodyChange: (body: string) => void
-  onAddLabel: (label: MinimalLabel) => void
-  onRemoveLabel: (label: MinimalLabel) => void
   onUploadImages: ClientUploadImages
 }
 
-export default function Editor({
-  issue,
-  allLabel,
-  isLoadingLabels,
-  isIssueChanged,
-  onTitleChange,
-  onBodyChange,
-  onAddLabel,
-  onRemoveLabel,
-  onUploadImages,
-}: EditorProps) {
+export default function Editor({allLabel, isLoadingLabels, onUploadImages}: EditorProps) {
   const toast = useToast()
+
+  const issue = useEditorStore(state => state.issue)
+  const setTitle = useEditorStore(state => state.setTitle)
+  const setBody = useEditorStore(state => state.setBody)
+  const addLabel = useEditorStore(state => state.addLabel)
+  const removeLabel = useEditorStore(state => state.removeLabel)
+  const isIssueChanged = useEditorStore(state => state.isChanged)
 
   const copyLink = () => {
     navigator.clipboard.writeText(issue.url)
@@ -63,7 +55,7 @@ export default function Editor({
               block
               placeholder="Title"
               value={issue.title}
-              onChange={e => onTitleChange(e.target.value)}
+              onChange={e => setTitle(e.target.value)}
             />
           </Stack.Item>
           {issue.number > -1 && (
@@ -88,7 +80,7 @@ export default function Editor({
                     key={label.id}
                     size="small"
                     variant={checked ? 'accent' : 'secondary'}
-                    onClick={() => (!checked ? onAddLabel(label) : onRemoveLabel(label))}
+                    onClick={() => (!checked ? addLabel(label) : removeLabel(label))}
                     sx={{fontSize: '11px'}}
                   >
                     {label.name}
@@ -106,7 +98,7 @@ export default function Editor({
           previewDebounce={50}
           uploadImages={onUploadImages}
           value={issue.body}
-          onChange={onBodyChange}
+          onChange={setBody}
         />
       </Stack.Item>
     </Stack>
