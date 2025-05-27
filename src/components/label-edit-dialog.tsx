@@ -9,31 +9,25 @@ import {
   Stack,
   Text,
   TextInput,
+  useConfirm,
 } from '@primer/react'
 import {useEffect, useState} from 'react'
 import {LABEL_DEFAULT_COLOR, LABEL_PREDEFINED_COLORS} from '@/constants'
+import {useCreateLabel, useDeleteLabel, useUpdateLabel} from '@/hooks'
 
 const CYCLE_COLORS = [...LABEL_PREDEFINED_COLORS, LABEL_DEFAULT_COLOR]
 
 const HEX_COLOR_REGEX = /^[0-9A-Fa-f]{6}$/
 
 interface LabelEditDialogProps {
-  isSaving?: boolean
-  isDeleting?: boolean
   label?: MinimalLabel | null
   allLabelName: string[]
-  onSave: (label: {name: string; color: string; description: string | null}) => Promise<void>
-  onDelete?: (labelName: string) => Promise<void>
   onClose: () => void
 }
 
 export default function LabelEditDialog({
-  isSaving,
-  isDeleting,
   label: originalLabel,
   allLabelName,
-  onSave,
-  onDelete,
   onClose,
 }: LabelEditDialogProps) {
   const [name, setName] = useState('')
@@ -47,7 +41,15 @@ export default function LabelEditDialog({
   )
   const [isColorGridOpen, setIsColorGridOpen] = useState(false)
 
-  const isEditing = !!originalLabel
+  const [isSaving, setIsSaving] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
+  const isEditMode = !!originalLabel
+
+  const {mutateAsync: createLabelAsync} = useCreateLabel()
+  const {mutateAsync: updateLabelAsync} = useUpdateLabel()
+  const {mutateAsync: deleteLabelAsync} = useDeleteLabel()
+
+  const confirm = useConfirm()
 
   useEffect(() => {
     setNameError(null)
@@ -127,18 +129,50 @@ export default function LabelEditDialog({
   const handleSubmit = async () => {
     if (!validate()) return
 
-    const data = {
-      name: name.trim(),
-      color: color.trim() || LABEL_DEFAULT_COLOR,
-      description: description.trim() || null,
-    }
+    setIsSaving(true)
 
-    await onSave(data)
+    try {
+      const newLabel = {
+        name: name.trim(),
+        color: color.trim() || LABEL_DEFAULT_COLOR,
+        description: description.trim() || null,
+      }
+
+      if (isEditMode) {
+        await updateLabelAsync({
+          newLabel,
+          oldLabel: originalLabel,
+        })
+      } else {
+        await createLabelAsync(newLabel)
+      }
+
+      onClose()
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   const handleDelete = async () => {
-    if (originalLabel && onDelete) {
-      await onDelete(originalLabel.name)
+    if (!originalLabel) return
+
+    const result = await confirm({
+      title: 'Tips',
+      content: 'Are you sure? Deleting a label will remove it from all issues and pull requests.',
+      cancelButtonContent: 'Cancel',
+      confirmButtonContent: 'Delete',
+      confirmButtonType: 'danger',
+    })
+
+    if (!result) return
+
+    setIsDeleting(true)
+
+    try {
+      await deleteLabelAsync(originalLabel.name)
+      onClose()
+    } finally {
+      setIsDeleting(false)
     }
   }
 
@@ -205,12 +239,13 @@ export default function LabelEditDialog({
     name.trim() && isColorFieldValidForSubmission && !nameError && !isSaving && !isDeleting
 
   const footerButtons: DialogButtonProps[] = [
-    ...(isEditing
+    ...(isEditMode
       ? [
           {
             buttonType: 'danger' as const,
-            content: isDeleting ? 'Deleting...' : 'Delete',
+            content: 'Delete',
             onClick: handleDelete,
+            loading: isDeleting,
             disabled: isDeleting || isSaving,
           },
         ]
@@ -219,19 +254,19 @@ export default function LabelEditDialog({
       buttonType: 'default' as const,
       content: 'Cancel',
       onClick: onClose,
-      disabled: isSaving || isDeleting,
+      disabled: isDeleting || isSaving,
     },
     {
       buttonType: 'primary' as const,
-      content: isSaving ? 'Saving...' : isEditing ? 'Save changes' : 'Create label',
+      content: isEditMode ? 'Save changes' : 'Create label',
       onClick: handleSubmit,
-      disabled: !canSubmit || isSaving,
+      disabled: !canSubmit || isDeleting || isSaving,
     },
   ]
 
   return (
     <Dialog
-      title={isEditing ? 'Edit label' : 'Create new label'}
+      title={isEditMode ? 'Edit label' : 'Create new label'}
       onClose={onClose}
       footerButtons={footerButtons}
     >

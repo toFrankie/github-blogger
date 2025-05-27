@@ -10,7 +10,7 @@ import {rpc} from '@/utils/rpc'
 import '@/app.css'
 
 export default function App() {
-  const [postsVisible, setPostsVisible] = useState(true)
+  const [postsVisible, setPostsVisible] = useState(false)
   const [labelsVisible, setLabelsVisible] = useState(false)
 
   const {data: allLabel, isLoading: isLoadingLabels} = useLabels()

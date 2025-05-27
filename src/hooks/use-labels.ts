@@ -15,8 +15,9 @@ export function useCreateLabel() {
 
   return useMutation({
     mutationFn: (label: Omit<MinimalLabel, 'id'>) => createLabel(label),
-    onSuccess: () => {
+    onSuccess: issue => {
       queryClient.invalidateQueries({queryKey: ['labels']})
+      toast.success(`Label (${issue.name}) created.`)
     },
     onError: (error, variables) => {
       if (error.message.includes('already_exists')) {
@@ -61,7 +62,7 @@ export function useDeleteLabel() {
     mutationFn: deleteLabel,
     onSuccess: (_res, variables) => {
       queryClient.invalidateQueries({queryKey: ['labels']})
-      toast.success(`Label (${variables}) deleted successfully`)
+      toast.success(`Label (${variables}) deleted.`)
     },
     onError: error => {
       toast.critical(error.message)
