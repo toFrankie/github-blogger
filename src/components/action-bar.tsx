@@ -118,8 +118,8 @@ export default function ActionBar({onSetLabelsVisible, onSetPostsVisible}: Actio
       <IconButton
         icon={ListUnorderedIcon}
         onClick={() => onSetPostsVisible(true)}
-        description="Posts"
-        aria-label="Posts"
+        description="Issues"
+        aria-label="Issues"
         tooltipDirection="w"
       />
     </Stack>

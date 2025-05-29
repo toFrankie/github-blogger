@@ -35,7 +35,7 @@ import {useQuery} from '@tanstack/react-query'
 import {debounce, intersect, unique} from 'licia'
 import {useCallback, useMemo, useState} from 'react'
 import {DEFAULT_PAGINATION_SIZE, MESSAGE_TYPE} from '@/constants'
-import {useIssues} from '@/hooks'
+import {useIssues, useLabels} from '@/hooks'
 import {useEditorStore} from '@/stores/use-editor-store'
 import {getVscode} from '@/utils'
 import {getRepo} from '@/utils/rpc'
@@ -58,12 +58,11 @@ const LINK_TYPE = {
 type LinkType = ValueOf<typeof LINK_TYPE>
 
 interface PostsProps {
-  allLabel: MinimalLabels | undefined
   visible: boolean
   onSetPostsVisible: (visible: boolean) => void
 }
 
-export default function Posts({allLabel = [], visible, onSetPostsVisible}: PostsProps) {
+export default function Posts({visible, onSetPostsVisible}: PostsProps) {
   const [currentPage, setCurrentPage] = useState(1)
   const [filterTitle, setFilterTitle] = useState('')
   const [filterLabelNames, setFilterLabelNames] = useState<string[]>([])
@@ -72,6 +71,8 @@ export default function Posts({allLabel = [], visible, onSetPostsVisible}: Posts
   const [selected, setSelected] = useState<ActionListItemInput[]>([])
   const [filter, setFilter] = useState('')
   const [open, setOpen] = useState(false)
+
+  const {data: labels = []} = useLabels()
 
   const confirm = useConfirm()
 
@@ -93,8 +94,8 @@ export default function Posts({allLabel = [], visible, onSetPostsVisible}: Posts
   const setIssue = useEditorStore(state => state.setIssue)
 
   const items = useMemo(() => {
-    return allLabel.map(item => ({text: item.name}))
-  }, [allLabel])
+    return labels.map(item => ({text: item.name}))
+  }, [labels])
 
   const filteredItems = items.filter(
     item =>
@@ -106,8 +107,8 @@ export default function Posts({allLabel = [], visible, onSetPostsVisible}: Posts
 
   const handleSelectedChange = (items: ActionListItemInput[]) => {
     setSelected(items)
-    const labels = items.map(item => item.text).filter(Boolean) as string[]
-    searchByLabel(labels)
+    const labelNames = items.map(item => item.text).filter(Boolean) as string[]
+    searchByLabel(labelNames)
   }
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -125,13 +126,13 @@ export default function Posts({allLabel = [], visible, onSetPostsVisible}: Posts
   )
 
   const searchByLabel = useCallback(
-    debounce((labels: string[]) => {
-      const allName = allLabel.map(l => l.name)
-      const filteredNames: string[] = intersect(allName, labels)
+    debounce((labelNames: string[]) => {
+      const allName = labels.map(l => l.name)
+      const filteredNames: string[] = intersect(allName, labelNames)
       setCurrentPage(1)
       setFilterLabelNames(filteredNames)
     }, 500),
-    [allLabel]
+    [labels]
   )
 
   const handleIssueClick = async (e: React.MouseEvent<HTMLAnchorElement>, issue: MinimalIssue) => {
@@ -168,7 +169,7 @@ export default function Posts({allLabel = [], visible, onSetPostsVisible}: Posts
       onClose={() => onSetPostsVisible(false)}
       title={
         <Stack align="center" gap="condensed" direction="horizontal">
-          <Stack.Item>Posts</Stack.Item>
+          <Stack.Item>Issues</Stack.Item>
           {issueCount && issueStatus.withFilter && issueCountWithFilter ? (
             <CounterLabel sx={{color: 'fg.muted'}}>
               {issueCountWithFilter}/{issueCount}
@@ -190,7 +191,7 @@ export default function Posts({allLabel = [], visible, onSetPostsVisible}: Posts
                     <HeaderPosts repo={repo} />
                     <TextInput
                       sx={{width: '100%'}}
-                      placeholder="Title"
+                      placeholder="Filter title"
                       onChange={handleTitleChange}
                       value={titleValue}
                       trailingAction={

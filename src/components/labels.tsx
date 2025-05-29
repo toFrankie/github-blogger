@@ -1,24 +1,27 @@
 import {PlusIcon} from '@primer/octicons-react'
 import {Box, CounterLabel, Dialog, IssueLabelToken, Stack} from '@primer/react'
 import {useMemo, useState} from 'react'
+import {useLabels} from '@/hooks'
 import LabelEditDialog from './label-edit-dialog'
 
 interface LabelsProps {
-  allLabel: MinimalLabels | undefined
   visible: boolean
   onSetLabelsVisible: (visible: boolean) => void
 }
 
-export default function Labels({allLabel = [], visible, onSetLabelsVisible}: LabelsProps) {
+export default function Labels({visible, onSetLabelsVisible}: LabelsProps) {
   const [hoveredId, setHoveredId] = useState<string>('')
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [editingLabel, setEditingLabel] = useState<MinimalLabel | null>(null)
 
+  const {data: labels = []} = useLabels()
+
   const allLabelName = useMemo(() => {
-    return allLabel
+    if (!labels) return []
+    return labels
       .filter(label => !editingLabel || label.id !== editingLabel.id)
       .map(label => label.name)
-  }, [allLabel, editingLabel])
+  }, [labels, editingLabel])
 
   const openEditDialog = (label: MinimalLabel) => {
     setEditingLabel(label)
@@ -46,16 +49,16 @@ export default function Labels({allLabel = [], visible, onSetLabelsVisible}: Lab
         title={
           <Stack align="center" gap="condensed" direction="horizontal">
             <Stack.Item>Labels</Stack.Item>
-            {allLabel.length > 0 && (
+            {labels.length > 0 && (
               <Stack.Item>
-                <CounterLabel sx={{color: 'fg.muted'}}>{allLabel.length}</CounterLabel>
+                <CounterLabel sx={{color: 'fg.muted'}}>{labels.length}</CounterLabel>
               </Stack.Item>
             )}
           </Stack>
         }
       >
         <Stack gap="condensed" direction="horizontal" wrap="wrap">
-          {allLabel.map(label => (
+          {labels.map(label => (
             <Stack.Item
               key={label.id}
               sx={{position: 'relative'}}

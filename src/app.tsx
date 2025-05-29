@@ -3,7 +3,6 @@ import 'github-markdown-css'
 import {useEffect, useState} from 'react'
 import {ActionBar, Editor, Labels, Posts} from '@/components'
 import {MESSAGE_TYPE} from '@/constants'
-import {useLabels, useUploadImages} from '@/hooks'
 import {useToast} from '@/hooks/use-toast'
 import {rpc} from '@/utils/rpc'
 
@@ -12,9 +11,6 @@ import '@/app.css'
 export default function App() {
   const [postsVisible, setPostsVisible] = useState(false)
   const [labelsVisible, setLabelsVisible] = useState(false)
-
-  const {data: allLabel, isLoading: isLoadingLabels} = useLabels()
-  const {upload: handleUploadImages} = useUploadImages()
 
   const toast = useToast()
 
@@ -36,17 +32,9 @@ export default function App() {
 
   return (
     <div className="app">
-      <Editor
-        allLabel={allLabel}
-        isLoadingLabels={isLoadingLabels}
-        onUploadImages={handleUploadImages}
-      />
-      <Posts allLabel={allLabel} visible={postsVisible} onSetPostsVisible={onPostsVisibleChange} />
-      <Labels
-        allLabel={allLabel}
-        visible={labelsVisible}
-        onSetLabelsVisible={onLabelsVisibleChange}
-      />
+      <Editor />
+      <Posts visible={postsVisible} onSetPostsVisible={onPostsVisibleChange} />
+      <Labels visible={labelsVisible} onSetLabelsVisible={onLabelsVisibleChange} />
       <ActionBar
         onSetLabelsVisible={onLabelsVisibleChange}
         onSetPostsVisible={onPostsVisibleChange}

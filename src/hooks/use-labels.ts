@@ -6,6 +6,7 @@ export function useLabels() {
   return useQuery({
     queryKey: ['labels'],
     queryFn: getLabels,
+    // placeholderData: [], TODO:
   })
 }
 

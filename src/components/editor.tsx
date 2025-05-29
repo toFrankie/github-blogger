@@ -9,8 +9,10 @@ import mermaid from '@bytemd/plugin-mermaid'
 import {Editor as BytemdEditor} from '@bytemd/react'
 import {Label, Stack, Text, TextInput} from '@primer/react'
 import {SkeletonText} from '@primer/react/experimental'
+import {useLabels, useUploadImages} from '@/hooks'
 import {useToast} from '@/hooks/use-toast'
 import {useEditorStore} from '@/stores/use-editor-store'
+import {FlashWithRetry} from './flash-with-retry'
 
 import 'bytemd/dist/index.min.css'
 
@@ -25,13 +27,7 @@ const plugins = [
   mermaid(),
 ]
 
-interface EditorProps {
-  allLabel: MinimalLabels | undefined
-  isLoadingLabels: boolean
-  onUploadImages: ClientUploadImages
-}
-
-export default function Editor({allLabel, isLoadingLabels, onUploadImages}: EditorProps) {
+export default function Editor() {
   const toast = useToast()
 
   const issue = useEditorStore(state => state.issue)
@@ -40,6 +36,15 @@ export default function Editor({allLabel, isLoadingLabels, onUploadImages}: Edit
   const addLabel = useEditorStore(state => state.addLabel)
   const removeLabel = useEditorStore(state => state.removeLabel)
   const isIssueChanged = useEditorStore(state => state.isChanged)
+
+  const {upload: handleUploadImages} = useUploadImages()
+
+  const {
+    data: labels,
+    isLoading: isLoadingLabels,
+    isError: isErrorLabels,
+    refetch: refetchLabels,
+  } = useLabels()
 
   const copyLink = () => {
     navigator.clipboard.writeText(issue.url)
@@ -69,11 +74,16 @@ export default function Editor({allLabel, isLoadingLabels, onUploadImages}: Edit
       </Stack.Item>
       <Stack.Item sx={{flexShrink: 0}}>
         <>
-          {isLoadingLabels ? (
+          {isErrorLabels ? (
+            <FlashWithRetry
+              message="获取数据失败，请检查网络连接或稍后重试。若持续失败，请联系管理员。"
+              onRetry={() => refetchLabels()}
+            />
+          ) : isLoadingLabels ? (
             <SkeletonText className="labels-skeleton" />
           ) : (
             <Stack direction="horizontal" gap="condensed" wrap="wrap">
-              {allLabel?.map(label => {
+              {labels?.map(label => {
                 const checked = issue.labels.some(l => l.id === label.id)
                 return (
                   <Label
@@ -96,7 +106,7 @@ export default function Editor({allLabel, isLoadingLabels, onUploadImages}: Edit
           placeholder="Leave your thought here..."
           plugins={plugins}
           previewDebounce={50}
-          uploadImages={onUploadImages}
+          uploadImages={handleUploadImages}
           value={issue.body}
           onChange={setBody}
         />
