@@ -43,19 +43,10 @@ export default function ActionBar({onLabelsVisible, onIssuesVisible}: ActionBoxP
 
     try {
       if (issue.number === -1) {
-        const data = await createIssue(issue)
-        setIssue({
-          ...issue,
-          number: data.number,
-          url: data.url,
-          createdAt: data.createdAt,
-          updatedAt: data.updatedAt,
-        })
+        await createIssue(issue)
         return
       }
-
-      const data = await updateIssue(issue)
-      setIssue({...issue, updatedAt: data.updatedAt})
+      await updateIssue(issue)
     } finally {
       setIsSaving(false)
     }

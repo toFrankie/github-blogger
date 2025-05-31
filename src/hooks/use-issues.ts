@@ -1,6 +1,8 @@
 import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query'
+import {sleep} from 'licia'
 import {useMemo} from 'react'
 import {SUBMIT_TYPE} from '@/constants'
+import {useEditorStore} from '@/stores/use-editor-store'
 import {
   archiveIssue,
   createIssue,
@@ -55,16 +57,26 @@ export function useIssueCountWithFilter({
 export function useCreateIssue() {
   const toast = useToast()
   const queryClient = useQueryClient()
+  const setIssue = useEditorStore(state => state.setIssue)
 
   return useMutation({
     mutationFn: createIssue,
-    onSuccess: newIssue => {
-      queryClient.invalidateQueries({queryKey: ['issues']})
+    onSuccess: async newIssue => {
+      setIssue(newIssue)
+      toast.success('Issue Created.')
 
       archiveIssue(newIssue, SUBMIT_TYPE.CREATE).catch(err => {
         console.log('🚀 ~ archiveIssue failed:', err)
-        toast.warning('Issue Archive Failed')
+        toast.warning('Issue Archive Failed.')
       })
+
+      // 创建完马上查询可能会查不到，延迟一下
+      await sleep(1000)
+      queryClient.invalidateQueries({queryKey: ['issues']})
+    },
+    onError: err => {
+      console.log('🚀 ~ useCreateIssue ~ err:', err)
+      toast.critical('Issue Create Failed.')
     },
   })
 }
@@ -72,16 +84,26 @@ export function useCreateIssue() {
 export function useUpdateIssue() {
   const toast = useToast()
   const queryClient = useQueryClient()
+  const setIssue = useEditorStore(state => state.setIssue)
 
   return useMutation({
     mutationFn: updateIssue,
-    onSuccess: newIssue => {
-      queryClient.invalidateQueries({queryKey: ['issues']})
+    onSuccess: async newIssue => {
+      setIssue(newIssue)
+      toast.success('Issue Updated.')
 
       archiveIssue(newIssue, SUBMIT_TYPE.UPDATE).catch(err => {
         console.log('🚀 ~ archiveIssue failed:', err)
-        toast.warning('Issue Archive Failed')
+        toast.warning('Issue Archive Failed.')
       })
+
+      // 更新完马上查询可能会查不到，延迟一下
+      await sleep(1000)
+      queryClient.invalidateQueries({queryKey: ['issues']})
+    },
+    onError: err => {
+      console.log('🚀 ~ useUpdateIssue ~ err:', err)
+      toast.critical('Issue Update Failed.')
     },
   })
 }
