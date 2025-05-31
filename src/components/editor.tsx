@@ -36,7 +36,7 @@ export default function Editor() {
   const removeLabel = useEditorStore(state => state.removeLabel)
   const isIssueChanged = useEditorStore(state => state.isChanged)
 
-  const {upload: handleUploadImages} = useUploadImages()
+  const {mutateAsync: handleUploadImages} = useUploadImages()
 
   const {isError: isErrorRepo, refetch: refetchRepo} = useRepo()
 

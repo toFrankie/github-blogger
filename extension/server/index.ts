@@ -185,16 +185,14 @@ export default class Service {
       })
     )
 
-    return createResponse(res, () => [
-      {
-        url: cdnURL({
-          user: this.config.user,
-          repo: this.config.repo,
-          branch: this.config.branch,
-          filePath: path,
-        }),
-      },
-    ])
+    return createResponse(res, () =>
+      cdnURL({
+        user: this.config.user,
+        repo: this.config.repo,
+        branch: this.config.branch,
+        filePath: path,
+      })
+    )
   }
 
   private async getIssueCount() {

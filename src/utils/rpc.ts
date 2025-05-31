@@ -2,7 +2,7 @@ import dayjs from 'dayjs'
 import {encode} from 'js-base64'
 import {WebviewRPC} from 'vscode-webview-rpc'
 import {DEFAULT_PAGINATION_SIZE, ERROR_TYPE_MAP, MESSAGE_TYPE, SUBMIT_TYPE} from '@/constants'
-import {generateMarkdown, getVscode} from '@/utils'
+import {checkFileSize, generateMarkdown, getVscode} from '@/utils'
 
 const vscode = getVscode()
 
@@ -144,4 +144,38 @@ export async function archiveIssue(issue: MinimalIssue, type: SubmitType) {
 
   // 6. 更新 Ref
   await rpcEmit<RestRef, [string]>(MESSAGE_TYPE.UPDATE_REF, [newCommitSha])
+}
+
+export async function uploadImage(files: File[]) {
+  console.log('------> 🚀 ~ mutationFn: ~ files:', files)
+  if (files.length === 0) {
+    throw new Error('Please select a image')
+  }
+
+  // TODO: support multiple images
+  const img = files[0]
+  const isLt2M = checkFileSize(img)
+  if (!isLt2M) {
+    throw new Error('Image maxsize is 2MB')
+  }
+
+  const dayjsObj = dayjs()
+  const ext = img.name.split('.').pop()?.toLowerCase()
+  const path = `images/${dayjsObj.year()}/${dayjsObj.month() + 1}/${dayjsObj.valueOf()}.${ext}`
+
+  return new Promise<ClientUploadImagesResult>((resolve, reject) => {
+    const fileReader = new FileReader()
+    fileReader.readAsDataURL(img)
+
+    fileReader.onloadend = () => {
+      const content = fileReader.result?.toString().split(',')[1]
+      if (!content) {
+        reject(new Error('Failed to read file'))
+        return
+      }
+      rpcEmit<string, UploadImageRpcArgs>(MESSAGE_TYPE.UPLOAD_IMAGE, [content, path])
+        .then(url => resolve([{url}]))
+        .catch(reject)
+    }
+  })
 }

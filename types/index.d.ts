@@ -36,4 +36,6 @@ declare global {
   type MinimalIssues = MinimalIssue[]
 
   type ClientUploadImages = EditorProps['uploadImages']
+
+  type ClientUploadImagesResult = Awaited<ReturnType<NonNullable<ClientUploadImages>>>
 }

@@ -74,3 +74,8 @@ export function generateMarkdown(issue: MinimalIssue) {
     labels: issue.labels.map(({name}) => name),
   })
 }
+
+export function checkFileSize(file: File) {
+  const isLt2M = file.size / 1024 / 1024 < 2
+  return isLt2M
+}

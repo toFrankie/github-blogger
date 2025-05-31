@@ -46,4 +46,6 @@ declare global {
   type CreateTreeRpcArgs = [base_tree: string, tree_path: string, tree_sha: string]
 
   type CreateCommitRpcArgs = [parents_commit_sha: string, tree_sha: string, message: string]
+
+  type UploadImageRpcArgs = [content: string, path: string]
 }
