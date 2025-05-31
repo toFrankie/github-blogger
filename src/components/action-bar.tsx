@@ -16,11 +16,11 @@ import {getVscode} from '@/utils'
 const vscode = getVscode()
 
 interface ActionBoxProps {
-  onSetLabelsVisible: (visible: boolean) => void
-  onSetIssuesVisible: (visible: boolean) => void
+  onLabelsVisible: (visible: boolean) => void
+  onIssuesVisible: (visible: boolean) => void
 }
 
-export default function ActionBar({onSetLabelsVisible, onSetIssuesVisible}: ActionBoxProps) {
+export default function ActionBar({onLabelsVisible, onIssuesVisible}: ActionBoxProps) {
   const issue = useEditorStore(state => state.issue)
   const isChanged = useEditorStore(state => state.isChanged)
   const canSubmit = useEditorStore(state => state.canSubmit)
@@ -115,14 +115,14 @@ export default function ActionBar({onSetLabelsVisible, onSetIssuesVisible}: Acti
       )}
       <IconButton
         icon={TagIcon}
-        onClick={() => onSetLabelsVisible(true)}
+        onClick={() => onLabelsVisible(true)}
         description="Labels"
         aria-label="Labels"
         tooltipDirection="w"
       />
       <IconButton
         icon={ListUnorderedIcon}
-        onClick={() => onSetIssuesVisible(true)}
+        onClick={() => onIssuesVisible(true)}
         description="Issues"
         aria-label="Issues"
         tooltipDirection="w"

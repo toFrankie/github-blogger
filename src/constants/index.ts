@@ -46,9 +46,6 @@ export const MESSAGE_TYPE = {
   CREATE_COMMIT: 'create_commit',
   UPDATE_REF: 'update_ref',
 
-  SHOW_SUCCESS: 'show_success',
-  SHOW_ERROR: 'show_error',
-
   GET_SETTINGS: 'get_settings',
   UPLOAD_IMAGE: 'upload_image',
   OPEN_EXTERNAL_LINK: 'open_external_link',

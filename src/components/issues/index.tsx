@@ -38,7 +38,7 @@ import {useIssueCount, useIssueCountWithFilter, useIssues, useLabels, useRepo} f
 import {useEditorStore} from '@/stores/use-editor-store'
 import {getVscode} from '@/utils'
 import {FlashWithRetry} from '../flash-with-retry'
-import {ListSkeleton, IssueSkeleton} from './skeleton'
+import {IssueSkeleton, ListSkeleton} from './skeleton'
 
 const SELECT_PANEL_PLACEHOLDER = 'Filter labels'
 
@@ -58,10 +58,10 @@ type LinkType = ValueOf<typeof LINK_TYPE>
 
 interface IssuesProps {
   visible: boolean
-  onSetIssuesVisible: (visible: boolean) => void
+  onIssuesVisible: (visible: boolean) => void
 }
 
-export default function Issues({visible, onSetIssuesVisible}: IssuesProps) {
+export default function Issues({visible, onIssuesVisible}: IssuesProps) {
   const [currentPage, setCurrentPage] = useState(1)
   const [filterTitle, setFilterTitle] = useState('')
   const [filterLabelNames, setFilterLabelNames] = useState<string[]>([])
@@ -160,7 +160,7 @@ export default function Issues({visible, onSetIssuesVisible}: IssuesProps) {
     e.preventDefault()
 
     if (issue.number === currentIssueNumber) {
-      onSetIssuesVisible(false)
+      onIssuesVisible(false)
       return
     }
 
@@ -178,7 +178,7 @@ export default function Issues({visible, onSetIssuesVisible}: IssuesProps) {
     }
 
     setIssue(issue)
-    onSetIssuesVisible(false)
+    onIssuesVisible(false)
   }
 
   if (!visible) return null
@@ -187,7 +187,7 @@ export default function Issues({visible, onSetIssuesVisible}: IssuesProps) {
     <Dialog
       position="left"
       width="large"
-      onClose={() => onSetIssuesVisible(false)}
+      onClose={() => onIssuesVisible(false)}
       title={
         <Stack align="center" gap="condensed" direction="horizontal">
           <Stack.Item>Issues</Stack.Item>
@@ -289,7 +289,7 @@ export default function Issues({visible, onSetIssuesVisible}: IssuesProps) {
                       onRetry={() => refetchIssues()}
                     />
                   ) : withoutIssue ? (
-                    <WithoutIssue onActionClick={() => onSetIssuesVisible(false)} />
+                    <WithoutIssue onActionClick={() => onIssuesVisible(false)} />
                   ) : withFilter && !isPendingIssues && !issues.length ? (
                     <NoFilterResult />
                   ) : (

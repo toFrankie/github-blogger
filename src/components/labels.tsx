@@ -9,10 +9,10 @@ const LABEL_SKELETON_COUNT = 12
 
 interface LabelsProps {
   visible: boolean
-  onSetLabelsVisible: (visible: boolean) => void
+  onLabelsVisible: (visible: boolean) => void
 }
 
-export default function Labels({visible, onSetLabelsVisible}: LabelsProps) {
+export default function Labels({visible, onLabelsVisible}: LabelsProps) {
   const [hoveredId, setHoveredId] = useState<string>('')
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [editingLabel, setEditingLabel] = useState<MinimalLabel | null>(null)
@@ -54,7 +54,7 @@ export default function Labels({visible, onSetLabelsVisible}: LabelsProps) {
         className="app-labels"
         position="right"
         width="medium"
-        onClose={() => onSetLabelsVisible(false)}
+        onClose={() => onLabelsVisible(false)}
         title={
           <Stack align="center" gap="condensed" direction="horizontal">
             <Stack.Item>Labels</Stack.Item>
