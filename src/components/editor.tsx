@@ -49,7 +49,7 @@ export default function Editor() {
 
   const copyLink = () => {
     navigator.clipboard.writeText(issue.url)
-    toast.success('Link copied.')
+    toast.success('Issue link copied.')
   }
 
   return (

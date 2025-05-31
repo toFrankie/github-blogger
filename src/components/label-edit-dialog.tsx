@@ -12,10 +12,10 @@ import {
   useConfirm,
 } from '@primer/react'
 import {useEffect, useState} from 'react'
-import {LABEL_DEFAULT_COLOR, LABEL_PREDEFINED_COLORS} from '@/constants'
+import {DEFAULT_LABEL_COLOR, PRESET_ISSUE_TYPE_COLORS, PRESET_LABEL_COLORS} from '@/constants'
 import {useCreateLabel, useDeleteLabel, useUpdateLabel} from '@/hooks'
 
-const CYCLE_COLORS = [...LABEL_PREDEFINED_COLORS, LABEL_DEFAULT_COLOR]
+const CYCLE_COLORS = [...PRESET_LABEL_COLORS, ...PRESET_ISSUE_TYPE_COLORS, DEFAULT_LABEL_COLOR]
 
 const HEX_COLOR_REGEX = /^[0-9A-Fa-f]{6}$/
 
@@ -33,11 +33,11 @@ export default function LabelEditDialog({
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [color, setColor] = useState('')
-  const [displayColorForToken, setDisplayColorForToken] = useState(LABEL_DEFAULT_COLOR)
+  const [displayColorForToken, setDisplayColorForToken] = useState(DEFAULT_LABEL_COLOR)
   const [nameError, setNameError] = useState<string | null>(null)
   const [colorError, setColorError] = useState<string | null>(null)
   const [currentColorIndex, setCurrentColorIndex] = useState<number>(
-    CYCLE_COLORS.findIndex(color => color.toUpperCase() === LABEL_DEFAULT_COLOR.toUpperCase()) || 0
+    CYCLE_COLORS.findIndex(color => color.toUpperCase() === DEFAULT_LABEL_COLOR.toUpperCase()) || 0
   )
   const [isColorGridOpen, setIsColorGridOpen] = useState(false)
 
@@ -60,10 +60,10 @@ export default function LabelEditDialog({
       setName('')
       setDescription('')
       setColor('')
-      setDisplayColorForToken(LABEL_DEFAULT_COLOR)
+      setDisplayColorForToken(DEFAULT_LABEL_COLOR)
       setCurrentColorIndex(
         CYCLE_COLORS.findIndex(
-          color => color.toUpperCase() === LABEL_DEFAULT_COLOR.toUpperCase()
+          color => color.toUpperCase() === DEFAULT_LABEL_COLOR.toUpperCase()
         ) || 0
       )
 
@@ -84,18 +84,18 @@ export default function LabelEditDialog({
       setCurrentColorIndex(foundIndex !== -1 ? foundIndex : -1)
     } else if (labelColor) {
       setColor(labelColor)
-      setDisplayColorForToken(LABEL_DEFAULT_COLOR)
+      setDisplayColorForToken(DEFAULT_LABEL_COLOR)
       setCurrentColorIndex(
         CYCLE_COLORS.findIndex(
-          color => color.toUpperCase() === LABEL_DEFAULT_COLOR.toUpperCase()
+          color => color.toUpperCase() === DEFAULT_LABEL_COLOR.toUpperCase()
         ) || 0
       )
     } else {
       setColor('')
-      setDisplayColorForToken(LABEL_DEFAULT_COLOR)
+      setDisplayColorForToken(DEFAULT_LABEL_COLOR)
       setCurrentColorIndex(
         CYCLE_COLORS.findIndex(
-          color => color.toUpperCase() === LABEL_DEFAULT_COLOR.toUpperCase()
+          color => color.toUpperCase() === DEFAULT_LABEL_COLOR.toUpperCase()
         ) || 0
       )
     }
@@ -134,7 +134,7 @@ export default function LabelEditDialog({
     try {
       const newLabel = {
         name: name.trim(),
-        color: color.trim() || LABEL_DEFAULT_COLOR,
+        color: color.trim() || DEFAULT_LABEL_COLOR,
         description: description.trim() || null,
       }
 
@@ -185,11 +185,11 @@ export default function LabelEditDialog({
     setColor(newColorValue)
 
     if (newColorValue.trim() === '') {
-      setDisplayColorForToken(LABEL_DEFAULT_COLOR)
+      setDisplayColorForToken(DEFAULT_LABEL_COLOR)
       setColorError(null)
       setCurrentColorIndex(
         CYCLE_COLORS.findIndex(
-          color => color.toUpperCase() === LABEL_DEFAULT_COLOR.toUpperCase()
+          color => color.toUpperCase() === DEFAULT_LABEL_COLOR.toUpperCase()
         ) || 0
       )
     } else if (HEX_COLOR_REGEX.test(newColorValue)) {
@@ -200,13 +200,13 @@ export default function LabelEditDialog({
       )
       setCurrentColorIndex(foundIndex !== -1 ? foundIndex : -1)
     } else {
-      setDisplayColorForToken(LABEL_DEFAULT_COLOR)
+      setDisplayColorForToken(DEFAULT_LABEL_COLOR)
       setColorError(null)
       setCurrentColorIndex(-1)
     }
   }
 
-  const handlePredefinedColorClick = (selectedColorFromGrid: string) => {
+  const onPresetColorSelect = (selectedColorFromGrid: string) => {
     const newColorValue = selectedColorFromGrid
     setColor(newColorValue)
     setDisplayColorForToken(newColorValue)
@@ -320,7 +320,7 @@ export default function LabelEditDialog({
                   leadingVisual="#"
                   value={color}
                   onChange={handleColorInputChange}
-                  placeholder={LABEL_DEFAULT_COLOR}
+                  placeholder={DEFAULT_LABEL_COLOR}
                   maxLength={6}
                   aria-label="Hex color code for Color input"
                   sx={{width: '100px'}}
@@ -348,7 +348,7 @@ export default function LabelEditDialog({
                             />
                             <Box
                               aria-label={`Select color ${color}`}
-                              onClick={() => handlePredefinedColorClick(color)}
+                              onClick={() => onPresetColorSelect(color)}
                               sx={{
                                 position: 'absolute',
                                 top: 0,
@@ -369,7 +369,7 @@ export default function LabelEditDialog({
                 <IssueLabelToken
                   text={<SyncIcon size={16} />}
                   size="large"
-                  fillColor={`#${displayColorForToken || LABEL_DEFAULT_COLOR}`}
+                  fillColor={`#${displayColorForToken || DEFAULT_LABEL_COLOR}`}
                 />
                 <Box
                   onClick={handleCycleColor}

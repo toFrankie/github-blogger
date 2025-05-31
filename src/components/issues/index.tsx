@@ -459,7 +459,7 @@ function WithoutIssue({onActionClick}: {onActionClick: () => void}) {
         Create and manage blog posts with GitHub Issues.
       </Blankslate.Description>
       <Blankslate.PrimaryAction onClick={onActionClick}>
-        Create Your First Issue
+        Create your first issue
       </Blankslate.PrimaryAction>
     </Blankslate>
   )

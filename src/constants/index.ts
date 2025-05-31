@@ -5,9 +5,11 @@ export const SUBMIT_TYPE = {
 
 export const DEFAULT_PAGINATION_SIZE = 20
 
-export const LABEL_DEFAULT_COLOR = 'F5FEE6'
+export const DEFAULT_LABEL_COLOR = 'F5FEE6'
 
-export const LABEL_PREDEFINED_COLORS = [
+export const PRESET_ISSUE_TYPE_COLORS = ['FFEBE9', 'FFF8C5', 'DDF4FF']
+
+export const PRESET_LABEL_COLORS = [
   'B60205',
   'D93F0B',
   'FBCA04',
