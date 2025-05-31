@@ -31,7 +31,7 @@ function createApiError(error: unknown): ApiError {
     return {
       type,
       message: error.message,
-      detail: error.response?.data,
+      detail: error,
     }
   }
 

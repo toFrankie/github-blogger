@@ -14,6 +14,7 @@ async function rpcEmit<T, A extends any[] = any[]>(
 ): Promise<T> {
   const response = (await rpc.emit(type, args)) as ApiResponse<T>
   if (!response.success) {
+    console.log('🚀 ~ client ~ rpcEmit ~ error ~ detail:', response.error?.detail)
     throw new Error(`${ERROR_TYPE_MAP[response.error.type]}: ${response.error.message}`)
   }
   return response.data
@@ -147,7 +148,6 @@ export async function archiveIssue(issue: MinimalIssue, type: SubmitType) {
 }
 
 export async function uploadImage(files: File[]) {
-  console.log('------> 🚀 ~ mutationFn: ~ files:', files)
   if (files.length === 0) {
     throw new Error('Please select a image')
   }

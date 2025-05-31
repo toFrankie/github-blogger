@@ -83,10 +83,10 @@ export async function to<T, U = Error>(
   try {
     const data = await promise
     const result: [null, T] = [null, data]
-    console.log('🚀 to ~ data:', data)
+    console.log('🚀 ~ extension ~ to ~ data:', data)
     return result
   } catch (err) {
-    console.error('🚀 to ~ err:', err)
+    console.log('🚀 ~ extension ~ to ~ err:', err)
     if (errorExt) {
       Object.assign(err as object, errorExt)
     }

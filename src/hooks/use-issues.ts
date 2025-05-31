@@ -65,8 +65,7 @@ export function useCreateIssue() {
       setIssue(newIssue)
       toast.success('Issue Created.')
 
-      archiveIssue(newIssue, SUBMIT_TYPE.CREATE).catch(err => {
-        console.log('🚀 ~ archiveIssue failed:', err)
+      archiveIssue(newIssue, SUBMIT_TYPE.CREATE).catch(() => {
         toast.warning('Issue Archive Failed.')
       })
 
@@ -74,8 +73,7 @@ export function useCreateIssue() {
       await sleep(1000)
       queryClient.invalidateQueries({queryKey: ['issues']})
     },
-    onError: err => {
-      console.log('🚀 ~ useCreateIssue ~ err:', err)
+    onError: () => {
       toast.critical('Issue Create Failed.')
     },
   })
@@ -92,8 +90,7 @@ export function useUpdateIssue() {
       setIssue(newIssue)
       toast.success('Issue Updated.')
 
-      archiveIssue(newIssue, SUBMIT_TYPE.UPDATE).catch(err => {
-        console.log('🚀 ~ archiveIssue failed:', err)
+      archiveIssue(newIssue, SUBMIT_TYPE.UPDATE).catch(() => {
         toast.warning('Issue Archive Failed.')
       })
 
@@ -101,8 +98,7 @@ export function useUpdateIssue() {
       await sleep(1000)
       queryClient.invalidateQueries({queryKey: ['issues']})
     },
-    onError: err => {
-      console.log('🚀 ~ useUpdateIssue ~ err:', err)
+    onError: () => {
       toast.critical('Issue Update Failed.')
     },
   })

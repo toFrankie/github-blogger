@@ -47,6 +47,8 @@ export default function ActionBar({onLabelsVisible, onIssuesVisible}: ActionBoxP
         return
       }
       await updateIssue(issue)
+    } catch {
+      // The error notification has been handled externally.
     } finally {
       setIsSaving(false)
     }
