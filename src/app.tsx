@@ -3,7 +3,7 @@ import 'github-markdown-css'
 import {useEffect, useState} from 'react'
 import {ActionBar, Editor, Labels, Posts} from '@/components'
 import {MESSAGE_TYPE} from '@/constants'
-import {useToast} from '@/hooks/use-toast'
+import {useToast} from '@/hooks'
 import {rpc} from '@/utils/rpc'
 
 import '@/app.css'

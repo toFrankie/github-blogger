@@ -5,9 +5,6 @@ export function useToast() {
   const {addToast} = useToastContext()
 
   return {
-    toast: (content: string, options?: ToastOptions) =>
-      addToast(content, {...options, type: 'info'}),
-
     info: (content: string, options?: ToastOptions) =>
       addToast(content, {...options, type: 'info'}),
 

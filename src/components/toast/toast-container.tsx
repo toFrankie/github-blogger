@@ -3,7 +3,7 @@ import {useLayoutEffect, useRef, useState} from 'react'
 import {type Toast} from '@/types/toast'
 import ToastItem from './toast-item'
 
-const TOAST_CONTAINER_WIDTH = 600
+const TOAST_CONTAINER_WIDTH = 300
 const GAP_HEIGHT = 8
 
 export default function ToastContainer({

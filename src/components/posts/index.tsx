@@ -31,14 +31,13 @@ import {
 } from '@primer/react'
 import {type ActionListItemInput} from '@primer/react/deprecated'
 import {Blankslate} from '@primer/react/experimental'
-import {useQuery} from '@tanstack/react-query'
 import {debounce, intersect, unique} from 'licia'
 import {useCallback, useMemo, useState} from 'react'
 import {DEFAULT_PAGINATION_SIZE, MESSAGE_TYPE} from '@/constants'
-import {useIssues, useLabels} from '@/hooks'
+import {useIssueCount, useIssueCountWithFilter, useIssues, useLabels, useRepo} from '@/hooks'
 import {useEditorStore} from '@/stores/use-editor-store'
 import {getVscode} from '@/utils'
-import {getRepo} from '@/utils/rpc'
+import {FlashWithRetry} from '../flash-with-retry'
 import {ListSkeleton, PostSkeleton} from './skeleton'
 
 const SELECT_PANEL_PLACEHOLDER = 'Filter labels'
@@ -72,22 +71,44 @@ export default function Posts({visible, onSetPostsVisible}: PostsProps) {
   const [filter, setFilter] = useState('')
   const [open, setOpen] = useState(false)
 
-  const {data: labels = []} = useLabels()
-
   const confirm = useConfirm()
 
-  const {data: repo} = useQuery({
-    queryKey: ['repo'],
-    queryFn: () => getRepo(),
-    gcTime: Infinity,
-    staleTime: Infinity,
-  })
+  const {
+    data: repo,
+    isLoading: isLoadingRepo,
+    isError: isErrorRepo,
+    refetch: refetchRepo,
+  } = useRepo()
 
-  const {issues, issueCount, issueCountWithFilter, issueStatus} = useIssues({
+  const {data: labels = []} = useLabels()
+
+  const {
+    data: issues,
+    isLoading: isLoadingIssues,
+    isPending: isPendingIssues,
+    isError: isErrorIssues,
+    refetch: refetchIssues,
+  } = useIssues({
     page: currentPage,
     labelNames: filterLabelNames,
     title: filterTitle,
   })
+
+  const {data: issueCount, isFetched: isFetchedIssueCount} = useIssueCount()
+
+  const {data: issueCountWithFilter} = useIssueCountWithFilter({
+    labelNames: filterLabelNames,
+    title: filterTitle,
+  })
+
+  const withoutIssue = useMemo(
+    () => isFetchedIssueCount && issueCount === 0,
+    [isFetchedIssueCount, issueCount]
+  )
+
+  const withFilter = useMemo(() => {
+    return !!filterTitle || filterLabelNames.length > 0
+  }, [filterTitle, filterLabelNames])
 
   const currentIssueNumber = useEditorStore(state => state.issue.number)
   const isChanged = useEditorStore(state => state.isChanged)
@@ -170,7 +191,7 @@ export default function Posts({visible, onSetPostsVisible}: PostsProps) {
       title={
         <Stack align="center" gap="condensed" direction="horizontal">
           <Stack.Item>Issues</Stack.Item>
-          {issueCount && issueStatus.withFilter && issueCountWithFilter ? (
+          {issueCount && withFilter && issueCountWithFilter ? (
             <CounterLabel sx={{color: 'fg.muted'}}>
               {issueCountWithFilter}/{issueCount}
             </CounterLabel>
@@ -180,7 +201,18 @@ export default function Posts({visible, onSetPostsVisible}: PostsProps) {
         </Stack>
       }
       renderBody={() => {
-        if (!repo) return <PostSkeleton />
+        if (isErrorRepo) {
+          return (
+            <Stack padding="normal">
+              <FlashWithRetry
+                message="Uh oh! Failed to load repository."
+                onRetry={() => refetchRepo()}
+              />
+            </Stack>
+          )
+        }
+
+        if (isLoadingRepo || !repo) return <PostSkeleton />
 
         return (
           <Box sx={{height: '100%'}}>
@@ -249,11 +281,16 @@ export default function Posts({visible, onSetPostsVisible}: PostsProps) {
               </Stack.Item>
               <Stack.Item grow sx={{px: 3, overflow: 'auto'}}>
                 <>
-                  {!issues || issueStatus.isLoading ? (
+                  {isLoadingIssues || isPendingIssues ? (
                     <ListSkeleton />
-                  ) : issueStatus.withoutIssue ? (
+                  ) : isErrorIssues ? (
+                    <FlashWithRetry
+                      message="Uh oh! Failed to load issues."
+                      onRetry={() => refetchIssues()}
+                    />
+                  ) : withoutIssue ? (
                     <WithoutIssue onActionClick={() => onSetPostsVisible(false)} />
-                  ) : issueStatus.withFilter && !issueStatus.isPending && !issues.length ? (
+                  ) : withFilter && !isPendingIssues && !issues.length ? (
                     <NoFilterResult />
                   ) : (
                     <NavList sx={{mx: -2, '&>ul': {pt: 0}}}>
@@ -301,7 +338,7 @@ export default function Posts({visible, onSetPostsVisible}: PostsProps) {
         )
       }}
       renderFooter={() => {
-        const count = issueStatus.withFilter ? issueCountWithFilter : issueCount
+        const count = withFilter ? issueCountWithFilter : issueCount
         return (
           <Box sx={{borderTop: '1px solid', borderColor: 'border.default'}}>
             <Pagination

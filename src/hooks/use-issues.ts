@@ -12,55 +12,44 @@ import {
 import {useToast} from './use-toast'
 
 interface UseIssuesParams {
-  page: number
+  page?: number
   labelNames?: string[]
   title?: string
 }
 
-export function useIssues({page, labelNames = [], title = ''}: UseIssuesParams) {
-  const {
-    data: issues,
-    isLoading: isLoadingIssues,
-    isPending: isPendingIssues,
-  } = useQuery({
+export function useIssues({page = 1, labelNames = [], title = ''}: UseIssuesParams) {
+  return useQuery({
     queryKey: ['issues', 'list', page, title, labelNames.join(',')],
     queryFn: () => getIssues(page, labelNames, title),
+    gcTime: Infinity,
+    staleTime: Infinity,
   })
+}
 
-  const {data: issueCount, isFetched: isFetchedIssueCount} = useQuery({
-    queryKey: ['issue', 'count', 'total'],
+export function useIssueCount() {
+  return useQuery({
+    queryKey: ['issues', 'count', 'total'],
     queryFn: () => getIssueCount(),
+    gcTime: Infinity,
+    staleTime: Infinity,
   })
+}
 
+export function useIssueCountWithFilter({
+  labelNames = [],
+  title = '',
+}: Omit<UseIssuesParams, 'page'>) {
   const withFilter = useMemo(() => {
     return !!title || labelNames.length > 0
   }, [title, labelNames])
 
-  const {data: issueCountWithFilter, isPending: isPendingIssueCountWithFilter} = useQuery({
-    queryKey: ['issue', 'count', 'filtered', title, labelNames.join(',')],
+  return useQuery({
+    queryKey: ['issues', 'count', 'filtered', title, labelNames.join(',')],
     queryFn: () => getIssueCountWithFilter(title, labelNames),
+    gcTime: Infinity,
+    staleTime: Infinity,
     enabled: withFilter,
   })
-
-  const withoutIssue = useMemo(() => {
-    return isFetchedIssueCount && issueCount === 0
-  }, [isFetchedIssueCount, issueCount])
-
-  const isPending = useMemo(() => {
-    return isPendingIssues || (withFilter && isPendingIssueCountWithFilter)
-  }, [isPendingIssues, withFilter, isPendingIssueCountWithFilter])
-
-  const issueStatus = useMemo(
-    () => ({withoutIssue, isLoading: isLoadingIssues, isPending, withFilter}),
-    [withoutIssue, isLoadingIssues, isPending, withFilter]
-  )
-
-  return {
-    issues,
-    issueCount, // 总数量
-    issueCountWithFilter, // 过滤后的数量
-    issueStatus,
-  }
 }
 
 export function useCreateIssue() {

@@ -9,8 +9,7 @@ import mermaid from '@bytemd/plugin-mermaid'
 import {Editor as BytemdEditor} from '@bytemd/react'
 import {Label, Stack, Text, TextInput} from '@primer/react'
 import {SkeletonText} from '@primer/react/experimental'
-import {useLabels, useUploadImages} from '@/hooks'
-import {useToast} from '@/hooks/use-toast'
+import {useLabels, useRepo, useToast, useUploadImages} from '@/hooks'
 import {useEditorStore} from '@/stores/use-editor-store'
 import {FlashWithRetry} from './flash-with-retry'
 
@@ -39,6 +38,8 @@ export default function Editor() {
 
   const {upload: handleUploadImages} = useUploadImages()
 
+  const {isError: isErrorRepo, refetch: refetchRepo} = useRepo()
+
   const {
     data: labels,
     isLoading: isLoadingLabels,
@@ -53,6 +54,14 @@ export default function Editor() {
 
   return (
     <Stack className="app-editor" gap="condensed" padding="condensed">
+      {isErrorRepo && (
+        <Stack.Item>
+          <FlashWithRetry
+            message="Uh oh! Failed to load repository."
+            onRetry={() => refetchRepo()}
+          />
+        </Stack.Item>
+      )}
       <Stack.Item sx={{flexShrink: 0}}>
         <Stack direction="horizontal" align="center" gap="condensed">
           <Stack.Item grow>
@@ -76,7 +85,7 @@ export default function Editor() {
         <>
           {isErrorLabels ? (
             <FlashWithRetry
-              message="获取数据失败，请检查网络连接或稍后重试。若持续失败，请联系管理员。"
+              message="Uh oh! Failed to load labels."
               onRetry={() => refetchLabels()}
             />
           ) : isLoadingLabels ? (

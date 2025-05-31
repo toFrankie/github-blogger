@@ -30,11 +30,12 @@ export default function ToastItem({toast, onClose}: ToastItemProps) {
         opacity: isExiting ? 0 : 1,
         transition: isExiting
           ? 'opacity 0.3s ease-out'
-          : 'transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)',
+          : 'transform 0.5s cubic-bezier(0.51, 1.39, 0.64, 1.00)',
         transformOrigin: 'right',
         willChange: 'transform, opacity',
       }}
     >
+      {/* TODO: custom dismiss message */}
       <Banner
         className="color-shadow-medium"
         hideTitle

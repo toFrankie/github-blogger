@@ -62,15 +62,20 @@ export default function ActionBar({onSetLabelsVisible, onSetPostsVisible}: Actio
   }
 
   const onSwitch = async () => {
-    const result = await confirm({
-      title: 'Tips',
-      content:
-        'You have unsaved changes. Creating a new issue will discard your current changes. Do you want to continue?',
-      cancelButtonContent: 'Cancel',
-      confirmButtonContent: 'Continue',
-      confirmButtonType: 'danger',
-    })
-    if (!result) return
+    if (!isChanged && issue.number === -1) return
+
+    if (isChanged) {
+      const result = await confirm({
+        title: 'Tips',
+        content:
+          'You have unsaved changes. Creating a new issue will discard your current changes. Do you want to continue?',
+        cancelButtonContent: 'Cancel',
+        confirmButtonContent: 'Continue',
+        confirmButtonType: 'danger',
+      })
+      if (!result) return
+    }
+
     setIssue(cloneDeep(EMPTY_ISSUE))
   }
 

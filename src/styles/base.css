@@ -109,3 +109,7 @@ code {
 .app-bytemd .bytemd-fullscreen .bytemd-toolbar {
   border-radius: 0;
 }
+
+.app-labels .label-skeleton {
+  border-radius: 12px;
+}

@@ -24,7 +24,7 @@ export function HeaderSkeleton() {
     <Stack>
       <Stack direction="horizontal" gap="condensed" align="center">
         <SkeletonAvatar size={SKELETON_ITEM_HEIGHT} />
-        <SkeletonText size="titleSmall" width="30px" />
+        <SkeletonText size="titleSmall" width="50px" />
       </Stack>
       <SkeletonBox height={SKELETON_ITEM_HEIGHT} />
       <SkeletonBox height={SKELETON_ITEM_HEIGHT} />
@@ -40,6 +40,7 @@ export function ListSkeleton() {
         <SkeletonBox key={index} height={SKELETON_ITEM_HEIGHT} />
       ))}
       <SkeletonBox width="80%" height={SKELETON_ITEM_HEIGHT} />
+      <SkeletonBox width="60%" height={SKELETON_ITEM_HEIGHT} />
       <SkeletonBox width="40%" height={SKELETON_ITEM_HEIGHT} />
     </Stack>
   )
