@@ -38,7 +38,7 @@ import {useIssueCount, useIssueCountWithFilter, useIssues, useLabels, useRepo} f
 import {useEditorStore} from '@/stores/use-editor-store'
 import {getVscode} from '@/utils'
 import {FlashWithRetry} from '../flash-with-retry'
-import {ListSkeleton, PostSkeleton} from './skeleton'
+import {ListSkeleton, IssueSkeleton} from './skeleton'
 
 const SELECT_PANEL_PLACEHOLDER = 'Filter labels'
 
@@ -56,12 +56,12 @@ const LINK_TYPE = {
 
 type LinkType = ValueOf<typeof LINK_TYPE>
 
-interface PostsProps {
+interface IssuesProps {
   visible: boolean
-  onSetPostsVisible: (visible: boolean) => void
+  onSetIssuesVisible: (visible: boolean) => void
 }
 
-export default function Posts({visible, onSetPostsVisible}: PostsProps) {
+export default function Issues({visible, onSetIssuesVisible}: IssuesProps) {
   const [currentPage, setCurrentPage] = useState(1)
   const [filterTitle, setFilterTitle] = useState('')
   const [filterLabelNames, setFilterLabelNames] = useState<string[]>([])
@@ -160,7 +160,7 @@ export default function Posts({visible, onSetPostsVisible}: PostsProps) {
     e.preventDefault()
 
     if (issue.number === currentIssueNumber) {
-      onSetPostsVisible(false)
+      onSetIssuesVisible(false)
       return
     }
 
@@ -178,7 +178,7 @@ export default function Posts({visible, onSetPostsVisible}: PostsProps) {
     }
 
     setIssue(issue)
-    onSetPostsVisible(false)
+    onSetIssuesVisible(false)
   }
 
   if (!visible) return null
@@ -187,7 +187,7 @@ export default function Posts({visible, onSetPostsVisible}: PostsProps) {
     <Dialog
       position="left"
       width="large"
-      onClose={() => onSetPostsVisible(false)}
+      onClose={() => onSetIssuesVisible(false)}
       title={
         <Stack align="center" gap="condensed" direction="horizontal">
           <Stack.Item>Issues</Stack.Item>
@@ -212,7 +212,7 @@ export default function Posts({visible, onSetPostsVisible}: PostsProps) {
           )
         }
 
-        if (isLoadingRepo || !repo) return <PostSkeleton />
+        if (isLoadingRepo || !repo) return <IssueSkeleton />
 
         return (
           <Box sx={{height: '100%'}}>
@@ -220,7 +220,7 @@ export default function Posts({visible, onSetPostsVisible}: PostsProps) {
               <Stack.Item sx={{flexShrink: 0}}>
                 <Box sx={{px: 3, pt: 3}}>
                   <Stack>
-                    <HeaderPosts repo={repo} />
+                    <HeaderIssues repo={repo} />
                     <TextInput
                       sx={{width: '100%'}}
                       placeholder="Filter title"
@@ -289,7 +289,7 @@ export default function Posts({visible, onSetPostsVisible}: PostsProps) {
                       onRetry={() => refetchIssues()}
                     />
                   ) : withoutIssue ? (
-                    <WithoutIssue onActionClick={() => onSetPostsVisible(false)} />
+                    <WithoutIssue onActionClick={() => onSetIssuesVisible(false)} />
                   ) : withFilter && !isPendingIssues && !issues.length ? (
                     <NoFilterResult />
                   ) : (
@@ -355,11 +355,11 @@ export default function Posts({visible, onSetPostsVisible}: PostsProps) {
   )
 }
 
-interface HeaderPostsProps {
+interface HeaderIssuesProps {
   repo: RestRepo
 }
 
-function HeaderPosts({repo}: HeaderPostsProps) {
+function HeaderIssues({repo}: HeaderIssuesProps) {
   const openExternalLink = (type: LinkType) => {
     if (!type) return
 
@@ -459,7 +459,7 @@ function WithoutIssue({onActionClick}: {onActionClick: () => void}) {
         Create and manage blog posts with GitHub Issues.
       </Blankslate.Description>
       <Blankslate.PrimaryAction onClick={onActionClick}>
-        Create Your First Post
+        Create Your First Issue
       </Blankslate.PrimaryAction>
     </Blankslate>
   )

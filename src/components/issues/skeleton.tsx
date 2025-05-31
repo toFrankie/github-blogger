@@ -6,7 +6,7 @@ const SKELETON_ITEM_HEIGHT = 32
 
 // TODO: use memo?
 
-export function PostSkeleton() {
+export function IssueSkeleton() {
   return (
     <Stack padding="normal" sx={{height: '100%', overflow: 'hidden'}}>
       <Stack.Item>

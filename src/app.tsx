@@ -1,7 +1,7 @@
 import 'github-markdown-css'
 
 import {useEffect, useState} from 'react'
-import {ActionBar, Editor, Labels, Posts} from '@/components'
+import {ActionBar, Editor, Labels, Issues} from '@/components'
 import {MESSAGE_TYPE} from '@/constants'
 import {useToast} from '@/hooks'
 import {rpc} from '@/utils/rpc'
@@ -9,7 +9,7 @@ import {rpc} from '@/utils/rpc'
 import '@/app.css'
 
 export default function App() {
-  const [postsVisible, setPostsVisible] = useState(false)
+  const [issuesVisible, setIssuesVisible] = useState(false)
   const [labelsVisible, setLabelsVisible] = useState(false)
 
   const toast = useToast()
@@ -22,8 +22,8 @@ export default function App() {
     rpc.on(MESSAGE_TYPE.SHOW_ERROR, showError)
   }, [])
 
-  const onPostsVisibleChange = (visible: boolean) => {
-    setPostsVisible(visible)
+  const onIssuesVisibleChange = (visible: boolean) => {
+    setIssuesVisible(visible)
   }
 
   const onLabelsVisibleChange = (visible: boolean) => {
@@ -33,11 +33,11 @@ export default function App() {
   return (
     <div className="app">
       <Editor />
-      <Posts visible={postsVisible} onSetPostsVisible={onPostsVisibleChange} />
+      <Issues visible={issuesVisible} onSetIssuesVisible={onIssuesVisibleChange} />
       <Labels visible={labelsVisible} onSetLabelsVisible={onLabelsVisibleChange} />
       <ActionBar
         onSetLabelsVisible={onLabelsVisibleChange}
-        onSetPostsVisible={onPostsVisibleChange}
+        onSetIssuesVisible={onIssuesVisibleChange}
       />
     </div>
   )
