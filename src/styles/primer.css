@@ -1,0 +1,6 @@
+@import url('@primer/css/dist/primer.css');
+@import url('@primer/primitives/dist/css/base/motion/motion.css');
+
+#__primerPortalRoot__ {
+  z-index: 100;
+}

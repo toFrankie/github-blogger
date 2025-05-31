@@ -2,6 +2,15 @@
 
 All notable changes will be documented in this file.
 
+## v2.0.0
+
+> June 1, 2025
+
+### Added
+
+- GitHub-like interaction experience.
+- Improved error handling.
+
 ## v1.0.0
 
 > Nov 25, 2024
