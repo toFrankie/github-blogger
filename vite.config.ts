@@ -11,6 +11,9 @@ export default defineConfig({
       extension: {
         sourcemap: 'inline',
       },
+      webview: {
+        csp: `<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src https: data:; style-src {{cspSource}} 'unsafe-inline'; script-src 'nonce-{{nonce}}' 'unsafe-eval';">`,
+      },
       devtools: false,
     }),
   ],
