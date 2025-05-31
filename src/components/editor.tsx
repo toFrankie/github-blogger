@@ -100,7 +100,7 @@ export default function Editor() {
                     size="small"
                     variant={checked ? 'accent' : 'secondary'}
                     onClick={() => (!checked ? addLabel(label) : removeLabel(label))}
-                    sx={{fontSize: '11px'}}
+                    sx={{fontSize: '11px', cursor: 'pointer'}}
                   >
                     {label.name}
                   </Label>

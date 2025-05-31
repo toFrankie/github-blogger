@@ -132,7 +132,7 @@ export default async function multiStepInput(context: ExtensionContext) {
 
         if (errorMsg.includes('already exists')) {
           window.showInformationMessage(
-            `GitHub Blogger initialization is completed. The ${repoName} repo already exists, skip the creation step.`
+            `GitHub Blogger initialization is completed. The ${repoName} repo already exists, skip the creation step. Now, you can type "Open GitHub Blogger" in the command palette to start writing your blog.`
           )
           return
         }

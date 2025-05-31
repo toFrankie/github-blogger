@@ -1,11 +1,11 @@
 {
   "name": "github-blogger",
   "displayName": "GitHub Blogger",
-  "description": "Use GitHub Issue as your blog",
-  "version": "1.0.0",
+  "description": "Create and manage blog posts with GitHub Issues.",
+  "version": "2.0.0",
   "publisher": "Frankie",
   "engines": {
-    "vscode": "^1.62.0"
+    "vscode": "^1.88.0"
   },
   "categories": [
     "Notebooks"
@@ -45,12 +45,12 @@
     },
     "commands": [
       {
-        "command": "github-blogger.open-dev",
-        "title": "Open GitHub Blogger (Dev)"
+        "command": "github-blogger.open",
+        "title": "Open GitHub Blogger"
       },
       {
-        "command": "github-blogger.config-dev",
-        "title": "Config GitHub Blogger (Dev)"
+        "command": "github-blogger.config",
+        "title": "Config GitHub Blogger"
       }
     ]
   },
@@ -59,7 +59,9 @@
     "build": "tsc && vite build",
     "preview": "vite preview",
     "package": "vsce package --no-dependencies",
-    "prepackage": "build",
+    "package:pre": "vsce package --pre-release --no-dependencies",
+    "prepackage": "pnpm build",
+    "prepackage:pre": "pnpm build",
     "lint": "run-s lint:eslint lint:prettier lint:stylelint tsc",
     "lint:eslint": "eslint 'src/**/*.{js,ts,tsx}' --cache --fix",
     "lint:prettier": "prettier . '!**/pnpm-lock.yaml' --cache --write",
@@ -82,7 +84,7 @@
     "@types/react": "18.3.20",
     "@types/react-dom": "18.3.6",
     "@types/styled-components": "5.1.34",
-    "@types/vscode": "1.100.0",
+    "@types/vscode": "1.88.0",
     "@types/vscode-webview": "1.57.5",
     "@vitejs/plugin-react": "4.5.0",
     "@vitejs/plugin-react-swc": "3.10.0",

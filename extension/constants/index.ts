@@ -3,8 +3,8 @@ import type {Endpoints} from '@octokit/types'
 export const EXTENSION_NAME = 'github-blogger'
 
 export const EXTENSION_COMMAND = {
-  OPEN: `${EXTENSION_NAME}.open-dev`,
-  CONFIG: `${EXTENSION_NAME}.config-dev`,
+  OPEN: `${EXTENSION_NAME}.open`,
+  CONFIG: `${EXTENSION_NAME}.config`,
 } as const
 
 export const DEFAULT_PAGINATION_SIZE = 20
