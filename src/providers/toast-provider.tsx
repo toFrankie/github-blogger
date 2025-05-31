@@ -1,7 +1,6 @@
 import {uuid} from 'licia'
 import {createContext, useCallback, useContext, useState} from 'react'
 import ToastContainer from '@/components/toast/toast-container'
-import {type Toast, type ToastContextType, type ToastOptions} from '@/types/toast'
 
 const ToastContext = createContext<ToastContextType | undefined>(undefined)
 
@@ -18,21 +17,34 @@ const TOAST_DEFAULT_OPTIONS = {
   duration: 3000,
 } as const
 
+const TYPE_TITLE_MAP: Record<ToastType, string> = {
+  critical: 'Error',
+  info: 'Info',
+  success: 'Success',
+  upsell: 'Upsell',
+  warning: 'Warning',
+}
+
 export function ToastProvider({children}: {children: React.ReactNode}) {
   const [toasts, setToasts] = useState<Toast[]>([])
 
-  const addToast = useCallback((content: string, options?: ToastOptions) => {
+  const addToast: ToastContextType['addToast'] = useCallback((description, options) => {
     const id = uuid()
 
-    setToasts(prev => [
-      ...prev,
-      {
-        id,
-        content,
-        ...TOAST_DEFAULT_OPTIONS,
-        ...options,
-      },
-    ])
+    const title =
+      options?.title ||
+      TYPE_TITLE_MAP[options.type] ||
+      options.type.charAt(0).toUpperCase() + options.type.slice(1)
+
+    const newItem = {
+      ...TOAST_DEFAULT_OPTIONS,
+      ...options,
+      id,
+      title,
+      description,
+    }
+
+    setToasts(prev => [...prev, newItem])
   }, [])
 
   const removeToast = useCallback((id: string) => {

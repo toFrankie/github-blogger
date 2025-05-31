@@ -1,7 +1,6 @@
 import {Box} from '@primer/react'
 import {Banner} from '@primer/react/experimental'
 import {useEffect, useState} from 'react'
-import {type Toast} from '@/types/toast'
 
 interface ToastItemProps {
   toast: Toast
@@ -38,13 +37,11 @@ export default function ToastItem({toast, onClose}: ToastItemProps) {
       {/* TODO: custom dismiss message */}
       <Banner
         className="color-shadow-medium"
-        hideTitle
-        title="Notice"
-        variant={toast.type || 'info'}
+        title={toast.title}
+        variant={toast.type}
         onDismiss={toast.withDismiss ? onClose : undefined}
-      >
-        {toast.content}
-      </Banner>
+        description={toast.description}
+      />
     </Box>
   )
 }

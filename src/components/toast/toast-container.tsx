@@ -1,6 +1,5 @@
 import {Box, Portal} from '@primer/react'
 import {useLayoutEffect, useRef, useState} from 'react'
-import {type Toast} from '@/types/toast'
 import ToastItem from './toast-item'
 
 const TOAST_CONTAINER_WIDTH = 300
