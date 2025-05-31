@@ -3,7 +3,7 @@ export type ToastType = 'critical' | 'info' | 'success' | 'upsell' | 'warning'
 export interface ToastOptions {
   type?: ToastType
   duration?: number
-  persistent?: boolean
+  withDismiss?: boolean
 }
 
 export interface Toast extends ToastOptions {

@@ -14,7 +14,7 @@ export function useToastContext() {
 }
 
 const TOAST_DEFAULT_OPTIONS = {
-  persistent: true,
+  withDismiss: true,
   duration: 3000,
 } as const
 

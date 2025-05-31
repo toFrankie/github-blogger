@@ -41,7 +41,7 @@ export default function ToastItem({toast, onClose}: ToastItemProps) {
         hideTitle
         title="Notice"
         variant={toast.type || 'info'}
-        onDismiss={!toast.persistent ? onClose : undefined}
+        onDismiss={toast.withDismiss ? onClose : undefined}
       >
         {toast.content}
       </Banner>
