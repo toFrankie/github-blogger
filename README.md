@@ -1,40 +1,62 @@
 # GitHub Blogger
 
-> Inspired by [Aaronphy/Blogger](https://github.com/Aaronphy/Blogger).
+**GitHub Blogger** is a VS Code extension that lets you create and manage blog posts with GitHub Issues. Enjoy Markdown editing, preview, and seamless publishing—all powered by GitHub.
 
-This VS Code extension lets you create and manage GitHub Issues as blog posts. It uses the GitHub REST API and GraphQL API to handle your Issues, with all content stored in your GitHub repository.
+## ✨ Features
 
-Perhaps you can use it in conjunction with [github-issue-toc](https://github.com/toFrankie/github-issue-toc), which generates the table of contents on the issue page.
+- Manage and publish blog posts via GitHub Issues.
+- GitHub-like interaction experience.
+- Markdown editing with real-time preview and plugins (Math, Mermaid, etc.).
+- Automatic image upload and CDN acceleration via jsDelivr.
+- All your posts and images are stored in your repository.
 
-## 📖 Quick Start
+## 🚀 Quick Start
 
-1. Get the extension from the [Marketpalce](https://marketplace.visualstudio.com/items?itemName=Frankie.github-blogger).
+1. Install from the [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=Frankie.github-blogger).
 2. Prepare your [GitHub Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens).
-3. Open the command palette (`Command + Shift + P` on macOS, `Ctrl + Shift + P` on Windows/Linux), then type `Config GitHub Blogger` to finish the initial setup.
-4. Open the command palette, type `Open GitHub Blogger`, and start writing your blog.
+3. Open the command palette (`Command + Shift + P` on macOS, `Ctrl + Shift + P` on Windows/Linux), type `Config GitHub Blogger` to set up.
+4. Open the command palette again, type `Open GitHub Blogger`, and start writing!
 
-```js
+Sample configuration:
+
+```json
 {
-  "github-blogger.token": "xxx", // Your GitHub Personal Access Token
-  "github-blogger.user": "xxx", // Your GitHub Username
-  "github-blogger.repo": "xxx", // Your Blog Repository Name
-  "github-blogger.branch": "main" // Your Blog Repository Branch Name
+  "github-blogger.token": "your-github-token",
+  "github-blogger.user": "your-github-username",
+  "github-blogger.repo": "your-github-repo",
+  "github-blogger.branch": "main"
 }
 ```
 
-## 💬 Important Notes
+## ⚠️ Notes
 
-- **Make sure your blog repository is public**, as images use jsDelivr + GitHub for CDN acceleration, incompatible with private repos. [jsdelivr #18243](https://github.com/jsdelivr/jsdelivr/issues/18243#issuecomment-857512289)
-- Issues and images are stored in the archives and images directories. The `github-blogger.branch` specifies the branch, usually the default. Ensure this branch exists, or archiving and image uploads may fail.
+- **Your blog repository must be public** for image CDN acceleration to work ([details](https://github.com/jsdelivr/jsdelivr/issues/18243#issuecomment-857512289)).
+- You can use an existing repository or create a new one.
+- Posts and images are stored in the `archives` and `images` directories. The branch is set by `github-blogger.branch`. Usually, the default branch is sufficient. Make sure this branch exists, or archiving and image uploads may fail.
 
-## 📚 About
+## 📷 Screenshots
 
-The extension uses:
+![Editor UI](./images/screenshot-1.png)
 
-- [ant-design](https://github.com/ant-design/ant-design) for the UI.
-- [bytemd](https://github.com/bytedance/bytemd) for markdown parsing.
-- [octokit.js](https://github.com/octokit/octokit.js) for GitHub API interaction.
+![Post List](./images/screenshot-2.png)
 
-![](./images/screenshot-1.png)
-![](./images/screenshot-2.png)
-![](./images/screenshot-3.png)
+![Settings](./images/screenshot-3.png)
+
+## 🙏 Acknowledgements
+
+This project is inspired by and built upon the work of the open-source community, including but not limited to:
+
+- [Aaronphy/Blogger](https://github.com/Aaronphy/Blogger) – Project inspiration
+- [@octokit/core](https://github.com/octokit/core.js) – GitHub API toolkit
+- [@primer/react](https://primer.style/react) – GitHub's official UI components
+- [@tomjs/vite-plugin-vscode](https://github.com/tomjs/vite-plugin-vscode) – VSCode extension tooling
+- [bytemd](https://github.com/bytedance/bytemd) – Markdown editor
+- [jsDelivr](https://www.jsdelivr.com/?docs=gh) – Free CDN service
+
+## 📚 Related Projects
+
+- [github-issue-toc](https://github.com/toFrankie/github-issue-toc): Generate a table of contents for GitHub Issues
+
+## 📝 License
+
+MIT
