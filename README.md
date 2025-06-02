@@ -34,14 +34,6 @@ Sample configuration:
 - You can use an existing repository or create a new one.
 - Posts and images are stored in the `archives` and `images` directories. The branch is set by `github-blogger.branch`. Usually, the default branch is sufficient. Make sure this branch exists, or archiving and image uploads may fail.
 
-## 📷 Screenshots
-
-![Editor UI](./images/screenshot-1.png)
-
-![Post List](./images/screenshot-2.png)
-
-![Settings](./images/screenshot-3.png)
-
 ## 🙏 Acknowledgements
 
 This project is inspired by and built upon the work of the open-source community, including but not limited to:
@@ -52,6 +44,14 @@ This project is inspired by and built upon the work of the open-source community
 - [@tomjs/vite-plugin-vscode](https://github.com/tomjs/vite-plugin-vscode) – VSCode extension tooling
 - [bytemd](https://github.com/bytedance/bytemd) – Markdown editor
 - [jsDelivr](https://www.jsdelivr.com/?docs=gh) – Free CDN service
+
+## 📷 Screenshots
+
+![](./images/screenshot-1.png)
+
+![](./images/screenshot-2.png)
+
+![](./images/screenshot-3.png)
 
 ## 📚 Related Projects
 

@@ -2,6 +2,14 @@
 
 All notable changes will be documented in this file.
 
+## v2.1.0
+
+> June 3, 2025
+
+### Changed
+
+- Update Label Group.
+
 ## v2.0.0
 
 > June 1, 2025
