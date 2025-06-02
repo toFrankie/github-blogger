@@ -7,7 +7,17 @@ import math from '@bytemd/plugin-math'
 import mediumZoom from '@bytemd/plugin-medium-zoom'
 import mermaid from '@bytemd/plugin-mermaid'
 import {Editor as BytemdEditor} from '@bytemd/react'
-import {Label, Stack, Text, TextInput} from '@primer/react'
+import {ClockIcon, InfoIcon, IssueOpenedIcon, LinkIcon} from '@primer/octicons-react'
+import {
+  ActionList,
+  ActionMenu,
+  IconButton,
+  Label,
+  LabelGroup,
+  RelativeTime,
+  Stack,
+  TextInput,
+} from '@primer/react'
 import {SkeletonText} from '@primer/react/experimental'
 import {useLabels, useRepo, useToast, useUploadImages} from '@/hooks'
 import {useEditorStore} from '@/stores/use-editor-store'
@@ -73,10 +83,40 @@ export default function Editor() {
             />
           </Stack.Item>
           {issue.number > -1 && (
-            <Stack.Item sx={{flexShrink: 0}}>
-              <Text onClick={copyLink} sx={{color: 'fg.muted', fontSize: 2, cursor: 'pointer'}}>
-                #{issue.number}
-              </Text>
+            <Stack.Item>
+              <ActionMenu>
+                <ActionMenu.Anchor>
+                  <IconButton variant="invisible" aria-label="Issue info" icon={InfoIcon} />
+                </ActionMenu.Anchor>
+                <ActionMenu.Overlay width="medium">
+                  <ActionList>
+                    <ActionList.Item disabled>
+                      <ActionList.LeadingVisual>
+                        <IssueOpenedIcon />
+                      </ActionList.LeadingVisual>
+                      {`#${issue.number}`}
+                    </ActionList.Item>
+                    <ActionList.Item disabled>
+                      <ActionList.LeadingVisual>
+                        <ClockIcon />
+                      </ActionList.LeadingVisual>
+                      Created at <RelativeTime datetime={issue.createdAt} prefix="" />
+                    </ActionList.Item>
+                    <ActionList.Item disabled>
+                      <ActionList.LeadingVisual>
+                        <ClockIcon />
+                      </ActionList.LeadingVisual>
+                      Updated at <RelativeTime datetime={issue.updatedAt} prefix="" />
+                    </ActionList.Item>
+                    <ActionList.Item onSelect={copyLink}>
+                      <ActionList.LeadingVisual>
+                        <LinkIcon />
+                      </ActionList.LeadingVisual>
+                      Copy link
+                    </ActionList.Item>
+                  </ActionList>
+                </ActionMenu.Overlay>
+              </ActionMenu>
             </Stack.Item>
           )}
         </Stack>
@@ -91,7 +131,7 @@ export default function Editor() {
           ) : isLoadingLabels ? (
             <SkeletonText className="labels-skeleton" />
           ) : (
-            <Stack direction="horizontal" gap="condensed" wrap="wrap">
+            <LabelGroup visibleChildCount="auto" overflowStyle="inline">
               {labels?.map(label => {
                 const checked = issue.labels.some(l => l.id === label.id)
                 return (
@@ -100,13 +140,13 @@ export default function Editor() {
                     size="small"
                     variant={checked ? 'accent' : 'secondary'}
                     onClick={() => (!checked ? addLabel(label) : removeLabel(label))}
-                    sx={{fontSize: '11px', cursor: 'pointer'}}
+                    sx={{cursor: 'pointer'}}
                   >
                     {label.name}
                   </Label>
                 )
               })}
-            </Stack>
+            </LabelGroup>
           )}
         </>
       </Stack.Item>
