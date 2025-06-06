@@ -7,7 +7,13 @@ import math from '@bytemd/plugin-math'
 import mediumZoom from '@bytemd/plugin-medium-zoom'
 import mermaid from '@bytemd/plugin-mermaid'
 import {Editor as BytemdEditor} from '@bytemd/react'
-import {ClockIcon, InfoIcon, IssueOpenedIcon, LinkIcon} from '@primer/octicons-react'
+import {
+  ClockIcon,
+  InfoIcon,
+  IssueOpenedIcon,
+  LinkExternalIcon,
+  LinkIcon,
+} from '@primer/octicons-react'
 import {
   ActionList,
   ActionMenu,
@@ -21,6 +27,7 @@ import {
 import {SkeletonText} from '@primer/react/experimental'
 import {useLabels, useRepo, useToast, useUploadImages} from '@/hooks'
 import {useEditorStore} from '@/stores/use-editor-store'
+import {openExternalLink} from '@/utils'
 import {FlashWithRetry} from './flash-with-retry'
 
 import 'bytemd/dist/index.min.css'
@@ -90,6 +97,18 @@ export default function Editor() {
                 </ActionMenu.Anchor>
                 <ActionMenu.Overlay width="medium">
                   <ActionList>
+                    <ActionList.Item onSelect={() => openExternalLink(issue.url)}>
+                      <ActionList.LeadingVisual>
+                        <LinkExternalIcon />
+                      </ActionList.LeadingVisual>
+                      Open in default browser
+                    </ActionList.Item>
+                    <ActionList.Item onSelect={copyLink}>
+                      <ActionList.LeadingVisual>
+                        <LinkIcon />
+                      </ActionList.LeadingVisual>
+                      Copy link
+                    </ActionList.Item>
                     <ActionList.Item disabled>
                       <ActionList.LeadingVisual>
                         <IssueOpenedIcon />
@@ -107,12 +126,6 @@ export default function Editor() {
                         <ClockIcon />
                       </ActionList.LeadingVisual>
                       Updated at <RelativeTime datetime={issue.updatedAt} prefix="" />
-                    </ActionList.Item>
-                    <ActionList.Item onSelect={copyLink}>
-                      <ActionList.LeadingVisual>
-                        <LinkIcon />
-                      </ActionList.LeadingVisual>
-                      Copy link
                     </ActionList.Item>
                   </ActionList>
                 </ActionMenu.Overlay>

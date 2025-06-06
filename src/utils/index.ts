@@ -79,3 +79,11 @@ export function checkFileSize(file: File) {
   const isLt2M = file.size / 1024 / 1024 < 2
   return isLt2M
 }
+
+export function openExternalLink(url: string) {
+  const vscode = getVscode()
+  vscode.postMessage({
+    command: MESSAGE_TYPE.OPEN_EXTERNAL_LINK,
+    externalLink: url,
+  })
+}

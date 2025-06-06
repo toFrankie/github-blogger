@@ -8,12 +8,10 @@ import {
 import {IconButton, Stack, useConfirm} from '@primer/react'
 import {cloneDeep} from 'licia'
 import {useMemo, useState} from 'react'
-import {EMPTY_ISSUE, MESSAGE_TYPE} from '@/constants'
+import {EMPTY_ISSUE} from '@/constants'
 import {useCreateIssue, useUpdateIssue} from '@/hooks'
 import {useEditorStore} from '@/stores/use-editor-store'
-import {getVscode} from '@/utils'
-
-const vscode = getVscode()
+import {openExternalLink} from '@/utils'
 
 interface ActionBoxProps {
   onLabelsVisible: (visible: boolean) => void
@@ -95,12 +93,7 @@ export default function ActionBar({onLabelsVisible, onIssuesVisible}: ActionBoxP
       {issue.number > -1 && (
         <IconButton
           icon={LinkExternalIcon}
-          onClick={() => {
-            vscode.postMessage({
-              command: MESSAGE_TYPE.OPEN_EXTERNAL_LINK,
-              externalLink: issue.url,
-            })
-          }}
+          onClick={() => openExternalLink(issue.url)}
           description="Open in default browser"
           aria-label="Open in default browser"
           tooltipDirection="w"
