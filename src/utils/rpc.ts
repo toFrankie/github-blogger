@@ -147,35 +147,52 @@ export async function archiveIssue(issue: MinimalIssue, type: SubmitType) {
   await rpcEmit<RestRef, [string]>(MESSAGE_TYPE.UPDATE_REF, [newCommitSha])
 }
 
-export async function uploadImage(files: File[]) {
+export async function uploadImages(files: File[]) {
   if (files.length === 0) {
-    throw new Error('Please select a image')
+    throw new Error('No images selected')
   }
 
-  // TODO: support multiple images
-  const img = files[0]
-  const isLt2M = checkFileSize(img)
-  if (!isLt2M) {
-    throw new Error('Image maxsize is 2MB')
-  }
+  const results: ClientUploadImagesResult = []
 
-  const dayjsObj = dayjs()
-  const ext = img.name.split('.').pop()?.toLowerCase()
-  const path = `images/${dayjsObj.year()}/${dayjsObj.month() + 1}/${dayjsObj.valueOf()}.${ext}`
-
-  return new Promise<ClientUploadImagesResult>((resolve, reject) => {
-    const fileReader = new FileReader()
-    fileReader.readAsDataURL(img)
-
-    fileReader.onloadend = () => {
-      const content = fileReader.result?.toString().split(',')[1]
-      if (!content) {
-        reject(new Error('Failed to read file'))
-        return
-      }
-      rpcEmit<string, UploadImageRpcArgs>(MESSAGE_TYPE.UPLOAD_IMAGE, [content, path])
-        .then(url => resolve([{url}]))
-        .catch(reject)
+  // 并行上传可能会发生冲突，详见：https://docs.github.com/zh/rest/repos/contents#create-or-update-file-contents
+  for (const img of files) {
+    const isLt2M = checkFileSize(img)
+    if (!isLt2M) {
+      throw new Error(`Image ${img.name} exceeds 2MB limit`)
     }
-  })
+
+    const dayjsObj = dayjs()
+    const year = dayjsObj.year()
+    const month = dayjsObj.month() + 1
+    const timestamp = dayjsObj.valueOf()
+    const ext = img.name.split('.').pop()?.toLowerCase()
+    const path = `images/${year}/${month}/${timestamp}.${ext}`
+
+    try {
+      const result = await new Promise<ClientUploadImagesResult[number]>((resolve, reject) => {
+        const fileReader = new FileReader()
+        fileReader.readAsDataURL(img)
+
+        fileReader.onloadend = () => {
+          const content = fileReader.result?.toString().split(',')[1]
+          if (!content) {
+            reject(new Error(`Failed to read ${img.name}`))
+            return
+          }
+          rpcEmit<string, UploadImageRpcArgs>(MESSAGE_TYPE.UPLOAD_IMAGE, [content, path])
+            .then(url => resolve({url}))
+            .catch(reject)
+        }
+      })
+      results.push(result)
+    } catch (error) {
+      console.error(`Failed to upload ${img.name}:`, error)
+    }
+  }
+
+  if (results.length === 0) {
+    throw new Error('Image upload failed')
+  }
+
+  return results
 }

@@ -111,7 +111,7 @@ export default function Editor() {
           placeholder="Leave your thought here..."
           plugins={plugins}
           previewDebounce={50}
-          uploadImages={handleUploadImages}
+          uploadImages={files => handleUploadImages(files).catch(() => [])}
           value={issue.body}
           onChange={setBody}
         />
