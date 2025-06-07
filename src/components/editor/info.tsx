@@ -32,7 +32,7 @@ export default function Info({issue}: InfoProps) {
             <ActionList.LeadingVisual>
               <LinkExternalIcon />
             </ActionList.LeadingVisual>
-            Open in default browser
+            Open in browser
           </ActionList.Item>
           <ActionList.Item onSelect={copyLink}>
             <ActionList.LeadingVisual>

@@ -94,8 +94,8 @@ export default function ActionBar({onLabelsVisible, onIssuesVisible}: ActionBoxP
         <IconButton
           icon={LinkExternalIcon}
           onClick={() => openExternalLink(issue.url)}
-          description="Open in default browser"
-          aria-label="Open in default browser"
+          description="Open in browser"
+          aria-label="Open in browser"
           tooltipDirection="w"
         />
       )}
