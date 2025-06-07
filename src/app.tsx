@@ -6,7 +6,7 @@ import {ActionBar, Editor, Issues, Labels} from '@/components'
 import '@/app.css'
 
 export default function App() {
-  const [issuesVisible, setIssuesVisible] = useState(false)
+  const [issuesVisible, setIssuesVisible] = useState(true)
   const [labelsVisible, setLabelsVisible] = useState(false)
 
   return (
