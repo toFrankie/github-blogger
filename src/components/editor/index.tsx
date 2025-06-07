@@ -7,28 +7,12 @@ import math from '@bytemd/plugin-math'
 import mediumZoom from '@bytemd/plugin-medium-zoom'
 import mermaid from '@bytemd/plugin-mermaid'
 import {Editor as BytemdEditor} from '@bytemd/react'
-import {
-  ClockIcon,
-  InfoIcon,
-  IssueOpenedIcon,
-  LinkExternalIcon,
-  LinkIcon,
-} from '@primer/octicons-react'
-import {
-  ActionList,
-  ActionMenu,
-  IconButton,
-  Label,
-  LabelGroup,
-  RelativeTime,
-  Stack,
-  TextInput,
-} from '@primer/react'
+import {Button, Label, LabelGroup, Stack, TextInput, Tooltip} from '@primer/react'
 import {SkeletonText} from '@primer/react/experimental'
-import {useLabels, useRepo, useToast, useUploadImages} from '@/hooks'
+import {useLabels, useRepo, useUploadImages} from '@/hooks'
 import {useEditorStore} from '@/stores/use-editor-store'
-import {openExternalLink} from '@/utils'
-import {FlashWithRetry} from './flash-with-retry'
+import {FlashWithRetry} from '../flash-with-retry'
+import Info from './info'
 
 import 'bytemd/dist/index.min.css'
 
@@ -44,8 +28,6 @@ const plugins = [
 ]
 
 export default function Editor() {
-  const toast = useToast()
-
   const issue = useEditorStore(state => state.issue)
   const setTitle = useEditorStore(state => state.setTitle)
   const setBody = useEditorStore(state => state.setBody)
@@ -53,7 +35,7 @@ export default function Editor() {
   const removeLabel = useEditorStore(state => state.removeLabel)
   const isIssueChanged = useEditorStore(state => state.isChanged)
 
-  const {mutateAsync: handleUploadImages} = useUploadImages()
+  const {mutateAsync: handleUploadImages, isPending: isUploadingImages} = useUploadImages()
 
   const {isError: isErrorRepo, refetch: refetchRepo} = useRepo()
 
@@ -63,11 +45,6 @@ export default function Editor() {
     isError: isErrorLabels,
     refetch: refetchLabels,
   } = useLabels()
-
-  const copyLink = () => {
-    navigator.clipboard.writeText(issue.url)
-    toast.success('Issue link copied.')
-  }
 
   return (
     <Stack className="app-editor" gap="condensed" padding="condensed">
@@ -89,49 +66,15 @@ export default function Editor() {
               onChange={e => setTitle(e.target.value)}
             />
           </Stack.Item>
-          {issue.number > -1 && (
+          {isUploadingImages ? (
+            <Tooltip text="Uploading images...">
+              <Button loading variant="invisible" size="small" />
+            </Tooltip>
+          ) : issue.number > -1 ? (
             <Stack.Item>
-              <ActionMenu>
-                <ActionMenu.Anchor>
-                  <IconButton variant="invisible" aria-label="Issue info" icon={InfoIcon} />
-                </ActionMenu.Anchor>
-                <ActionMenu.Overlay width="medium">
-                  <ActionList>
-                    <ActionList.Item onSelect={() => openExternalLink(issue.url)}>
-                      <ActionList.LeadingVisual>
-                        <LinkExternalIcon />
-                      </ActionList.LeadingVisual>
-                      Open in default browser
-                    </ActionList.Item>
-                    <ActionList.Item onSelect={copyLink}>
-                      <ActionList.LeadingVisual>
-                        <LinkIcon />
-                      </ActionList.LeadingVisual>
-                      Copy link
-                    </ActionList.Item>
-                    <ActionList.Item disabled>
-                      <ActionList.LeadingVisual>
-                        <IssueOpenedIcon />
-                      </ActionList.LeadingVisual>
-                      {`#${issue.number}`}
-                    </ActionList.Item>
-                    <ActionList.Item disabled>
-                      <ActionList.LeadingVisual>
-                        <ClockIcon />
-                      </ActionList.LeadingVisual>
-                      Created at <RelativeTime datetime={issue.createdAt} prefix="" />
-                    </ActionList.Item>
-                    <ActionList.Item disabled>
-                      <ActionList.LeadingVisual>
-                        <ClockIcon />
-                      </ActionList.LeadingVisual>
-                      Updated at <RelativeTime datetime={issue.updatedAt} prefix="" />
-                    </ActionList.Item>
-                  </ActionList>
-                </ActionMenu.Overlay>
-              </ActionMenu>
+              <Info issue={issue} />
             </Stack.Item>
-          )}
+          ) : null}
         </Stack>
       </Stack.Item>
       <Stack.Item sx={{flexShrink: 0}}>

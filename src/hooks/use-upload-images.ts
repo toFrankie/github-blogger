@@ -7,9 +7,6 @@ export function useUploadImages() {
 
   return useMutation<ClientUploadImagesResult, Error, File[]>({
     mutationFn: uploadImage,
-    onSuccess: () => {
-      toast.success('Image uploaded.')
-    },
     onError: error => {
       toast.critical(error.message)
     },
