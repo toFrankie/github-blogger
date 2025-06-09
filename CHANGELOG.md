@@ -2,18 +2,24 @@
 
 All notable changes will be documented in this file.
 
+## v2.2.1
+
+### Fixed
+
+- Ensure hyperlinks can be triggered reliably.
+
 ## v2.2.0
 
 > June 8, 2025
 
 ### Added
 
-- Open issues dialog by default
-- Support multiple image uploads
+- Open issues dialog by default.
+- Support multiple image uploads.
 
 ### Fixed
 
-- Add loading indicator for image uploads
+- Add loading indicator for image uploads.
 
 ## v2.1.0
 

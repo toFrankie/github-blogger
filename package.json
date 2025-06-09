@@ -2,7 +2,7 @@
   "name": "github-blogger",
   "displayName": "GitHub Blogger",
   "description": "Create and manage blog posts with GitHub Issues.",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "publisher": "Frankie",
   "engines": {
     "vscode": "^1.88.0"
