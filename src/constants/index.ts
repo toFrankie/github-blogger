@@ -1,3 +1,5 @@
+export const VITE_DEV = process.env.NODE_ENV === 'development'
+
 export const SUBMIT_TYPE = {
   CREATE: 'create',
   UPDATE: 'update',

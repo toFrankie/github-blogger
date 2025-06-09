@@ -1,6 +1,6 @@
 import dayjs from 'dayjs'
 import matter from 'gray-matter'
-import {MESSAGE_TYPE} from '@/constants'
+import {MESSAGE_TYPE, VITE_DEV} from '@/constants'
 
 export function cdnURL({
   user,
@@ -86,4 +86,32 @@ export function openExternalLink(url: string) {
     command: MESSAGE_TYPE.OPEN_EXTERNAL_LINK,
     externalLink: url,
   })
+}
+
+export function setupExternalLinkInterceptor() {
+  const originalWindowOpen = window.open
+
+  const httpRegex = /^https?:\/\//
+
+  // 正式环境下 sanbox 未设置 allow-popups，不能直接使用 window.open 打开链接
+  window.open = function (url?: string | URL, target?: string, features?: string): Window | null {
+    if (typeof url === 'string' && httpRegex.test(url)) {
+      openExternalLink(url)
+      return null
+    }
+
+    // fallback
+    return originalWindowOpen.call(window, url, target, features)
+  }
+
+  // 开发环境下点击连接，避免打开新页面
+  if (VITE_DEV) {
+    document.addEventListener('click', event => {
+      const anchor = (event.target as HTMLElement).closest?.('a[href]') as HTMLAnchorElement | null
+      if (anchor && httpRegex.test(anchor.href)) {
+        event.preventDefault()
+        openExternalLink(anchor.href)
+      }
+    })
+  }
 }
